@@ -30,6 +30,7 @@ import {
   eliminarTarea as eliminarTareaLib,
   moverTarea as moverTareaLib
 } from "@/lib/tareas";
+import { obtenerProyectos } from "@/lib/proyectos";
 import {
   limpiarTextoPlano,
   limitesSeguridad,
@@ -49,6 +50,7 @@ import {
   type EstadoKanban,
   type OrdenTablero,
   type Persona,
+  type Proyecto,
   type SentidoOrden,
   type Tarea,
   estadosKanban
@@ -109,11 +111,14 @@ type MensajeSistema = {
 export function TableroKanban() {
   const [tareas, setTareas] = useState<Tarea[]>([]);
   const [personas, setPersonas] = useState<Persona[]>([]);
+  const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [hidratado, setHidratado] = useState(false);
   const [cargando, setCargando] = useState(true);
   const [semanaActiva, setSemanaActiva] = useState(obtenerSemanaId());
   const [ordenActivo, setOrdenActivo] = useState<OrdenTablero>("manual");
   const [sentidoOrden, setSentidoOrden] = useState<SentidoOrden>("asc");
+  const [filtroProyecto, setFiltroProyecto] = useState<string>("todos");
+  const [filtroPersona, setFiltroPersona] = useState<string>("todos");
   const [tareaEnEdicion, setTareaEnEdicion] = useState<Tarea | null>(null);
   const [borradorNuevaTarea, setBorradorNuevaTarea] = useState<BorradorTarea | null>(null);
   const [modalPersonaAbierto, setModalPersonaAbierto] = useState(false);
@@ -127,12 +132,14 @@ export function TableroKanban() {
   useEffect(() => {
     async function inicializar() {
       try {
-        const [ps, ts] = await Promise.all([
-          import("@/lib/personas").then(m => m.obtenerPersonas()),
-          import("@/lib/tareas").then(m => m.obtenerTareas())
+        const [ps, ts, prjs] = await Promise.all([
+          obtenerPersonas(),
+          obtenerTareas(),
+          obtenerProyectos()
         ]);
         setPersonas(ps);
         setTareas(ts);
+        setProyectos(prjs);
       } catch (e) {
         console.error("Error al cargar datos:", e);
       } finally {
@@ -149,17 +156,19 @@ export function TableroKanban() {
     return () => window.clearTimeout(temporizador);
   }, [mensajeSistema]);
 
-  // (Helper function to refresh data)
   async function recargarTareas() {
-    const { obtenerTareas } = await import("@/lib/tareas");
     const ts = await obtenerTareas();
     setTareas(ts);
   }
 
-  const tareasSemanales = useMemo(
-    () => tareas.filter((t) => t.semanaId === semanaActiva),
-    [tareas, semanaActiva]
-  );
+  const tareasSemanales = useMemo(() => {
+    return tareas.filter((t) => {
+      const coincideSemana = t.semanaId === semanaActiva;
+      const coincideProyecto = filtroProyecto === "todos" || t.proyectoId === filtroProyecto;
+      const coincidePersona = filtroPersona === "todos" || (t.personaAsignadaId || "sin-asignar") === filtroPersona;
+      return coincideSemana && coincideProyecto && coincidePersona;
+    });
+  }, [tareas, semanaActiva, filtroProyecto, filtroPersona]);
 
   const columnas = useMemo(
     () =>
@@ -423,6 +432,37 @@ export function TableroKanban() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
+                  {/* Filtro Proyecto */}
+                  <div className="flex items-center gap-2 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-1.5 h-11">
+                    <span className="text-[10px] font-black uppercase text-slate-400">Proyecto</span>
+                    <select
+                      className="bg-transparent text-sm font-black text-slate-900 outline-none cursor-pointer max-w-[150px]"
+                      value={filtroProyecto}
+                      onChange={(e) => setFiltroProyecto(e.target.value)}
+                    >
+                      <option value="todos">Todos</option>
+                      {proyectos.map(p => (
+                        <option key={p.identificador} value={p.identificador}>{p.nombre}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Filtro Persona */}
+                  <div className="flex items-center gap-2 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-1.5 h-11">
+                    <span className="text-[10px] font-black uppercase text-slate-400">Persona</span>
+                    <select
+                      className="bg-transparent text-sm font-black text-slate-900 outline-none cursor-pointer max-w-[150px]"
+                      value={filtroPersona}
+                      onChange={(e) => setFiltroPersona(e.target.value)}
+                    >
+                      <option value="todos">Todas</option>
+                      <option value="sin-asignar">Sin asignar</option>
+                      {personas.map(p => (
+                        <option key={p.identificador} value={p.identificador}>{p.nombre}</option>
+                      ))}
+                    </select>
+                  </div>
+
                   <div className="flex items-center gap-2 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-1.5 h-11">
                     <span className="text-[10px] font-black uppercase text-slate-400">Orden</span>
                     <select

@@ -92,7 +92,7 @@ export function TarjetaTarea({
         </div>
 
         {/* Título o Edición */}
-        <div className="min-h-[48px]">
+        <div className="flex-1 min-h-[40px]">
           {edicionRapida ? (
             <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
               <input
@@ -121,49 +121,49 @@ export function TarjetaTarea({
               </div>
             </div>
           ) : (
-            <div className="space-y-2">
-              <h3 className="text-[13px] font-black leading-[1.3] text-slate-950 transition-colors group-hover:text-sky-600">
-                {tarea.titulo}
-              </h3>
-              <div className="flex items-center gap-3">
-                <span className="inline-flex items-center rounded-lg bg-slate-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-slate-500">
-                  {tarea.tipo}
+            <h3 className="text-[13px] font-black leading-[1.4] text-slate-950 transition-colors group-hover:text-sky-600 line-clamp-3">
+              {tarea.titulo}
+            </h3>
+          )}
+        </div>
+
+        {/* Footer: Tags, Fecha y Avatar */}
+        <div className="flex items-end justify-between mt-1 gap-2">
+          <div className="flex flex-wrap items-center gap-2 max-w-[70%]">
+            <span className="inline-flex items-center rounded-lg bg-slate-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-slate-500">
+              {tarea.tipo}
+            </span>
+            {tarea.fechaDeseableFin && (
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="text-[10px] font-bold text-slate-400 whitespace-nowrap">
+                  📅 {formatearFechaCorta(tarea.fechaDeseableFin)}
                 </span>
-                {tarea.fechaDeseableFin && (
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-1 w-1 rounded-full bg-slate-200" />
-                    <span className="text-[10px] font-bold text-slate-400">
-                      📅 {formatearFechaCorta(tarea.fechaDeseableFin)}
-                    </span>
-                  </div>
-                )}
               </div>
+            )}
+          </div>
+
+          {personaAsignada && (
+            <div className="shrink-0 transition-all duration-300 group-hover:scale-110">
+              <AvatarPersona
+                nombre={personaAsignada.nombre}
+                foto={personaAsignada.foto}
+                tamano="mini"
+              />
             </div>
           )}
         </div>
       </div>
 
-      {/* Avatar flotante */}
-      {personaAsignada && (
-        <div className="absolute bottom-4 right-4 transition-all duration-300 group-hover:scale-110 group-hover:-translate-x-1">
-          <AvatarPersona
-            nombre={personaAsignada.nombre}
-            foto={personaAsignada.foto}
-            tamano="mini"
-          />
-        </div>
-      )}
-
-      {/* Botón de edición rápida mejorado */}
+      {/* Botón de edición rápida */}
       {!edicionRapida && (
         <button
           onClick={(e) => {
             e.stopPropagation();
             setEdicionRapida(true);
           }}
-          className="absolute right-3 top-8 flex h-8 w-8 items-center justify-center rounded-xl bg-white opacity-0 shadow-xl border border-slate-100 text-slate-400 transition-all hover:bg-sky-50 hover:text-sky-600 hover:border-sky-100 group-hover:opacity-100 -translate-y-2 group-hover:translate-y-0"
+          className="absolute right-3 top-2 flex h-7 w-7 items-center justify-center rounded-lg bg-white opacity-0 shadow-sm border border-slate-100 text-slate-400 transition-all hover:bg-sky-50 hover:text-sky-600 hover:border-sky-100 group-hover:opacity-100"
         >
-          <span className="text-sm">✎</span>
+          <span className="text-xs">✎</span>
         </button>
       )}
     </article>
