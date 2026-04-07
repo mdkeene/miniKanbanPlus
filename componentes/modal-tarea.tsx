@@ -58,24 +58,32 @@ const etiquetasEstado: Record<EstadoKanban, string> = {
 };
 
 export function ModalTarea(propiedades: PropiedadesModalTarea) {
-  const estadoInicial =
-    propiedades.modo === "crear"
-      ? propiedades.borrador
-      : {
-          titulo: propiedades.tarea.titulo,
-          tipo: propiedades.tarea.tipo,
-          prioridad: propiedades.tarea.prioridad,
-          complejidad: propiedades.tarea.complejidad,
-          fechaDeseableFin: propiedades.tarea.fechaDeseableFin,
-          observaciones: propiedades.tarea.observaciones,
-          enlace: propiedades.tarea.enlace,
-          estado: propiedades.tarea.estado,
-          personaAsignadaId: propiedades.tarea.personaAsignadaId,
-          semanaId: propiedades.tarea.semanaId,
-          proyectoId: propiedades.tarea.proyectoId
-        };
+  const obtenerEstadoInicial = () => {
+    if (propiedades.modo === "editar") {
+      return {
+        titulo: propiedades.tarea.titulo,
+        tipo: propiedades.tarea.tipo,
+        prioridad: propiedades.tarea.prioridad,
+        complejidad: propiedades.tarea.complejidad,
+        fechaDeseableFin: propiedades.tarea.fechaDeseableFin,
+        observaciones: propiedades.tarea.observaciones,
+        enlace: propiedades.tarea.enlace,
+        estado: propiedades.tarea.estado,
+        personaAsignadaId: propiedades.tarea.personaAsignadaId,
+        semanaId: propiedades.tarea.semanaId,
+        proyectoId: propiedades.tarea.proyectoId
+      };
+    }
+    
+    // Modo crear
+    const borrador = { ...propiedades.borrador };
+    if (!borrador.personaAsignadaId && propiedades.personas.length > 0) {
+      borrador.personaAsignadaId = propiedades.personas[0].identificador;
+    }
+    return borrador;
+  };
 
-  const [formulario, setFormulario] = useState<BorradorTarea>(estadoInicial);
+  const [formulario, setFormulario] = useState<BorradorTarea>(obtenerEstadoInicial);
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [error, setError] = useState("");
 
