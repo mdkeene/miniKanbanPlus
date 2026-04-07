@@ -160,18 +160,26 @@ export function TableroKanban() {
         { event: '*', schema: 'public', table: 'tasks' },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            const nueva = payload.new as Tarea;
+            const p = payload.new as any;
+            const nueva: Tarea = {
+              ...p,
+              identificador: p.id
+            };
             setTareas(actuales => {
               if (actuales.find(t => t.identificador === nueva.identificador)) return actuales;
               return [...actuales, nueva];
             });
           } else if (payload.eventType === 'UPDATE') {
-            const actualizada = payload.new as Tarea;
+            const p = payload.new as any;
+            const actualizada: Tarea = {
+              ...p,
+              identificador: p.id
+            };
             setTareas(actuales => actuales.map(t => 
               t.identificador === actualizada.identificador ? actualizada : t
             ));
           } else if (payload.eventType === 'DELETE') {
-            const eliminadaId = payload.old.identificador;
+            const eliminadaId = payload.old.id;
             setTareas(actuales => actuales.filter(t => t.identificador !== eliminadaId));
           }
         }
@@ -185,6 +193,7 @@ export function TableroKanban() {
             const personaActualizada: Persona = {
               identificador: p.id,
               nombre: p.nombre,
+              email: p.email,
               area: p.area,
               foto: p.foto,
               color: p.color,

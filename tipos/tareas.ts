@@ -41,6 +41,7 @@ export type RolUsuario = "admin" | "usuario";
 export type Persona = {
   identificador: string;
   nombre: string;
+  email: string;
   area: string;
   foto: string;
   color?: string; // Color personalizado para avatares

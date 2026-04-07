@@ -49,6 +49,7 @@ export function ModalPersona({ onCerrar, onGuardar }: PropiedadesModalPersona) {
 
     onGuardar({
       nombre,
+      email: formulario.email.trim(),
       area,
       foto
     });
@@ -96,6 +97,17 @@ export function ModalPersona({ onCerrar, onGuardar }: PropiedadesModalPersona) {
                 className="campo-formulario"
                 maxLength={limitesSeguridad.areaMaxima}
                 placeholder="Ejemplo: Marketing"
+              />
+            </label>
+
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-slate-700 font-bold text-indigo-600">Email Corporativo (Para vincular login)</span>
+              <input
+                type="email"
+                value={formulario.email}
+                onChange={(evento) => actualizarCampo("email", evento.target.value)}
+                className="campo-formulario border-indigo-100 bg-indigo-50/10 placeholder:text-indigo-300"
+                placeholder="ejemplo@innovaexport.com"
               />
             </label>
 

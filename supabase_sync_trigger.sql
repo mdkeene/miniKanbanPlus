@@ -3,10 +3,11 @@
 CREATE OR REPLACE FUNCTION public.handle_new_auth_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, nombre, area, color, rol)
+  INSERT INTO public.profiles (id, nombre, email, area, color, rol)
   VALUES (
     NEW.id, 
     COALESCE(NEW.raw_user_meta_data->>'full_name', SPLIT_PART(NEW.email, '@', 1)), 
+    NEW.email,
     'General', 
     '#94a3b8', 
     'usuario'

@@ -307,6 +307,12 @@ export function AppShell({
                         placeholder="Ej: Marketing, Sistemas..."
                       />
                     </div>
+                    <div className="space-y-1.5 opacity-60">
+                      <label className="etiqueta-campo text-slate-400">Email (Vinculado a Login)</label>
+                      <p className="px-5 py-3 text-sm font-bold text-slate-500 bg-slate-50 rounded-2xl border border-slate-100 select-none">
+                        {sesion.usuario.email}
+                      </p>
+                    </div>
                  </div>
 
                  {/* Selección de Color */}

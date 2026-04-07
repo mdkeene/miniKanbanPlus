@@ -9,6 +9,7 @@ export function crearPersonaDesdeBorrador(
   return {
     identificador: generarIdentificadorPersona(),
     nombre,
+    email: borrador.email || "",
     area: limpiarTextoPlano(borrador.area, limitesSeguridad.areaMaxima),
     foto: normalizarUrlImagen(borrador.foto) || crearFotoAvatar(nombre, indiceColor),
     color: borrador.color || gamasColor[indiceColor % gamasColor.length].fondoA,
@@ -59,6 +60,7 @@ export const personasEjemplo: Persona[] = [
   {
     identificador: "PR-ADMIN",
     nombre: "Dirección",
+    email: "direccion@innovaxport.com",
     area: "Administración",
     foto: "",
     color: "#0ea5e9",
@@ -128,6 +130,7 @@ export function crearFotoAvatar(nombre: string, indiceColor = 0) {
 export function crearBorradorPersona(): BorradorPersona {
   return {
     nombre: "",
+    email: "",
     area: "",
     foto: "",
     color: "#0ea5e9",
@@ -146,6 +149,7 @@ export async function obtenerPersonas(): Promise<Persona[]> {
   return data.map((p, idx) => ({
     identificador: p.id,
     nombre: p.nombre,
+    email: p.email || "",
     area: p.area,
     foto: p.foto || crearFotoAvatar(p.nombre, idx),
     color: p.color,
@@ -159,6 +163,7 @@ export async function guardarPersona(persona: Persona) {
     .upsert({
       id: persona.identificador,
       nombre: persona.nombre,
+      email: persona.email,
       area: persona.area,
       foto: persona.foto,
       color: persona.color,
@@ -202,6 +207,7 @@ export async function buscarPersonaPorId(id: string): Promise<Persona | undefine
   return {
     identificador: data.id,
     nombre: data.nombre,
+    email: data.email || "",
     area: data.area,
     foto: data.foto || crearFotoAvatar(data.nombre, 0),
     color: data.color,
