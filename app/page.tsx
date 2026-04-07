@@ -15,6 +15,7 @@ export default function PaginaInicio() {
   const [sesion, setSesion] = useState<Sesion | null>(null);
   const [hidratado, setHidratado] = useState(false);
   const [tabActiva, setTabActiva] = useState("kanban");
+  const [estadoRealtime, setEstadoRealtime] = useState<"conectando" | "conectado" | "error">("conectando");
 
   useEffect(() => {
     async function cargarSesion() {
@@ -46,8 +47,14 @@ export default function PaginaInicio() {
       alCerrarSesion={manejarCerrarSesion}
       tabActiva={tabActiva}
       alCambiarTab={setTabActiva}
+      estadoRealtime={estadoRealtime}
     >
-      {tabActiva === "kanban" && <TableroKanban />}
+      {tabActiva === "kanban" && (
+        <TableroKanban 
+          estadoRealtime={estadoRealtime} 
+          setEstadoRealtime={setEstadoRealtime} 
+        />
+      )}
       {tabActiva === "proyectos" && <TabProyectos />}
       {tabActiva === "usuarios" && <TabUsuarios />}
       {tabActiva === "dashboard" && <TabDashboard />}
