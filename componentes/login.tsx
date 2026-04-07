@@ -33,18 +33,19 @@ export function PaginaLogin({ alEntrar }: PaginaLoginProps) {
   return (
     <div className="relative w-full max-w-md space-y-8 rounded-[48px] border border-slate-200 bg-white p-10 shadow-3xl xl:p-12 font-sans selection:bg-sky-500/30">
         <div className="text-center">
-          <div className="group relative inline-flex h-24 w-24 items-center justify-center rounded-[32px] bg-gradient-to-tr from-sky-500 to-indigo-600 shadow-2xl shadow-sky-200 transition-transform active:scale-95">
-            <span className="text-5xl font-black text-white tracking-tighter">MK</span>
-            <div className="absolute -right-2 -top-2 h-6 w-6 rounded-lg bg-white p-1 text-[10px] font-black text-sky-600 shadow-md">
-              +
-            </div>
+          <div className="flex justify-center mb-8">
+            <img 
+              src="https://www.innovaexport.com/wp-content/uploads/2022/10/logo-ide_compartir_link_web-1.jpg" 
+              alt="InnovaExport Logo" 
+              className="h-24 w-auto rounded-2xl shadow-xl transition-transform hover:scale-105"
+            />
           </div>
-          <h1 className="mt-10 text-4xl font-black tracking-tight text-slate-950">
-            miniKanban<span className="text-sky-600">Plus</span>
+          <h1 className="mt-4 text-3xl font-black tracking-tight text-slate-950 uppercase border-b-4 border-sky-500 inline-block px-2">
+            Gestión de Equipos
           </h1>
-          <p className="mt-4 text-sm font-bold text-slate-500 leading-relaxed italic">
-            Gestión visual de alto rendimiento.<br />
-            Simple, rápido y potente.
+          <p className="mt-6 text-sm font-bold text-slate-500 leading-relaxed italic">
+            Visualización y coordinación de alto rendimiento.<br />
+            Impulsado por InnovaExport.
           </p>
         </div>
 

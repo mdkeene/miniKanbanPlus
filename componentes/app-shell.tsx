@@ -159,39 +159,34 @@ export function AppShell({
              </button>
 
             <div className="flex items-stretch gap-4 h-full">
-              <div className="flex items-center gap-3">
-                <Link 
-                  href="/"
-                  className="hidden md:flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 font-black text-sm text-white hover:scale-105 transition-transform"
-                >
-                  MK
-                </Link>
-                <div className="flex flex-col justify-center leading-none">
-                  <Link 
-                    href="/"
-                    className="text-base font-black tracking-tighter text-slate-950 hover:text-sky-600 transition-colors"
+            <div className="flex items-center gap-3">
+              <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <img 
+                  src="https://www.innovaexport.com/wp-content/uploads/2022/10/logo-ide_compartir_link_web-1.jpg" 
+                  alt="InnovaExport Logo" 
+                  className="h-10 w-auto rounded-lg shadow-sm"
+                />
+              </Link>
+              <div className="flex flex-col justify-center leading-none">
+                {editandoTitulo ? (
+                  <input
+                    autoFocus
+                    className="text-[10px] font-bold text-sky-500 outline-none border-b border-sky-300 bg-transparent py-0 h-4"
+                    value={titulo}
+                    onChange={(e) => setTitulo(e.target.value)}
+                    onBlur={() => setEditandoTitulo(false)}
+                    onKeyDown={(e) => e.key === "Enter" && setEditandoTitulo(false)}
+                  />
+                ) : (
+                  <span 
+                    className="text-[10px] font-black text-slate-400 cursor-pointer hover:text-sky-600 transition-colors"
+                    onClick={() => setEditandoTitulo(true)}
                   >
-                    miniKanbanPlus
-                  </Link>
-                  {editandoTitulo ? (
-                    <input
-                      autoFocus
-                      className="text-[10px] font-bold text-sky-500 outline-none border-b border-sky-300 bg-transparent py-0 h-4"
-                      value={titulo}
-                      onChange={(e) => setTitulo(e.target.value)}
-                      onBlur={() => setEditandoTitulo(false)}
-                      onKeyDown={(e) => e.key === "Enter" && setEditandoTitulo(false)}
-                    />
-                  ) : (
-                    <span 
-                      className="text-[10px] font-black text-slate-400 cursor-pointer hover:text-sky-600 transition-colors"
-                      onClick={() => setEditandoTitulo(true)}
-                    >
-                      {titulo} <span className="opacity-40">✎</span>
-                    </span>
-                  )}
-                </div>
+                    {titulo} <span className="opacity-40">✎</span>
+                  </span>
+                )}
               </div>
+            </div>
             </div>
           </div>
 
