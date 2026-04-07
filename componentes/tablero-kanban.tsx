@@ -385,52 +385,58 @@ export function TableroKanban() {
             <div className="flex flex-col gap-4 mb-6">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 {/* Controles Principales: Navegación + Acción */}
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="flex items-center gap-1 rounded-2xl border border-slate-100 bg-slate-50 p-1">
+                <div className="flex flex-row items-center justify-between gap-2 overflow-x-hidden">
+                  {/* Navegación Semanal Compacta */}
+                  <div className="flex items-center gap-1 rounded-2xl border border-slate-100 bg-slate-50 p-1 shrink-0">
                     <button
                       onClick={() => navegarSemana(-1)}
-                      className="h-9 w-9 flex items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm hover:text-slate-900 transition-all font-bold"
+                      className="h-9 w-8 flex items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm hover:text-slate-900 transition-all font-bold"
                     >
                       ◀
                     </button>
-                    <div className="flex flex-col items-center px-4 min-w-[120px]">
-                      <span className="text-xs font-black text-slate-900">Semana {infoSemana.numero}</span>
-                      <span className="text-[9px] font-bold text-slate-400 uppercase">
+                    <div className="flex flex-col items-center px-2 min-w-[100px] md:min-w-[120px]">
+                      <span className="text-[10px] md:text-xs font-black text-slate-900">Semana {infoSemana.numero}</span>
+                      <span className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase">
                         {formatearRangoSemana(infoSemana.inicio, infoSemana.fin)}
                       </span>
                     </div>
                     <button
                       onClick={() => navegarSemana(1)}
-                      className="h-9 w-9 flex items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm hover:text-slate-900 transition-all font-bold"
+                      className="h-9 w-8 flex items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm hover:text-slate-900 transition-all font-bold"
                     >
                       ▶
                     </button>
                     <button
                       onClick={irHoy}
-                      className="h-9 px-3 rounded-xl bg-sky-50 text-[10px] font-black uppercase text-sky-600 hover:bg-sky-100 transition-all ml-1"
+                      className="h-9 px-2 md:px-3 rounded-xl bg-sky-50 text-[9px] md:text-[10px] font-black uppercase text-sky-600 hover:bg-sky-100 transition-all ml-0.5"
                     >
                       Hoy
                     </button>
                   </div>
 
-                  <button 
-                    onClick={abrirCreacionRapida}
-                    className="flex h-11 items-center gap-2 rounded-2xl bg-slate-950 px-5 text-xs font-black text-white shadow-xl shadow-slate-950/20 hover:bg-slate-800 transition-all hover:scale-105 active:scale-95"
-                  >
-                    <span>+</span> Nueva Tarea
-                  </button>
+                  <div className="flex items-center gap-1.5 md:gap-3">
+                    <button 
+                      onClick={abrirCreacionRapida}
+                      title="Nueva Tarea"
+                      className="flex h-11 w-11 lg:w-auto items-center justify-center gap-2 rounded-2xl bg-slate-950 lg:px-5 text-sm font-black text-white shadow-xl shadow-slate-950/20 hover:bg-slate-800 transition-all hover:scale-105 active:scale-95"
+                    >
+                      <span className="text-lg lg:text-base">+</span> 
+                      <span className="hidden lg:inline text-xs">Nueva Tarea</span>
+                    </button>
 
-                  <button 
-                    onClick={() => setMostrarFiltros(!mostrarFiltros)}
-                    className={`lg:hidden flex h-11 items-center gap-2 rounded-2xl border px-5 text-[10px] font-black uppercase transition-all ${
-                      mostrarFiltros || filtroProyecto !== "todos" || filtroPersona !== "todos"
-                      ? "border-sky-500 bg-sky-50 text-sky-600"
-                      : "border-slate-100 bg-slate-50 text-slate-500"
-                    }`}
-                  >
-                    🔍 {mostrarFiltros ? 'Cerrar Filtros' : 'Filtros'}
-                    {(filtroProyecto !== "todos" || filtroPersona !== "todos") && <span className="ml-1 h-2 w-2 rounded-full bg-sky-500" />}
-                  </button>
+                    <button 
+                      onClick={() => setMostrarFiltros(!mostrarFiltros)}
+                      title="Filtros"
+                      className={`lg:hidden flex h-11 w-11 items-center justify-center rounded-2xl border transition-all ${
+                        mostrarFiltros || filtroProyecto !== "todos" || filtroPersona !== "todos"
+                        ? "border-sky-500 bg-sky-50 text-sky-600 shadow-sm"
+                        : "border-slate-100 bg-slate-50 text-slate-500"
+                      }`}
+                    >
+                      <span className="text-lg">🔍</span>
+                      {(filtroProyecto !== "todos" || filtroPersona !== "todos") && <div className="absolute top-2 right-2 h-2 w-2 rounded-full bg-sky-500 animate-pulse" />}
+                    </button>
+                  </div>
                 </div>
 
                 {/* Filtros Detallados - Colapsables en móvil */}
