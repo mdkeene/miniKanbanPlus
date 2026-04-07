@@ -171,12 +171,10 @@ export function TableroKanban() {
             });
           } else if (payload.eventType === 'UPDATE') {
             const p = payload.new as any;
-            const actualizada: Tarea = {
-              ...p,
-              identificador: p.id
-            };
             setTareas(actuales => actuales.map(t => 
-              t.identificador === actualizada.identificador ? actualizada : t
+              t.identificador === p.id 
+                ? { ...t, ...p, identificador: p.id } 
+                : t
             ));
           } else if (payload.eventType === 'DELETE') {
             const eliminadaId = payload.old.id;
@@ -200,11 +198,25 @@ export function TableroKanban() {
               rol: p.rol as any
             };
             setPersonas(actuales => {
-              const existe = actuales.find(item => item.identificador === personaActualizada.identificador);
+              const existe = actuales.find(item => item.identificador === p.id);
               if (existe) {
-                return actuales.map(item => item.identificador === personaActualizada.identificador ? personaActualizada : item);
+                return actuales.map(item => 
+                  item.identificador === p.id 
+                    ? { ...item, ...p, identificador: p.id } 
+                    : item
+                );
               }
-              return [...actuales, personaActualizada];
+              // Si no existe (INSERT o similar), creamos completo
+              const personaNueva: Persona = {
+                identificador: p.id,
+                nombre: p.nombre,
+                email: p.email,
+                area: p.area,
+                foto: p.foto,
+                color: p.color,
+                rol: p.rol as any
+              };
+              return [...actuales, personaNueva];
             });
           } else if (payload.eventType === 'DELETE') {
             const eliminadaId = payload.old.id;
