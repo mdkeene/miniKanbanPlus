@@ -128,6 +128,7 @@ export function TableroKanban() {
   const [mensajeSistema, setMensajeSistema] = useState<MensajeSistema>(null);
   const [seleccionadas, setSeleccionadas] = useState<string[]>([]);
   const [agruparPorPersona, setAgruparPorPersona] = useState(false);
+  const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
   useEffect(() => {
     async function inicializar() {
@@ -378,65 +379,67 @@ export function TableroKanban() {
   return (
     <main className="min-h-screen bg-white text-slate-900">
       <div className="flex h-screen flex-col overflow-hidden">
-        <header className="relative shrink-0 border-b border-slate-100 bg-slate-50/50 px-4 py-3 md:px-6">
-          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <div>
-              <span className="inline-flex rounded-full bg-sky-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-sky-700">
-                ✨ Cloud Sync Active
-              </span>
-              <h1 className="mt-1 text-xl font-black tracking-tighter text-slate-950 md:text-2xl">
-                gestión de equipos <span className="text-sky-600">inteligente</span>
-              </h1>
-            </div>
-            <div className="flex items-center gap-2">
-               <button 
-                onClick={abrirCreacionRapida}
-                className="flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-black text-white shadow-lg shadow-slate-950/10 hover:bg-slate-800 transition-all hover:-translate-y-0.5 active:translate-y-0"
-              >
-                <span>+</span> Nueva Tarea
-              </button>
-            </div>
-          </div>
-        </header>
 
         <div className="flex-1 overflow-auto bg-white p-4 md:p-6 custom-scrollbar">
           <div className="mx-auto w-full max-w-full">
             <div className="flex flex-col gap-4 mb-6">
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                {/* Navegación Semanal */}
-                <div className="flex items-center gap-1 rounded-2xl border border-slate-100 bg-slate-50 p-1">
-                  <button
-                    onClick={() => navegarSemana(-1)}
-                    className="h-9 w-9 flex items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm hover:text-slate-900 transition-all font-bold"
-                  >
-                    ◀
-                  </button>
-                  <div className="flex flex-col items-center px-4 min-w-[120px]">
-                    <span className="text-xs font-black text-slate-900">Semana {infoSemana.numero}</span>
-                    <span className="text-[9px] font-bold text-slate-400 uppercase">
-                      {formatearRangoSemana(infoSemana.inicio, infoSemana.fin)}
-                    </span>
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                {/* Controles Principales: Navegación + Acción */}
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-1 rounded-2xl border border-slate-100 bg-slate-50 p-1">
+                    <button
+                      onClick={() => navegarSemana(-1)}
+                      className="h-9 w-9 flex items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm hover:text-slate-900 transition-all font-bold"
+                    >
+                      ◀
+                    </button>
+                    <div className="flex flex-col items-center px-4 min-w-[120px]">
+                      <span className="text-xs font-black text-slate-900">Semana {infoSemana.numero}</span>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase">
+                        {formatearRangoSemana(infoSemana.inicio, infoSemana.fin)}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => navegarSemana(1)}
+                      className="h-9 w-9 flex items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm hover:text-slate-900 transition-all font-bold"
+                    >
+                      ▶
+                    </button>
+                    <button
+                      onClick={irHoy}
+                      className="h-9 px-3 rounded-xl bg-sky-50 text-[10px] font-black uppercase text-sky-600 hover:bg-sky-100 transition-all ml-1"
+                    >
+                      Hoy
+                    </button>
                   </div>
-                  <button
-                    onClick={() => navegarSemana(1)}
-                    className="h-9 w-9 flex items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm hover:text-slate-900 transition-all font-bold"
+
+                  <button 
+                    onClick={abrirCreacionRapida}
+                    className="flex h-11 items-center gap-2 rounded-2xl bg-slate-950 px-5 text-xs font-black text-white shadow-xl shadow-slate-950/20 hover:bg-slate-800 transition-all hover:scale-105 active:scale-95"
                   >
-                    ▶
+                    <span>+</span> Nueva Tarea
                   </button>
-                  <button
-                    onClick={irHoy}
-                    className="h-9 px-3 rounded-xl bg-sky-50 text-[10px] font-black uppercase text-sky-600 hover:bg-sky-100 transition-all ml-1"
+
+                  <button 
+                    onClick={() => setMostrarFiltros(!mostrarFiltros)}
+                    className={`lg:hidden flex h-11 items-center gap-2 rounded-2xl border px-5 text-[10px] font-black uppercase transition-all ${
+                      mostrarFiltros || filtroProyecto !== "todos" || filtroPersona !== "todos"
+                      ? "border-sky-500 bg-sky-50 text-sky-600"
+                      : "border-slate-100 bg-slate-50 text-slate-500"
+                    }`}
                   >
-                    Hoy
+                    🔍 {mostrarFiltros ? 'Cerrar Filtros' : 'Filtros'}
+                    {(filtroProyecto !== "todos" || filtroPersona !== "todos") && <span className="ml-1 h-2 w-2 rounded-full bg-sky-500" />}
                   </button>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
+                {/* Filtros Detallados - Colapsables en móvil */}
+                <div className={`${mostrarFiltros ? 'flex' : 'hidden'} lg:flex flex-wrap items-center gap-2 transition-all`}>
                   {/* Filtro Proyecto */}
                   <div className="flex items-center gap-2 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-1.5 h-11">
                     <span className="text-[10px] font-black uppercase text-slate-400">Proyecto</span>
                     <select
-                      className="bg-transparent text-sm font-black text-slate-900 outline-none cursor-pointer max-w-[150px]"
+                      className="bg-transparent text-sm font-black text-slate-900 outline-none cursor-pointer max-w-[120px]"
                       value={filtroProyecto}
                       onChange={(e) => setFiltroProyecto(e.target.value)}
                     >
@@ -451,7 +454,7 @@ export function TableroKanban() {
                   <div className="flex items-center gap-2 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-1.5 h-11">
                     <span className="text-[10px] font-black uppercase text-slate-400">Persona</span>
                     <select
-                      className="bg-transparent text-sm font-black text-slate-900 outline-none cursor-pointer max-w-[150px]"
+                      className="bg-transparent text-sm font-black text-slate-900 outline-none cursor-pointer max-w-[120px]"
                       value={filtroPersona}
                       onChange={(e) => setFiltroPersona(e.target.value)}
                     >
@@ -484,13 +487,12 @@ export function TableroKanban() {
                   <button
                     type="button"
                     onClick={() => setSentidoOrden(s => s === "asc" ? "desc" : "asc")}
-                    className="h-11 px-4 rounded-2xl border-2 border-slate-100 bg-white text-[11px] font-black text-slate-600 hover:bg-slate-50 transition-all"
+                    className="h-11 px-4 rounded-2xl border-2 border-slate-100 bg-white text-[11px] font-black text-slate-600 hover:bg-slate-50 transition-all font-mono"
                   >
                     {sentidoOrden === "asc" ? "ASC ↑" : "DESC ↓"}
                   </button>
 
-                  <button
-                    type="button"
+                  <button 
                     onClick={() => setAgruparPorPersona(a => !a)}
                     className={`h-11 flex items-center gap-2 rounded-2xl border-2 px-4 text-[11px] font-black transition-all ${
                       agruparPorPersona
@@ -498,7 +500,7 @@ export function TableroKanban() {
                         : "border-slate-100 bg-white text-slate-600 hover:bg-slate-50"
                     }`}
                   >
-                    {agruparPorPersona ? "🏊 Vista Calles" : "🏢 Vista Base"}
+                    {agruparPorPersona ? "🏊 Calles" : "🏢 Base"}
                   </button>
 
                   <button
