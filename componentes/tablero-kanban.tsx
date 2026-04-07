@@ -530,15 +530,6 @@ export function TableroKanban() {
                       </span>
                     </div>
 
-                    <div className="relative group/menu">
-                      <button className="flex items-center gap-2 rounded-2xl bg-slate-950 px-4 py-2.5 text-xs font-black text-white hover:bg-slate-800 transition-all shadow-lg shadow-slate-950/10">
-                        <span>Acciones</span>
-                        <svg className="h-3 w-3 transition-transform group-hover/menu:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-                    </div>
-
                     <button 
                       onClick={abrirCreacionRapida}
                       title="Nueva Tarea"
