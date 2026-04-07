@@ -27,6 +27,7 @@ export function AppShell({
   const [titulo, setTitulo] = useState("Panel de tareas");
   const [editandoTitulo, setEditandoTitulo] = useState(false);
   const [modalPasswordAbierto, setModalPasswordAbierto] = useState(false);
+  const [estadoRealtime, setEstadoRealtime] = useState<'conectando' | 'conectado' | 'error'>('conectando');
   const [nuevaClave, setNuevaClave] = useState("");
   const [mensajeClave, setMensajeClave] = useState("");
   const [nombreTemp, setNombreTemp] = useState("");
@@ -70,6 +71,17 @@ export function AppShell({
   useEffect(() => {
     if (!sesion.usuario.identificador) return;
 
+    // Monitor global de Realtime (Heartbeat)
+    const canalSalud = supabase
+      .channel('salud-sistema')
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          setEstadoRealtime('conectado');
+        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setEstadoRealtime('error');
+        }
+      });
+
     const canal = supabase
       .channel(`perfil-${sesion.usuario.identificador}`)
       .on(
@@ -82,14 +94,13 @@ export function AppShell({
         },
         (payload) => {
           // Notificar o actualizar estado local si fuera necesario
-          // Por ahora, como es Realtime, la mayoría de los componentes 
-          // que usan el perfil (como el Tablero) ya se actualizarán.
         }
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(canal);
+      supabase.removeChannel(canalSalud);
     };
   }, [sesion.usuario.identificador]);
 
@@ -248,6 +259,17 @@ export function AppShell({
 
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
+              {/* Global Realtime Pulse */}
+              <div className="flex items-center gap-2 mr-1">
+                <div 
+                  title={estadoRealtime === 'conectado' ? 'Sistema en vivo' : 'Problema de conexión'}
+                  className={`w-2.5 h-2.5 rounded-full animate-pulse transition-colors ${
+                    estadoRealtime === 'conectado' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]' :
+                    estadoRealtime === 'conectando' ? 'bg-amber-400' : 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)]'
+                  }`} 
+                />
+              </div>
+
               <div className="hidden flex-col items-end sm:flex leading-none">
                 <span className="text-sm font-black text-slate-950">{sesion.usuario.nombre}</span>
                 <span className="text-[9px] font-black uppercase tracking-widest text-sky-500 bg-sky-50 px-1.5 py-0.5 rounded-md">{sesion.usuario.rol}</span>
