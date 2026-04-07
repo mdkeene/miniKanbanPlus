@@ -20,21 +20,21 @@ export function LandingPage({ alEntrar }: LandingPageProps) {
       <div className="relative z-10 w-full max-w-5xl flex flex-col items-center gap-10 md:gap-16">
         {/* Header Section with Direct Strategy Quote */}
         <div className="text-center space-y-4 md:space-y-6">
-           <div className="inline-flex rounded-full bg-white px-5 py-2 text-[10px] font-black uppercase tracking-[0.25em] text-sky-600 shadow-sm border border-slate-100 animate-in slide-in-from-top-4 duration-700">
-             Acceso Directo • miniKanbanPlus
+           <div className="inline-flex rounded-full bg-white px-5 py-2 text-[10px] font-black uppercase tracking-[0.25em] text-sky-600 shadow-sm border border-slate-100">
+             Acceso Directo • InnovaExport
            </div>
-           <blockquote className="text-3xl md:text-6xl font-black italic tracking-tighter text-slate-950 leading-[1] max-w-3xl mx-auto px-4 opacity-0 animate-in fade-in slide-in-from-bottom-4 fill-mode-forwards duration-1000 delay-200">
+           <blockquote className="text-3xl md:text-6xl font-black italic tracking-tighter text-slate-950 leading-[1] max-w-3xl mx-auto px-4">
              "Una estrategia no comunicada es una estrategia no existente."
            </blockquote>
         </div>
 
         {/* Central Component: The Login Box Direct Access */}
-        <div className="w-full max-w-md opacity-0 animate-in fade-in zoom-in-95 fill-mode-forwards duration-700 delay-500">
+        <div className="w-full max-w-md">
            <PaginaLogin alEntrar={alEntrar} />
         </div>
 
         {/* Secondary Goal Quote as a Philosophy Anchor */}
-        <div className="max-w-2xl text-center opacity-0 animate-in fade-in slide-in-from-top-4 fill-mode-forwards duration-1000 delay-800">
+        <div className="max-w-2xl text-center">
            <p className="text-sm md:text-lg font-black tracking-[0.15em] text-slate-400 leading-relaxed uppercase">
              Personas e interacciones <span className="text-slate-950">sobre procesos y herramientas</span>
            </p>
