@@ -488,7 +488,7 @@ export function TableroKanban() {
             <div className="flex flex-col gap-4 mb-6">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 {/* Controles Principales: Navegación + Acción */}
-                <div className="flex flex-row items-center justify-between gap-2 overflow-x-hidden">
+                <div className="flex flex-row items-center justify-between gap-2 w-full overflow-x-hidden">
                   {/* Navegación Semanal Compacta */}
                   <div className="flex items-center gap-1 rounded-2xl border border-slate-100 bg-slate-50 p-1 shrink-0">
                     <button
@@ -530,38 +530,29 @@ export function TableroKanban() {
                       </span>
                     </div>
 
-                    <div className="relative group/menu">
-                      <button className="flex items-center gap-2 rounded-2xl bg-slate-950 px-4 py-2.5 text-xs font-black text-white hover:bg-slate-800 transition-all shadow-lg shadow-slate-950/10">
-                        <span>Acciones</span>
-                        <svg className="h-3 w-3 transition-transform group-hover/menu:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-                    </div>
-
                     <button 
                       onClick={abrirCreacionRapida}
                       title="Nueva Tarea"
-                      className="flex h-11 w-11 lg:w-auto items-center justify-center gap-2 rounded-2xl bg-slate-950 lg:px-5 lg:shadow-xl lg:shadow-slate-950/20 text-sm font-black text-white hover:bg-slate-800 transition-all hover:scale-105 active:scale-95"
+                      className="group flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950 text-white transition-all hover:bg-sky-600 hover:shadow-lg hover:shadow-sky-200 active:scale-90"
                     >
-                      <span className="text-lg lg:text-base">+</span> 
-                      <span className="hidden lg:inline text-xs">Nueva Tarea</span>
+                      <span className="text-lg font-bold transition-transform group-hover:rotate-90">+</span>
                     </button>
 
                     <button 
                       onClick={() => setMostrarFiltros(!mostrarFiltros)}
                       title="Filtros"
-                      className={`lg:hidden flex h-11 w-11 items-center justify-center rounded-2xl border transition-all ${
+                      className={`lg:hidden flex h-10 w-10 items-center justify-center rounded-2xl border transition-all ${
                         mostrarFiltros || filtroProyecto !== "todos" || filtroPersona !== "todos"
                         ? "border-sky-500 bg-sky-50 text-sky-600"
                         : "border-slate-100 bg-slate-50 text-slate-500"
                       }`}
                     >
-                      <span className="text-lg">🔍</span>
-                      {(filtroProyecto !== "todos" || filtroPersona !== "todos") && <div className="absolute top-2 right-2 h-2 w-2 rounded-full bg-sky-500 animate-pulse" />}
+                      <span className="text-sm">🔍</span>
+                      {(filtroProyecto !== "todos" || filtroPersona !== "todos") && <div className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-sky-500 animate-pulse" />}
                     </button>
                   </div>
                 </div>
+              </div>
 
                 {/* Filtros Detallados - Colapsables en móvil */}
                 <div className={`${mostrarFiltros ? 'flex' : 'hidden'} lg:flex flex-wrap items-center gap-2 transition-all`}>
@@ -640,15 +631,13 @@ export function TableroKanban() {
                   >
                     🚀 Carga Rápida
                   </button>
+                  {!arrastreDisponible && (
+                    <div className="rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-[10px] font-bold text-amber-700 animate-pulse mt-4">
+                      ⚠️ Drag & Drop deshabilitado en orden automático.
+                    </div>
+                  )}
                 </div>
               </div>
-
-              {!arrastreDisponible && (
-                <div className="rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-[10px] font-bold text-amber-700 animate-pulse">
-                  ⚠️ Drag & Drop deshabilitado en orden automático.
-                </div>
-              )}
-            </div>
 
             {/* Barra de Acciones en Lote (Flotante) */}
             {seleccionadas.length > 0 && (
