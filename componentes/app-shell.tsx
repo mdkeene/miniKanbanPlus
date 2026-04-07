@@ -14,7 +14,6 @@ type AppShellProps = {
   tabActiva: string;
   alCambiarTab: (tab: string) => void;
   children: React.ReactNode;
-  estadoRealtime?: "conectando" | "conectado" | "error";
 };
 
 export function AppShell({
@@ -22,8 +21,7 @@ export function AppShell({
   alCerrarSesion,
   tabActiva,
   alCambiarTab,
-  children,
-  estadoRealtime = "conectando"
+  children
 }: AppShellProps) {
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [titulo, setTitulo] = useState("Panel de tareas");
@@ -200,6 +198,7 @@ export function AppShell({
         </div>
       )}
 
+      {/* Cabecera Principal - Compacta (70px) */}
       <header className="h-[70px] shrink-0 z-[60] border-b border-slate-100 bg-white shadow-[0_1px_5px_rgba(0,0,0,0.02)]">
         <div className="w-full h-full flex items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-4">
@@ -208,13 +207,14 @@ export function AppShell({
                 onClick={() => setMenuAbierto(true)}
                 className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-950 transition-all"
              >
-                <div className="flex flex-col gap-1 w-5">
-                  <div className="h-0.5 w-full bg-current rounded-full" />
-                  <div className="h-0.5 w-2/3 bg-current rounded-full" />
-                  <div className="h-0.5 w-full bg-current rounded-full" />
-                </div>
+               <div className="flex flex-col gap-1 w-5">
+                 <div className="h-0.5 w-full bg-current rounded-full" />
+                 <div className="h-0.5 w-2/3 bg-current rounded-full" />
+                 <div className="h-0.5 w-full bg-current rounded-full" />
+               </div>
              </button>
 
+            <div className="flex items-stretch gap-4 h-full">
             <div className="flex items-center gap-3">
               <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                 <img 
@@ -243,43 +243,29 @@ export function AppShell({
                 )}
               </div>
             </div>
+            </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-6">
-              {/* Indicador Realtime Global */}
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100">
-                <div className={`w-2 h-2 rounded-full animate-pulse ${
-                  estadoRealtime === 'conectado' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' :
-                  estadoRealtime === 'conectando' ? 'bg-amber-400' : 'bg-rose-500'
-                }`} />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  {estadoRealtime === 'conectado' ? 'Live' : 
-                   estadoRealtime === 'conectando' ? 'Sinc' : 'Off'}
-                </span>
+            <div className="flex items-center gap-3">
+              <div className="hidden flex-col items-end sm:flex leading-none">
+                <span className="text-sm font-black text-slate-950">{sesion.usuario.nombre}</span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-sky-500 bg-sky-50 px-1.5 py-0.5 rounded-md">{sesion.usuario.rol}</span>
               </div>
-
-              <div className="flex items-center gap-3">
-                <div className="hidden flex-col items-end sm:flex leading-none">
-                  <span className="text-sm font-black text-slate-950">{sesion.usuario.nombre}</span>
-                  <span className="text-[9px] font-black uppercase tracking-widest text-sky-500 bg-sky-50 px-1.5 py-0.5 rounded-md">{sesion.usuario.rol}</span>
-                </div>
-                <div 
-                  className="h-10 w-10 rounded-xl border border-white shadow-sm flex items-center justify-center text-[11px] font-black text-white group cursor-pointer transition-all hover:scale-110 active:scale-95 hover:shadow-lg hover:shadow-sky-500/20"
-                  style={{ backgroundColor: sesion.usuario.color || "#0ea5e9" }}
-                  onClick={abrirConfiguracion}
-                >
-                  {sesion.usuario.foto ? (
-                    <img src={sesion.usuario.foto} alt="" className="h-full w-full rounded-xl object-cover" />
-                  ) : (
-                    sesion.usuario.nombre.substring(0, 1).toUpperCase()
-                  )}
-                </div>
+               <div 
+                className="h-10 w-10 rounded-xl border border-white shadow-sm flex items-center justify-center text-[11px] font-black text-white group cursor-pointer transition-all hover:scale-110 active:scale-95 hover:shadow-lg hover:shadow-sky-500/20"
+                style={{ backgroundColor: sesion.usuario.color || "#0ea5e9" }}
+                onClick={abrirConfiguracion}
+              >
+                {sesion.usuario.foto ? (
+                  <img src={sesion.usuario.foto} alt="" className="h-full w-full rounded-xl object-cover" />
+                ) : (
+                  sesion.usuario.nombre.substring(0, 1).toUpperCase()
+                )}
               </div>
             </div>
           </div>
         </div>
-      </header>
 
          {/* Modal Gestión de Perfil */}
          {modalPasswordAbierto && (
@@ -421,6 +407,7 @@ export function AppShell({
             </div>
           </div>
         )}
+      </header>
 
       <main className="flex-1 overflow-auto bg-white">
         {children}

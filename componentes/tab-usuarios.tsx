@@ -14,7 +14,6 @@ export function TabUsuarios() {
   const [rol, setRol] = useState<RolUsuario>("usuario");
   const [color, setColor] = useState("#0ea5e9");
   const [foto, setFoto] = useState("");
-  const [email, setEmail] = useState("");
   const [clave, setClave] = useState("");
 
   useEffect(() => {
@@ -31,7 +30,6 @@ export function TabUsuarios() {
     const persona: Persona = {
       identificador: editandoUsuario?.identificador || crypto.randomUUID(),
       nombre,
-      email,
       area,
       rol,
       color,
@@ -63,7 +61,6 @@ export function TabUsuarios() {
     setRol("usuario");
     setColor("#0ea5e9");
     setFoto("");
-    setEmail("");
     setClave("");
   }
 
@@ -71,7 +68,6 @@ export function TabUsuarios() {
     setEditandoUsuario(p);
     setNombre(p.nombre);
     setArea(p.area);
-    setEmail(p.email || "");
     setRol(p.rol || "usuario");
     setColor(p.color || "#0ea5e9");
     setFoto(p.foto || "");
@@ -150,17 +146,8 @@ export function TabUsuarios() {
                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-base font-semibold text-slate-900 outline-none"
               >
                 <option value="usuario">Colaborador</option>
+                <option value="admin">Admin</option>
               </select>
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Email Corporativo</label>
-              <input 
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="ejemplo@innovaexport.com"
-                className="w-full rounded-xl border border-indigo-200 bg-indigo-50/50 px-3 py-2 text-base font-semibold text-slate-900 outline-none focus:border-indigo-400"
-              />
             </div>
             <div className="space-y-1">
               <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Color</label>
