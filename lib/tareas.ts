@@ -72,7 +72,10 @@ export async function guardarTarea(tarea: Tarea) {
       team_id: '00000000-0000-0000-0000-000000000001'
     });
 
-  if (error) console.error("Error saving task:", error.message);
+  if (error) {
+    console.error("DEBUG: Error saving task:", error.message, error.details, error.hint);
+    alert("Error al guardar tarea: " + error.message);
+  }
 }
 
 export async function eliminarTarea(identificador: string) {

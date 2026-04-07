@@ -32,7 +32,11 @@ export async function guardarProyecto(proyecto: Proyecto): Promise<void> {
       tareas_periodicas: proyecto.tareasPeriodicas || []
     });
 
-  if (error) throw error;
+  if (error) {
+    console.error("DEBUG: Error saving project:", error.message, error.details);
+    alert("Error al guardar proyecto: " + error.message);
+    throw error;
+  }
 }
 
 export async function eliminarProyecto(identificador: string): Promise<void> {

@@ -165,7 +165,10 @@ export async function guardarPersona(persona: Persona) {
       rol: persona.rol
     });
 
-  if (error) console.error("Error saving profile:", error.message);
+  if (error) {
+    console.error("DEBUG: Error saving profile:", error.message, error.details);
+    alert("Error al guardar perfil: " + error.message);
+  }
 }
 
 export async function eliminarPersona(identificador: string) {
