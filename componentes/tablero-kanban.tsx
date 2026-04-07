@@ -69,24 +69,24 @@ const estilosEstado: Record<
   { fondo: string; borde: string; brillo: string }
 > = {
   DEFINIDO: {
-    fondo: "from-sky-400 via-cyan-300 to-white",
-    borde: "border-sky-200",
-    brillo: "bg-sky-50/85"
+    fondo: "bg-sky-50",
+    borde: "border-sky-400",
+    brillo: "bg-white"
   },
   EN_CURSO: {
-    fondo: "from-amber-300 via-orange-200 to-white",
-    borde: "border-amber-200",
-    brillo: "bg-amber-50/85"
+    fondo: "bg-amber-50",
+    borde: "border-amber-400",
+    brillo: "bg-white"
   },
   BLOQUEADO: {
-    fondo: "from-rose-300 via-pink-200 to-white",
-    borde: "border-rose-200",
-    brillo: "bg-rose-50/85"
+    fondo: "bg-rose-50",
+    borde: "border-rose-400",
+    brillo: "bg-white"
   },
   TERMINADO: {
-    fondo: "from-emerald-300 via-lime-200 to-white",
-    borde: "border-emerald-200",
-    brillo: "bg-emerald-50/85"
+    fondo: "bg-emerald-50",
+    borde: "border-emerald-400",
+    brillo: "bg-white"
   }
 };
 

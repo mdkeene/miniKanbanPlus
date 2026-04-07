@@ -50,7 +50,7 @@ export function ColumnaKanban({
 
   return (
     <section
-      className={`flex w-[340px] shrink-0 flex-col rounded-[28px] border ${estilos.borde} ${estilos.brillo} p-4 shadow-panel transition-all md:w-[360px] 2xl:w-[420px]`}
+      className={`flex w-[340px] shrink-0 flex-col rounded-[28px] border-2 ${estilos.borde} ${estilos.brillo} p-4 transition-all md:w-[360px] 2xl:w-[420px]`}
       onDragOver={(evento) => {
         if (!arrastreDisponible || !estadoArrastre) {
           return;
@@ -69,7 +69,7 @@ export function ColumnaKanban({
       }}
     >
       <header
-        className={`rounded-[22px] border border-white/70 bg-gradient-to-r ${estilos.fondo} px-4 py-4 shadow-sm`}
+        className={`rounded-[22px] border border-slate-100 ${estilos.fondo} px-4 py-4`}
       >
         <div className="flex items-center justify-between gap-3">
           <div>
