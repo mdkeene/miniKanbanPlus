@@ -525,18 +525,6 @@ export function TableroKanban() {
                     {agruparPorPersona ? "🏊 Calles" : "🏢 Base"}
                   </button>
 
-                  {agruparPorPersona && swimlanes && (
-                    <button
-                      onClick={toggleTodoSwimlanes}
-                      title="Gestionar Visibilidad de Calles"
-                      className="h-11 px-4 flex items-center justify-center rounded-2xl border-2 border-slate-100 bg-white hover:border-sky-200 hover:text-sky-600 transition-all"
-                    >
-                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
-                        {swimlanesExpandidos.length === swimlanes.length ? "Colapsar Todo" : "Expandir Todo"}
-                      </span>
-                    </button>
-                  )}
-
                   <button
                     type="button"
                     onClick={() => setModalCargaAbierto(true)}
