@@ -56,6 +56,7 @@ import {
   estadosKanban
 } from "@/tipos/tareas";
 import { generarIdentificador } from "@/lib/tareas";
+import { supabase } from "@/lib/supabase";
 
 const etiquetasEstado: Record<EstadoKanban, string> = {
   DEFINIDO: "Definido",
@@ -150,6 +151,63 @@ export function TableroKanban() {
       }
     }
     inicializar();
+
+    // Suscripción Realtime para Tareas y Perfiles
+    const canal = supabase
+      .channel('cambios-tablero')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tasks' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const nueva = payload.new as Tarea;
+            setTareas(actuales => {
+              if (actuales.find(t => t.identificador === nueva.identificador)) return actuales;
+              return [...actuales, nueva];
+            });
+          } else if (payload.eventType === 'UPDATE') {
+            const actualizada = payload.new as Tarea;
+            setTareas(actuales => actuales.map(t => 
+              t.identificador === actualizada.identificador ? actualizada : t
+            ));
+          } else if (payload.eventType === 'DELETE') {
+            const eliminadaId = payload.old.identificador;
+            setTareas(actuales => actuales.filter(t => t.identificador !== eliminadaId));
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles' },
+        (payload) => {
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            const p = payload.new as any;
+            const personaActualizada: Persona = {
+              identificador: p.id,
+              nombre: p.nombre,
+              area: p.area,
+              foto: p.foto,
+              color: p.color,
+              rol: p.rol as any
+            };
+            setPersonas(actuales => {
+              const existe = actuales.find(item => item.identificador === personaActualizada.identificador);
+              if (existe) {
+                return actuales.map(item => item.identificador === personaActualizada.identificador ? personaActualizada : item);
+              }
+              return [...actuales, personaActualizada];
+            });
+          } else if (payload.eventType === 'DELETE') {
+            const eliminadaId = payload.old.id;
+            setPersonas(actuales => actuales.filter(p => p.identificador !== eliminadaId));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(canal);
+    };
   }, []);
 
   useEffect(() => {

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { type Sesion } from "@/tipos/tareas";
-import { obtenerPersonas, guardarPersona, personasEjemplo } from "@/lib/personas";
+import { type Persona, type Sesion, type Usuario } from "@/tipos/tareas";
+import { supabase } from "@/lib/supabase";
+import { guardarPersona, obtenerPersonas } from "@/lib/personas";
 import { obtenerTareas, guardarTarea, tareasEjemplo } from "@/lib/tareas";
 import { obtenerProyectos, guardarProyecto, proyectosEjemplo } from "@/lib/proyectos";
 
@@ -57,12 +58,40 @@ export function AppShell({
 
       setMensajeClave("¡Logrado! Perfil actualizado.");
       setTimeout(() => {
-        window.location.reload(); // Recarga para sincronizar todo el sistema
+        setModalPasswordAbierto(false);
+        setMensajeClave("");
       }, 1000);
     } catch (err) {
       setMensajeClave("Error al guardar cambios.");
     }
   }
+
+  // Listener para sincronizar perfil propio en tiempo real (Header/Avatar)
+  useEffect(() => {
+    if (!sesion.usuario.identificador) return;
+
+    const canal = supabase
+      .channel(`perfil-${sesion.usuario.identificador}`)
+      .on(
+        'postgres_changes',
+        { 
+          event: 'UPDATE', 
+          schema: 'public', 
+          table: 'profiles', 
+          filter: `id=eq.${sesion.usuario.identificador}` 
+        },
+        (payload) => {
+          // Notificar o actualizar estado local si fuera necesario
+          // Por ahora, como es Realtime, la mayoría de los componentes 
+          // que usan el perfil (como el Tablero) ya se actualizarán.
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(canal);
+    };
+  }, [sesion.usuario.identificador]);
 
   function abrirConfiguracion() {
     setNombreTemp(sesion.usuario.nombre);
