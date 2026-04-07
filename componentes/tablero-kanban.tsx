@@ -114,6 +114,7 @@ export function TableroKanban() {
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [hidratado, setHidratado] = useState(false);
+  const [estadoRealtime, setEstadoRealtime] = useState<'conectando' | 'conectado' | 'error'>('conectando');
   const [cargando, setCargando] = useState(true);
   const [semanaActiva, setSemanaActiva] = useState(obtenerSemanaId());
   const [ordenActivo, setOrdenActivo] = useState<OrdenTablero>("manual");
@@ -224,7 +225,14 @@ export function TableroKanban() {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          setEstadoRealtime('conectado');
+        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setEstadoRealtime('error');
+          console.error("DEBUG: Error de conexión Realtime:", status);
+        }
+      });
 
     return () => {
       supabase.removeChannel(canal);
@@ -509,7 +517,28 @@ export function TableroKanban() {
                     </button>
                   </div>
 
-                  <div className="flex items-center gap-1.5 md:gap-3">
+                  <div className="flex items-center gap-3">
+                    {/* Indicador de Conexión Realtime */}
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100">
+                      <div className={`w-2 h-2 rounded-full animate-pulse ${
+                        estadoRealtime === 'conectado' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' :
+                        estadoRealtime === 'conectando' ? 'bg-amber-400' : 'bg-rose-500'
+                      }`} />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        {estadoRealtime === 'conectado' ? 'Live' : 
+                         estadoRealtime === 'conectando' ? 'Sincronizando...' : 'Desconectado'}
+                      </span>
+                    </div>
+
+                    <div className="relative group/menu">
+                      <button className="flex items-center gap-2 rounded-2xl bg-slate-950 px-4 py-2.5 text-xs font-black text-white hover:bg-slate-800 transition-all shadow-lg shadow-slate-950/10">
+                        <span>Acciones</span>
+                        <svg className="h-3 w-3 transition-transform group-hover/menu:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                    </div>
+
                     <button 
                       onClick={abrirCreacionRapida}
                       title="Nueva Tarea"
