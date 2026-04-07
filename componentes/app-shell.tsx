@@ -28,21 +28,48 @@ export function AppShell({
   const [modalPasswordAbierto, setModalPasswordAbierto] = useState(false);
   const [nuevaClave, setNuevaClave] = useState("");
   const [mensajeClave, setMensajeClave] = useState("");
+  const [nombreTemp, setNombreTemp] = useState("");
+  const [areaTemp, setAreaTemp] = useState("");
+  const [colorTemp, setColorTemp] = useState("");
   const [accionConfirmacion, setAccionConfirmacion] = useState<{titulo: string; descripcion: string; onConfirmar: () => Promise<void>} | null>(null);
 
-  async function handleCambiarClave() {
-    if (!nuevaClave.trim()) return;
-    const personas = await obtenerPersonas();
-    const persona = personas.find(p => p.identificador === sesion.usuario.identificador);
-    if (persona) {
-      await guardarPersona({ ...persona, clave: nuevaClave });
-      setMensajeClave("¡Logrado! Contraseña actualizada.");
+  const coloresDisponibles = ["#0ea5e9", "#f59e0b", "#10b981", "#ec4899", "#6366f1", "#0f172a"];
+
+  async function handleGuardarPerfil() {
+    setMensajeClave("Guardando perfil...");
+    try {
+      // 1. Guardar datos de perfil
+      await guardarPersona({
+        ...sesion.usuario,
+        nombre: nombreTemp,
+        area: areaTemp,
+        color: colorTemp
+      });
+
+      // 2. Guardar clave si se ha escrito algo
+      if (nuevaClave.trim()) {
+        const personas = await obtenerPersonas();
+        const persona = personas.find(p => p.identificador === sesion.usuario.identificador);
+        if (persona) {
+          await guardarPersona({ ...persona, clave: nuevaClave });
+        }
+      }
+
+      setMensajeClave("¡Logrado! Perfil actualizado.");
       setTimeout(() => {
-        setModalPasswordAbierto(false);
-        setMensajeClave("");
-        setNuevaClave("");
-      }, 1500);
+        window.location.reload(); // Recarga para sincronizar todo el sistema
+      }, 1000);
+    } catch (err) {
+      setMensajeClave("Error al guardar cambios.");
     }
+  }
+
+  function abrirConfiguracion() {
+    setNombreTemp(sesion.usuario.nombre);
+    setAreaTemp(sesion.usuario.area);
+    setColorTemp(sesion.usuario.color || "#0ea5e9");
+    setNuevaClave("");
+    setModalPasswordAbierto(true);
   }
 
   function preConfirmarAccion(titulo: string, descripcion: string, onConfirmar: () => Promise<void>) {
@@ -122,14 +149,14 @@ export function AppShell({
             </div>
 
             <div className="pt-6 border-t border-slate-100 flex flex-col gap-3">
-               <button
+                <button
                   onClick={() => {
                     setMenuAbierto(false);
-                    setModalPasswordAbierto(true);
+                    abrirConfiguracion();
                   }}
                   className="w-full flex items-center gap-4 rounded-[20px] bg-slate-50 px-5 py-4 text-sm font-black text-slate-600 hover:bg-slate-100 transition-all"
                 >
-                  ⚙️ Configurar Perfil
+                  ⚙️ Editar Perfil
                 </button>
                <button
                   onClick={alCerrarSesion}
@@ -196,10 +223,10 @@ export function AppShell({
                 <span className="text-sm font-black text-slate-950">{sesion.usuario.nombre}</span>
                 <span className="text-[9px] font-black uppercase tracking-widest text-sky-500 bg-sky-50 px-1.5 py-0.5 rounded-md">{sesion.usuario.rol}</span>
               </div>
-              <div 
+               <div 
                 className="h-10 w-10 rounded-xl border border-white shadow-sm flex items-center justify-center text-[11px] font-black text-white group cursor-pointer transition-all hover:scale-110 active:scale-95 hover:shadow-lg hover:shadow-sky-500/20"
                 style={{ backgroundColor: sesion.usuario.color || "#0ea5e9" }}
-                onClick={() => setModalPasswordAbierto(true)}
+                onClick={abrirConfiguracion}
               >
                 {sesion.usuario.foto ? (
                   <img src={sesion.usuario.foto} alt="" className="h-full w-full rounded-xl object-cover" />
@@ -211,69 +238,124 @@ export function AppShell({
           </div>
         </div>
 
-        {/* Modal Cambio Password */}
-        {modalPasswordAbierto && (
-          <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-950/20 backdrop-blur-md p-4 animate-in fade-in duration-300">
-            <div className="w-full max-w-sm rounded-[32px] border border-white bg-white p-8 shadow-2xl animate-in zoom-in-95 duration-200">
-               <h3 className="text-xl font-black text-slate-950 mb-4">Seguridad Perfil</h3>
-               <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="etiqueta-campo">Nueva Clave</label>
-                  <input 
-                    type="password"
-                    value={nuevaClave}
-                    onChange={e => setNuevaClave(e.target.value)}
-                    className="campo-formulario"
-                    autoFocus
-                    onKeyDown={(e) => e.key === "Enter" && handleCambiarClave()}
-                  />
-                </div>
-                {mensajeClave ? (
-                  <div className="rounded-xl bg-emerald-50 p-4 text-center text-emerald-700 font-bold text-sm">
-                    {mensajeClave}
+         {/* Modal Gestión de Perfil */}
+         {modalPasswordAbierto && (
+           <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-950/20 backdrop-blur-md p-4 animate-in fade-in duration-300">
+             <div className="w-full max-w-sm rounded-[32px] border border-white bg-white p-6 md:p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+               <div className="flex items-center gap-4 mb-8">
+                  <div 
+                    className="h-14 w-14 rounded-2xl flex items-center justify-center text-xl font-black text-white shadow-2xl"
+                    style={{ backgroundColor: colorTemp }}
+                  >
+                    {sesion.usuario.nombre.substring(0, 1).toUpperCase()}
                   </div>
-                ) : (
-                  <div className="flex flex-col gap-3">
-                    <button onClick={handleCambiarClave} className="w-full rounded-xl bg-slate-900 py-3 text-sm font-black text-white hover:bg-slate-800 transition-all">Guardar Clave</button>
-                    <button onClick={() => setModalPasswordAbierto(false)} className="w-full rounded-xl border border-slate-200 py-3 text-sm font-black text-slate-500 hover:bg-slate-50 transition-all">Cancelar</button>
-                    
-                    {sesion.usuario.rol === "admin" && (
-                      <div className="mt-4 border-t border-slate-100 pt-4 space-y-2 text-center">
-                        <button 
-                          onClick={() => {
-                            setModalPasswordAbierto(false);
-                            preConfirmarAccion("Demostración", "Generar datos de ejemplo...", handleGenerarEjemplos);
-                          }} 
-                          className="w-full text-xs font-bold text-sky-600 hover:underline"
-                        >
-                          ✨ Generar Datos Ejemplo
-                        </button>
-                        <button 
-                          onClick={() => {
-                            setModalPasswordAbierto(false);
-                            preConfirmarAccion("Limpieza", "Borrar datos de ejemplo...", handleBorrarEjemplos);
-                          }} 
-                          className="w-full text-xs font-bold text-amber-600 hover:underline"
-                        >
-                          🗑️ Borrar Ejemplos
-                        </button>
-                        <button 
-                          onClick={() => {
-                            setModalPasswordAbierto(false);
-                            preConfirmarAccion("⚠️ RESET", "¡Borrar TODO el sistema!", handleBorrarTodo);
-                          }} 
-                          className="w-full text-xs font-bold text-rose-600 hover:underline hover:text-rose-700 transition-colors"
-                        >
-                          🔥 Reset Total
-                        </button>
-                      </div>
-                    )}
+                  <div>
+                    <h3 className="text-xl font-black text-slate-950 leading-none">Mi Perfil</h3>
+                    <p className="text-[10px] font-black uppercase text-slate-400 mt-1 tracking-widest">Identidad en el sistema</p>
                   </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+               </div>
+
+               <div className="space-y-6">
+                 {/* Datos Básicos */}
+                 <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <label className="etiqueta-campo">Nombre Completo</label>
+                      <input 
+                        type="text"
+                        value={nombreTemp}
+                        onChange={e => setNombreTemp(e.target.value)}
+                        className="campo-formulario"
+                        placeholder="Tu nombre real"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="etiqueta-campo">Área / Departamento</label>
+                      <input 
+                        type="text"
+                        value={areaTemp}
+                        onChange={e => setAreaTemp(e.target.value)}
+                        className="campo-formulario"
+                        placeholder="Ej: Marketing, Sistemas..."
+                      />
+                    </div>
+                 </div>
+
+                 {/* Selección de Color */}
+                 <div className="space-y-2">
+                    <label className="etiqueta-campo">Gama de Color Personal</label>
+                    <div className="flex flex-wrap gap-2">
+                      {coloresDisponibles.map(color => (
+                        <button
+                          key={color}
+                          onClick={() => setColorTemp(color)}
+                          className={`h-8 w-8 rounded-lg border-2 transition-all ${color === colorTemp ? "border-slate-400 scale-110 shadow-lg" : "border-transparent opacity-60 hover:opacity-100"}`}
+                          style={{ backgroundColor: color }}
+                        />
+                      ))}
+                    </div>
+                 </div>
+
+                 {/* Seguridad */}
+                 <div className="pt-4 border-t border-slate-100">
+                    <div className="space-y-1.5">
+                      <label className="etiqueta-campo text-rose-400">Cambiar Contraseña (opcional)</label>
+                      <input 
+                        type="password"
+                        value={nuevaClave}
+                        onChange={e => setNuevaClave(e.target.value)}
+                        className="campo-formulario border-rose-100 bg-rose-50/10"
+                        placeholder="Dejar en blanco para no cambiar"
+                        onKeyDown={(e) => e.key === "Enter" && handleGuardarPerfil()}
+                      />
+                    </div>
+                 </div>
+
+                 {mensajeClave ? (
+                   <div className="rounded-xl bg-slate-950 p-4 text-center text-white font-bold text-sm animate-pulse">
+                     {mensajeClave}
+                   </div>
+                 ) : (
+                   <div className="flex flex-col gap-3">
+                     <button onClick={handleGuardarPerfil} className="w-full rounded-2xl bg-sky-600 py-4 text-sm font-black text-white hover:bg-sky-500 shadow-xl shadow-sky-500/20 transition-all">Guardar Perfil</button>
+                     <button onClick={() => setModalPasswordAbierto(false)} className="w-full rounded-2xl border border-slate-200 py-3 text-sm font-black text-slate-500 hover:bg-slate-50 transition-all">Cancelar</button>
+                     
+                     {sesion.usuario.rol === "admin" && (
+                       <div className="mt-4 border-t border-slate-100 pt-4 space-y-2 text-center">
+                         <button 
+                           onClick={() => {
+                             setModalPasswordAbierto(false);
+                             preConfirmarAccion("Demostración", "Generar datos de ejemplo...", handleGenerarEjemplos);
+                           }} 
+                           className="w-full text-xs font-bold text-sky-600 hover:underline"
+                         >
+                           ✨ Generar Datos Ejemplo
+                         </button>
+                         <button 
+                           onClick={() => {
+                             setModalPasswordAbierto(false);
+                             preConfirmarAccion("Limpieza", "Borrar datos de ejemplo...", handleBorrarEjemplos);
+                           }} 
+                           className="w-full text-xs font-bold text-amber-600 hover:underline"
+                         >
+                           🗑️ Borrar Ejemplos
+                         </button>
+                         <button 
+                           onClick={() => {
+                             setModalPasswordAbierto(false);
+                             preConfirmarAccion("⚠️ RESET", "¡Borrar TODO el sistema!", handleBorrarTodo);
+                           }} 
+                           className="w-full text-xs font-bold text-rose-600 hover:underline hover:text-rose-700 transition-colors"
+                         >
+                           🔥 Reset Total
+                         </button>
+                       </div>
+                     )}
+                   </div>
+                 )}
+               </div>
+             </div>
+           </div>
+         )}
 
         {/* Modal Confirmación */}
         {accionConfirmacion && (
