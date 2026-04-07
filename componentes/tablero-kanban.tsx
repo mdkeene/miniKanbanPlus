@@ -418,7 +418,7 @@ export function TableroKanban() {
                     <button 
                       onClick={abrirCreacionRapida}
                       title="Nueva Tarea"
-                      className="flex h-11 w-11 lg:w-auto items-center justify-center gap-2 rounded-2xl bg-slate-950 lg:px-5 text-sm font-black text-white shadow-xl shadow-slate-950/20 hover:bg-slate-800 transition-all hover:scale-105 active:scale-95"
+                      className="flex h-11 w-11 lg:w-auto items-center justify-center gap-2 rounded-2xl bg-slate-950 lg:px-5 lg:shadow-xl lg:shadow-slate-950/20 text-sm font-black text-white hover:bg-slate-800 transition-all hover:scale-105 active:scale-95"
                     >
                       <span className="text-lg lg:text-base">+</span> 
                       <span className="hidden lg:inline text-xs">Nueva Tarea</span>
@@ -429,7 +429,7 @@ export function TableroKanban() {
                       title="Filtros"
                       className={`lg:hidden flex h-11 w-11 items-center justify-center rounded-2xl border transition-all ${
                         mostrarFiltros || filtroProyecto !== "todos" || filtroPersona !== "todos"
-                        ? "border-sky-500 bg-sky-50 text-sky-600 shadow-sm"
+                        ? "border-sky-500 bg-sky-50 text-sky-600"
                         : "border-slate-100 bg-slate-50 text-slate-500"
                       }`}
                     >
