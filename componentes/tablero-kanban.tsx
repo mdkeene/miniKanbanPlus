@@ -528,10 +528,12 @@ export function TableroKanban() {
                   {agruparPorPersona && swimlanes && (
                     <button
                       onClick={toggleTodoSwimlanes}
-                      title="Colapsar/Expandir Todo"
-                      className="h-11 w-11 flex items-center justify-center rounded-2xl border-2 border-slate-100 bg-white text-slate-500 hover:border-sky-200 hover:text-sky-600 transition-all font-bold"
+                      title="Gestionar Visibilidad de Calles"
+                      className="h-11 px-4 flex items-center justify-center rounded-2xl border-2 border-slate-100 bg-white hover:border-sky-200 hover:text-sky-600 transition-all"
                     >
-                      {swimlanesExpandidos.length === swimlanes.length ? "↕️" : "↔️"}
+                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
+                        {swimlanesExpandidos.length === swimlanes.length ? "Colapsar Todo" : "Expandir Todo"}
+                      </span>
                     </button>
                   )}
 
