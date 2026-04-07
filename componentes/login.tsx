@@ -31,40 +31,40 @@ export function PaginaLogin({ alEntrar }: PaginaLoginProps) {
   }
 
   return (
-    <div className="relative w-full max-w-md space-y-8 rounded-[48px] border border-slate-200 bg-white p-10 shadow-3xl xl:p-12 font-sans selection:bg-sky-500/30">
+    <div className="relative w-full max-w-sm space-y-10 font-sans selection:bg-sky-500/30 mx-auto">
         <div className="text-center">
           <div className="flex justify-center">
             <img 
               src="https://www.innovaexport.com/wp-content/uploads/2022/10/logo-ide_compartir_link_web-1.jpg" 
               alt="InnovaExport Logo" 
-              className="h-28 w-auto rounded-3xl shadow-2xl transition-transform hover:scale-105"
+              className="h-20 w-auto rounded-2xl transition-transform hover:scale-105"
             />
           </div>
         </div>
 
-        <form className="mt-12 space-y-6" onSubmit={manejarEnvio}>
-          <div className="space-y-5">
-            <div className="space-y-2">
+        <form className="space-y-6" onSubmit={manejarEnvio}>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
               <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">
                 Email de Usuario
               </label>
               <input
                 type="email"
                 required
-                className="block w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-4 text-slate-950 placeholder-slate-400 outline-none transition focus:border-sky-500 focus:bg-white"
+                className="block w-full rounded-2xl border-2 border-slate-200 bg-white px-4 py-4 text-slate-950 placeholder-slate-400 outline-none transition focus:border-sky-500"
                 placeholder="tu@email.com"
                 value={usuario}
                 onChange={(e) => setUsuario(e.target.value)}
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">
                 Contraseña
               </label>
               <input
                 type="password"
                 required
-                className="block w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-4 text-slate-950 placeholder-slate-400 outline-none transition focus:border-sky-500 focus:bg-white"
+                className="block w-full rounded-2xl border-2 border-slate-200 bg-white px-4 py-4 text-slate-950 placeholder-slate-400 outline-none transition focus:border-sky-500"
                 placeholder="••••••••"
                 value={clave}
                 onChange={(e) => setClave(e.target.value)}
@@ -86,7 +86,6 @@ export function PaginaLogin({ alEntrar }: PaginaLoginProps) {
             <span className="transition-transform group-hover:translate-x-1">→</span>
           </button>
         </form>
-
       </div>
   );
 }
