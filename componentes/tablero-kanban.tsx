@@ -129,7 +129,7 @@ export function TableroKanban() {
   const [seleccionadas, setSeleccionadas] = useState<string[]>([]);
   const [agruparPorPersona, setAgruparPorPersona] = useState(false);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
-  const [swimlanesColapsados, setSwimlanesColapsados] = useState<string[]>([]);
+  const [swimlanesExpandidos, setSwimlanesExpandidos] = useState<string[]>([]);
 
   useEffect(() => {
     async function inicializar() {
@@ -365,17 +365,17 @@ export function TableroKanban() {
   }
 
   function toggleSwimlane(id: string) {
-    setSwimlanesColapsados(actual => 
+    setSwimlanesExpandidos(actual => 
       actual.includes(id) ? actual.filter(item => item !== id) : [...actual, id]
     );
   }
 
   function toggleTodoSwimlanes() {
     if (!swimlanes) return;
-    if (swimlanesColapsados.length === swimlanes.length) {
-      setSwimlanesColapsados([]);
+    if (swimlanesExpandidos.length === swimlanes.length) {
+      setSwimlanesExpandidos([]);
     } else {
-      setSwimlanesColapsados(swimlanes.map(l => l.id));
+      setSwimlanesExpandidos(swimlanes.map(l => l.id));
     }
   }
 
@@ -531,7 +531,7 @@ export function TableroKanban() {
                       title="Colapsar/Expandir Todo"
                       className="h-11 w-11 flex items-center justify-center rounded-2xl border-2 border-slate-100 bg-white text-slate-500 hover:border-sky-200 hover:text-sky-600 transition-all font-bold"
                     >
-                      {swimlanesColapsados.length === swimlanes.length ? "↕️" : "↔️"}
+                      {swimlanesExpandidos.length === swimlanes.length ? "↕️" : "↔️"}
                     </button>
                   )}
 
@@ -569,19 +569,19 @@ export function TableroKanban() {
               {agruparPorPersona && swimlanes ? (
                 <div className="flex flex-col gap-6">
                   {swimlanes.map((lane) => (
-                    <div
-                      key={lane.id}
-                      className={`flex flex-col gap-3 rounded-[32px] border border-slate-100 p-4 transition-all ${
-                        swimlanesColapsados.includes(lane.id) ? "bg-slate-50/10 opacity-70" : "bg-slate-50/30"
-                      }`}
-                    >
-                      <div 
-                        className="flex items-center gap-3 px-2 cursor-pointer group"
-                        onClick={() => toggleSwimlane(lane.id)}
+                      <div
+                        key={lane.id}
+                        className={`flex flex-col gap-3 rounded-[32px] border border-slate-100 p-4 transition-all ${
+                          !swimlanesExpandidos.includes(lane.id) ? "bg-slate-50/10 opacity-70" : "bg-slate-50/30"
+                        }`}
                       >
-                        <div className={`flex h-6 w-6 items-center justify-center rounded-lg bg-white border border-slate-100 text-[10px] transition-transform ${swimlanesColapsados.includes(lane.id) ? "-rotate-90" : "rotate-0"}`}>
-                          ▼
-                        </div>
+                        <div 
+                          className="flex items-center gap-3 px-2 cursor-pointer group"
+                          onClick={() => toggleSwimlane(lane.id)}
+                        >
+                          <div className={`flex h-6 w-6 items-center justify-center rounded-lg bg-white border border-slate-100 text-[10px] transition-transform ${swimlanesExpandidos.includes(lane.id) ? "rotate-0" : "-rotate-90"}`}>
+                            ▼
+                          </div>
                         {lane.persona ? (
                           <div className="flex items-center gap-3">
                             <img src={lane.persona.foto} className="h-8 w-8 rounded-xl object-cover shadow-sm bg-white" alt="" />
@@ -595,7 +595,7 @@ export function TableroKanban() {
                         <span className="text-[10px] font-bold text-slate-400">{lane.tareas.length} tareas</span>
                       </div>
                       
-                      {!swimlanesColapsados.includes(lane.id) && (
+                      {swimlanesExpandidos.includes(lane.id) && (
                         <div className="flex gap-4 overflow-x-auto pb-2 custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-300">
                         {columnas.map((columna) => {
                           const tareasDeColumnaYPersona = columna.tareas.filter(
