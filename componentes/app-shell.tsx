@@ -93,28 +93,28 @@ export function AppShell({
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-sky-100 selection:text-sky-900">
-      {/* Cabecera Principal */}
-      <header className="sticky top-0 z-[60] border-b border-slate-200 bg-white/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-28 max-w-[98%] items-center justify-between px-6 lg:px-10">
-          <div className="flex items-center gap-10">
-            <div className="flex items-center gap-4">
+      {/* Cabecera Principal - Responsive */}
+      <header className="sticky top-0 z-[60] border-b border-slate-200 bg-white/80 backdrop-blur-xl">
+        <div className="mx-auto flex h-20 md:h-28 max-w-[98%] items-center justify-between px-4 md:px-10">
+          <div className="flex items-center gap-4 md:gap-10">
+            <div className="flex items-center gap-3 md:gap-4">
               <Link 
                 href="/"
-                className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-sky-600 font-black text-xl text-white shadow-xl shadow-sky-500/20 hover:scale-105 transition-transform"
+                className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-sky-600 font-black text-lg md:text-xl text-white shadow-xl shadow-sky-500/20 hover:scale-105 transition-transform"
               >
                 MK
               </Link>
               <div className="flex flex-col">
                 <Link 
                   href="/"
-                  className="text-3xl font-black tracking-tighter text-slate-950 hover:text-sky-600 transition-colors"
+                  className="text-xl md:text-3xl font-black tracking-tighter text-slate-950 hover:text-sky-600 transition-colors truncate max-w-[150px] md:max-w-none"
                 >
                   miniKanbanPlus
                 </Link>
                 {editandoTitulo ? (
                   <input
                     autoFocus
-                    className="text-sm font-bold text-slate-500 outline-none border-b-2 border-sky-400 bg-transparent py-0.5"
+                    className="text-[10px] md:text-sm font-bold text-slate-500 outline-none border-b-2 border-sky-400 bg-transparent py-0.5"
                     value={titulo}
                     onChange={(e) => setTitulo(e.target.value)}
                     onBlur={() => setEditandoTitulo(false)}
@@ -122,7 +122,7 @@ export function AppShell({
                   />
                 ) : (
                   <span 
-                    className="text-base font-black text-slate-500 cursor-pointer hover:text-sky-600 transition-colors"
+                    className="text-[10px] md:text-base font-black text-slate-500 cursor-pointer hover:text-sky-600 transition-colors"
                     onClick={() => setEditandoTitulo(true)}
                   >
                     {titulo} <span className="text-sky-400/50 ml-1 text-xs">✎</span>
@@ -132,19 +132,19 @@ export function AppShell({
             </div>
 
             {/* Navegación Desktop */}
-            <nav className="hidden items-center gap-2 md:flex">
+            <nav className="hidden items-center gap-1 md:flex xl:gap-2">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => alCambiarTab(tab.id)}
-                  className={`group relative flex items-center gap-3 rounded-2xl px-5 py-3 text-lg font-black transition-all ${
+                  className={`group relative flex items-center gap-2 rounded-xl px-3 py-2 md:rounded-2xl md:px-5 md:py-3 text-sm md:text-lg font-black transition-all ${
                     tabActiva === tab.id
                       ? "bg-slate-100 text-sky-600 shadow-inner"
                       : "text-slate-500 hover:bg-slate-50 hover:text-slate-950"
                   }`}
                 >
-                  <span className="text-xl transition-transform group-hover:scale-110">{tab.icono}</span>
-                  <span>{tab.nombre}</span>
+                  <span className="text-base md:text-xl transition-transform group-hover:scale-110">{tab.icono}</span>
+                  <span className="hidden lg:inline">{tab.nombre}</span>
                   {tabActiva === tab.id && (
                     <span className="absolute -bottom-1 left-4 right-4 h-1.5 bg-sky-500 rounded-full shadow-lg shadow-sky-500/40" />
                   )}
@@ -153,14 +153,14 @@ export function AppShell({
             </nav>
           </div>
 
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-4 pr-6 border-r border-slate-200">
-              <div className="flex flex-col items-end">
-                <span className="text-lg font-black text-slate-950 leading-tight">{sesion.usuario.nombre}</span>
-                <span className="text-xs font-black uppercase tracking-[0.2em] text-sky-600 bg-sky-50 px-2 py-0.5 rounded-md">{sesion.usuario.rol}</span>
+          <div className="flex items-center gap-3 md:gap-6">
+            <div className="flex items-center gap-2 md:gap-4 pr-3 md:pr-6 border-r border-slate-200">
+              <div className="hidden flex-col items-end sm:flex">
+                <span className="text-sm md:text-lg font-black text-slate-950 leading-tight">{sesion.usuario.nombre}</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-sky-600 bg-sky-50 px-2 py-0.5 rounded-md">{sesion.usuario.rol}</span>
               </div>
               <div 
-                className="h-12 w-12 rounded-2xl border-4 border-white shadow-xl flex items-center justify-center text-lg font-black text-white group cursor-pointer transition-transform hover:scale-105"
+                className="h-10 w-10 md:h-12 md:w-12 rounded-2xl border-2 md:border-4 border-white shadow-xl flex items-center justify-center text-sm md:text-lg font-black text-white group cursor-pointer transition-transform hover:scale-105"
                 style={{ backgroundColor: sesion.usuario.color || "#0ea5e9" }}
                 onClick={() => setModalPasswordAbierto(true)}
               >
@@ -172,17 +172,17 @@ export function AppShell({
               </div>
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex gap-1 md:gap-2">
               <button
                 onClick={() => setModalPasswordAbierto(true)}
-                className="flex h-12 items-center gap-2 rounded-2xl border-2 border-slate-200 bg-white px-4 text-base font-black text-slate-700 shadow-sm transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-600"
+                className="flex h-10 w-10 md:h-12 md:w-auto items-center justify-center md:px-4 gap-2 rounded-xl md:rounded-2xl border-2 border-slate-200 bg-white text-sm md:text-base font-black text-slate-700 shadow-sm transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-600"
                 title="Ajustes de mi perfil"
               >
                 ⚙️ <span className="hidden lg:inline">Perfil</span>
               </button>
               <button
                 onClick={alCerrarSesion}
-                className="flex h-12 items-center gap-2 rounded-2xl border-2 border-slate-200 bg-white px-4 text-base font-black text-slate-700 shadow-sm transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600"
+                className="flex h-10 w-10 md:h-12 md:w-auto items-center justify-center md:px-4 gap-2 rounded-xl md:rounded-2xl border-2 border-slate-200 bg-white text-sm md:text-base font-black text-slate-700 shadow-sm transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600"
               >
                 🚪 <span className="hidden lg:inline">Salir</span>
               </button>

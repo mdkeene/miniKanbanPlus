@@ -67,13 +67,13 @@ export function TarjetaTarea({
           onAbrir();
         }
       }}
-      className={`group relative rounded-2xl border border-slate-200 border-l-4 bg-white p-3 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md ${
+      className={`group relative rounded-[24px] border border-slate-200/60 border-l-[6px] bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-slate-200/50 ${
         estaArrastrando ? "scale-[0.95] opacity-40" : "opacity-100"
       } ${arrastrable ? "cursor-grab active:cursor-grabbing" : "cursor-default"} ${
-        seleccionada ? "ring-2 ring-sky-500 ring-offset-2" : ""
+        seleccionada ? "ring-4 ring-sky-500/20 border-sky-500" : ""
       } ${bordesPrioridad[tarea.prioridad]}`}
     >
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         {/* Cabecera: ID y Complejidad */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -82,9 +82,9 @@ export function TarjetaTarea({
               checked={seleccionada}
               onChange={(e) => alCambiarSeleccion(e.target.checked)}
               onClick={(e) => e.stopPropagation()}
-              className="h-4 w-4 rounded-md border-slate-300 text-sky-500 transition focus:ring-sky-500/20 cursor-pointer"
+              className="h-4.5 w-4.5 rounded-lg border-2 border-slate-200 text-sky-600 transition focus:ring-sky-500/20 cursor-pointer"
             />
-            <span className="text-[10px] font-bold tracking-tight text-slate-400">
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400/80">
               {tarea.identificador}
             </span>
           </div>
@@ -92,13 +92,13 @@ export function TarjetaTarea({
         </div>
 
         {/* Título o Edición */}
-        <div className="min-h-[40px]">
+        <div className="min-h-[48px]">
           {edicionRapida ? (
-            <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
+            <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
               <input
                 value={tituloTemporal}
                 onChange={(evento) => setTituloTemporal(evento.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-900 outline-none focus:border-sky-400"
+                className="w-full rounded-2xl border-2 border-sky-100 bg-sky-50/30 px-4 py-2 text-sm font-bold text-slate-900 outline-none focus:border-sky-500 focus:bg-white"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Enter") guardarTitulo();
@@ -108,34 +108,34 @@ export function TarjetaTarea({
               <div className="flex gap-2">
                 <button
                   onClick={guardarTitulo}
-                  className="rounded-lg bg-slate-900 px-3 py-1 text-[10px] font-bold text-white hover:bg-slate-800"
+                  className="rounded-xl bg-slate-900 px-4 py-2 text-[11px] font-black text-white hover:bg-slate-800 transition-colors"
                 >
-                  Listo
+                  Guardar
                 </button>
                 <button
                   onClick={() => setEdicionRapida(false)}
-                  className="rounded-lg border border-slate-200 px-3 py-1 text-[10px] font-bold text-slate-600 hover:bg-slate-50"
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-[11px] font-black text-slate-500 hover:bg-slate-50"
                 >
-                  No
+                  Cancelar
                 </button>
               </div>
             </div>
           ) : (
-            <div className="space-y-1">
-              <h3 className="text-[12px] font-black leading-tight text-slate-900 transition-colors group-hover:text-sky-600">
+            <div className="space-y-2">
+              <h3 className="text-[13px] font-black leading-[1.3] text-slate-950 transition-colors group-hover:text-sky-600">
                 {tarea.titulo}
               </h3>
-              <div className="flex items-center gap-2">
-                <span className="text-[9px] font-black uppercase tracking-wider text-slate-400">
+              <div className="flex items-center gap-3">
+                <span className="inline-flex items-center rounded-lg bg-slate-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-slate-500">
                   {tarea.tipo}
                 </span>
                 {tarea.fechaDeseableFin && (
-                  <>
-                    <span className="text-[9px] text-slate-300">•</span>
-                    <span className="text-[9px] font-bold text-slate-400">
-                      {formatearFechaCorta(tarea.fechaDeseableFin)}
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-1 w-1 rounded-full bg-slate-200" />
+                    <span className="text-[10px] font-bold text-slate-400">
+                      📅 {formatearFechaCorta(tarea.fechaDeseableFin)}
                     </span>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
@@ -145,7 +145,7 @@ export function TarjetaTarea({
 
       {/* Avatar flotante */}
       {personaAsignada && (
-        <div className="absolute bottom-3 right-3 transition-transform group-hover:scale-110">
+        <div className="absolute bottom-4 right-4 transition-all duration-300 group-hover:scale-110 group-hover:-translate-x-1">
           <AvatarPersona
             nombre={personaAsignada.nombre}
             foto={personaAsignada.foto}
@@ -154,16 +154,16 @@ export function TarjetaTarea({
         </div>
       )}
 
-      {/* Botón de edición rápida invisible hasta hover */}
+      {/* Botón de edición rápida mejorado */}
       {!edicionRapida && (
         <button
           onClick={(e) => {
             e.stopPropagation();
             setEdicionRapida(true);
           }}
-          className="absolute right-3 top-7 flex h-7 w-7 items-center justify-center rounded-full bg-white opacity-0 shadow-sm border border-slate-100 transition-all hover:bg-slate-50 group-hover:opacity-100"
+          className="absolute right-3 top-8 flex h-8 w-8 items-center justify-center rounded-xl bg-white opacity-0 shadow-xl border border-slate-100 text-slate-400 transition-all hover:bg-sky-50 hover:text-sky-600 hover:border-sky-100 group-hover:opacity-100 -translate-y-2 group-hover:translate-y-0"
         >
-          <span className="text-xs">✎</span>
+          <span className="text-sm">✎</span>
         </button>
       )}
     </article>

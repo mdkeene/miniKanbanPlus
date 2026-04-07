@@ -135,209 +135,225 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-3xl rounded-[30px] border border-white/70 bg-white p-6 shadow-2xl sm:p-7">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-700">
-              {propiedades.modo === "crear" ? "Nueva tarea" : "Edición completa"}
-            </p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
-              {propiedades.modo === "crear"
-                ? "Crear una nueva tarea"
-                : propiedades.tarea.identificador}
-            </h2>
-          </div>
-          <button
-            type="button"
-            onClick={propiedades.onCerrar}
-            className="rounded-2xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-950"
-          >
-            Cerrar
-          </button>
-        </div>
-
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <EtiquetaCampo titulo="Título">
-            <input
-              value={formulario.titulo}
-              onChange={(evento) => actualizarCampo("titulo", evento.target.value)}
-              className="campo-formulario"
-              maxLength={limitesSeguridad.tituloMaximo}
-              placeholder="Ejemplo: Preparar reunión de dirección"
-            />
-          </EtiquetaCampo>
-
-          <EtiquetaCampo titulo="Estado">
-            <select
-              value={formulario.estado}
-              onChange={(evento) =>
-                actualizarCampo("estado", evento.target.value as EstadoKanban)
-              }
-              className="campo-formulario"
-            >
-              {estadosKanban.map((estado) => (
-                <option key={estado} value={estado}>
-                  {etiquetasEstado[estado]}
-                </option>
-              ))}
-            </select>
-          </EtiquetaCampo>
-
-          <EtiquetaCampo titulo="Tipo">
-            <select
-              value={formulario.tipo}
-              onChange={(evento) =>
-                actualizarCampo("tipo", evento.target.value as TipoTarea)
-              }
-              className="campo-formulario"
-            >
-              {opcionesTipo.map((tipo) => (
-                <option key={tipo} value={tipo}>
-                  {tipo}
-                </option>
-              ))}
-            </select>
-          </EtiquetaCampo>
-
-          <EtiquetaCampo titulo="Prioridad">
-            <select
-              value={formulario.prioridad}
-              onChange={(evento) =>
-                actualizarCampo(
-                  "prioridad",
-                  evento.target.value as PrioridadTarea
-                )
-              }
-              className="campo-formulario"
-            >
-              {opcionesPrioridad.map((prioridad) => (
-                <option key={prioridad} value={prioridad}>
-                  {prioridad}
-                </option>
-              ))}
-            </select>
-          </EtiquetaCampo>
-
-          <EtiquetaCampo titulo="Fecha deseable de fin">
-            <input
-              type="date"
-              value={formulario.fechaDeseableFin}
-              onChange={(evento) =>
-                actualizarCampo("fechaDeseableFin", evento.target.value)
-              }
-              className="campo-formulario"
-            />
-          </EtiquetaCampo>
-
-          <EtiquetaCampo titulo="Complejidad (Puntos)">
-            <select
-              value={formulario.complejidad}
-              onChange={(evento) =>
-                actualizarCampo("complejidad", parseInt(evento.target.value) as any)
-              }
-              className="campo-formulario"
-            >
-              {[1, 2, 3, 5, 8].map((v) => (
-                <option key={v} value={v}>
-                  {v} {v === 1 ? "punto" : "puntos"}
-                </option>
-              ))}
-            </select>
-          </EtiquetaCampo>
-
-          <EtiquetaCampo titulo="Enlace">
-            <input
-              value={formulario.enlace}
-              onChange={(evento) => actualizarCampo("enlace", evento.target.value)}
-              className="campo-formulario"
-              maxLength={2048}
-              placeholder="https://..."
-            />
-          </EtiquetaCampo>
-
-          <EtiquetaCampo titulo="Proyecto">
-            <select
-              value={formulario.proyectoId || ""}
-              onChange={(evento) =>
-                actualizarCampo("proyectoId", evento.target.value || undefined)
-              }
-              className="campo-formulario"
-            >
-              <option value="">Sin proyecto específico</option>
-              {proyectos.map((proyecto) => (
-                <option key={proyecto.identificador} value={proyecto.identificador}>
-                  {proyecto.nombre}
-                </option>
-              ))}
-            </select>
-          </EtiquetaCampo>
-
-          <EtiquetaCampo titulo="Persona responsable">
-            <select
-              value={formulario.personaAsignadaId}
-              onChange={(evento) =>
-                actualizarCampo("personaAsignadaId", evento.target.value)
-              }
-              className="campo-formulario"
-            >
-              {propiedades.personas.map((persona) => (
-                <option key={persona.identificador} value={persona.identificador}>
-                  {persona.nombre} · {persona.area}
-                </option>
-              ))}
-            </select>
-          </EtiquetaCampo>
-        </div>
-
-        <div className="mt-4">
-          <EtiquetaCampo titulo="Observaciones">
-            <textarea
-              value={formulario.observaciones}
-              onChange={(evento) =>
-                actualizarCampo("observaciones", evento.target.value)
-              }
-              className="campo-formulario min-h-32 resize-none"
-              maxLength={limitesSeguridad.observacionesMaximas}
-              placeholder="Anota contexto, acuerdos o próximos pasos..."
-            />
-          </EtiquetaCampo>
-        </div>
-
-        {error ? (
-          <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">
-            {error}
-          </div>
-        ) : null}
-
-        <div className="mt-6 flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            {propiedades.modo === "editar" ? (
-              <button
-                type="button"
-                onClick={() => propiedades.onEliminar(propiedades.tarea.identificador)}
-                className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-900 transition hover:bg-rose-100"
-              >
-                Eliminar tarea
-              </button>
-            ) : null}
-          </div>
-
-          <div className="flex gap-3">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-md animate-in fade-in duration-300">
+      <div className="flex w-full max-w-4xl flex-col overflow-hidden rounded-[40px] border border-white/60 bg-white shadow-2xl animate-in zoom-in-95 duration-200 lg:max-h-[92vh]">
+        {/* Header del Modal */}
+        <div className="border-b border-slate-100 bg-slate-50/50 p-6 md:p-8">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <span className="inline-flex rounded-full bg-sky-100 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-sky-700">
+                {propiedades.modo === "crear" ? "Nueva tarea" : `Edición: ${propiedades.tarea.identificador}`}
+              </span>
+              <h2 className="mt-3 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
+                {propiedades.modo === "crear" ? "Captura los detalles" : "Actualizar información"}
+              </h2>
+            </div>
             <button
               type="button"
               onClick={propiedades.onCerrar}
-              className="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-950"
+              className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-xl text-slate-400 transition hover:border-slate-300 hover:text-slate-950"
             >
-              Cancelar
+              ✕
             </button>
-            <button
-              type="button"
-              onClick={guardar}
-              className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-            >
-              {propiedades.modo === "crear" ? "Crear tarea" : "Guardar cambios"}
-            </button>
+          </div>
+        </div>
+
+        {/* Cuerpo del Modal (Scrollable) */}
+        <div className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="md:col-span-2">
+              <label className="etiqueta-campo">Título de la tarea</label>
+              <input
+                value={formulario.titulo}
+                onChange={(evento) => actualizarCampo("titulo", evento.target.value)}
+                className="campo-formulario !text-lg"
+                maxLength={limitesSeguridad.tituloMaximo}
+                placeholder="¿Qué hay que hacer?"
+                autoFocus
+              />
+            </div>
+
+            <div>
+              <label className="etiqueta-campo">Estado</label>
+              <select
+                value={formulario.estado}
+                onChange={(evento) =>
+                  actualizarCampo("estado", evento.target.value as EstadoKanban)
+                }
+                className="campo-formulario"
+              >
+                {estadosKanban.map((estado) => (
+                  <option key={estado} value={estado}>
+                    {etiquetasEstado[estado]}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="etiqueta-campo">Tipo de Actividad</label>
+              <select
+                value={formulario.tipo}
+                onChange={(evento) =>
+                  actualizarCampo("tipo", evento.target.value as TipoTarea)
+                }
+                className="campo-formulario"
+              >
+                {opcionesTipo.map((tipo) => (
+                  <option key={tipo} value={tipo}>
+                    {tipo}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="etiqueta-campo">Prioridad</label>
+              <select
+                value={formulario.prioridad}
+                onChange={(evento) =>
+                  actualizarCampo(
+                    "prioridad",
+                    evento.target.value as PrioridadTarea
+                  )
+                }
+                className="campo-formulario"
+              >
+                {opcionesPrioridad.map((prioridad) => (
+                  <option key={prioridad} value={prioridad}>
+                    {prioridad}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="etiqueta-campo">Complejidad</label>
+              <select
+                value={formulario.complejidad}
+                onChange={(evento) =>
+                  actualizarCampo("complejidad", parseInt(evento.target.value) as any)
+                }
+                className="campo-formulario"
+              >
+                {[1, 2, 3, 5, 8].map((v) => (
+                  <option key={v} value={v}>
+                    {v} {v === 1 ? "Punto (Muy fácil)" : "Puntos"}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="etiqueta-campo">Fecha Límite</label>
+              <input
+                type="date"
+                value={formulario.fechaDeseableFin}
+                onChange={(evento) =>
+                  actualizarCampo("fechaDeseableFin", evento.target.value)
+                }
+                className="campo-formulario [color-scheme:light]"
+              />
+            </div>
+
+            <div>
+              <label className="etiqueta-campo">Persona Responsable</label>
+              <select
+                value={formulario.personaAsignadaId}
+                onChange={(evento) =>
+                  actualizarCampo("personaAsignadaId", evento.target.value)
+                }
+                className="campo-formulario font-bold"
+              >
+                {propiedades.personas.map((persona) => (
+                  <option key={persona.identificador} value={persona.identificador}>
+                    {persona.nombre} ({persona.area})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="etiqueta-campo">Proyecto Relacionado</label>
+              <select
+                value={formulario.proyectoId || ""}
+                onChange={(evento) =>
+                  actualizarCampo("proyectoId", evento.target.value || undefined)
+                }
+                className="campo-formulario"
+              >
+                <option value="">Sin proyecto específico</option>
+                {proyectos.map((proyecto) => (
+                  <option key={proyecto.identificador} value={proyecto.identificador}>
+                    {proyecto.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="etiqueta-campo">Enlace de Referencia</label>
+              <input
+                value={formulario.enlace}
+                onChange={(evento) => actualizarCampo("enlace", evento.target.value)}
+                className="campo-formulario"
+                maxLength={2048}
+                placeholder="https://cloud.folder.com/..."
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="etiqueta-campo">Observaciones y Notas</label>
+              <textarea
+                value={formulario.observaciones}
+                onChange={(evento) =>
+                  actualizarCampo("observaciones", evento.target.value)
+                }
+                className="campo-formulario min-h-[160px] resize-none"
+                maxLength={limitesSeguridad.observacionesMaximas}
+                placeholder="Escribe aquí los detalles importantes..."
+              />
+            </div>
+          </div>
+
+          {error && (
+            <div className="mt-6 rounded-[24px] bg-rose-50 p-5 text-center text-rose-700 font-bold border border-rose-100 animate-bounce">
+              ⚠️ {error}
+            </div>
+          )}
+        </div>
+
+        {/* Footer del Modal */}
+        <div className="border-t border-slate-100 bg-slate-50/50 p-6 md:p-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              {propiedades.modo === "editar" && (
+                <button
+                  type="button"
+                  onClick={() => propiedades.onEliminar(propiedades.tarea.identificador)}
+                  className="w-full rounded-2xl bg-rose-50 px-6 py-4 text-sm font-black text-rose-600 transition hover:bg-rose-100 sm:w-auto"
+                >
+                  🗑️ Eliminar Tarea
+                </button>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={propiedades.onCerrar}
+                className="rounded-2xl border-2 border-slate-200 bg-white px-8 py-4 text-sm font-black text-slate-600 transition hover:bg-slate-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={guardar}
+                className="rounded-2xl bg-slate-950 px-10 py-4 text-sm font-black text-white shadow-2xl shadow-slate-900/20 transition hover:bg-slate-800 hover:-translate-y-0.5 active:translate-y-0"
+              >
+                {propiedades.modo === "crear" ? "Crear Tarea" : "Guardar Cambios"}
+              </button>
+            </div>
           </div>
         </div>
       </div>

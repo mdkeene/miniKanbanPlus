@@ -367,17 +367,17 @@ export function TableroKanban() {
   const infoSemana = obtenerInfoSemana(semanaActiva);
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(186,230,253,0.35),_transparent_30%),radial-gradient(circle_at_bottom_right,_rgba(254,215,170,0.35),_transparent_30%),linear-gradient(180deg,_#f8fafc_0%,_#eef6ff_100%)] text-slate-900">
-      <div className="mx-auto flex min-h-screen max-w-[98%] flex-col px-4 py-6 sm:px-6 lg:px-8">
-        <section className="relative overflow-hidden rounded-[30px] border border-white/70 bg-white/80 px-6 py-6 shadow-panel backdrop-blur xl:px-8">
-          <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(14,165,233,0.08),rgba(251,191,36,0.08),rgba(16,185,129,0.08))]" />
-          <div className="relative flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+    <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,_#e0f2fe_0%,_transparent_40%),radial-gradient(circle_at_bottom_right,_#fef3c7_0%,_transparent_40%),linear-gradient(180deg,_#f8fafc_0%,_#f1f5f9_100%)] text-slate-900">
+      <div className="mx-auto flex min-h-screen max-w-[98%] flex-col px-4 py-8 md:py-12 sm:px-6 lg:px-8">
+        <section className="relative overflow-hidden rounded-[40px] border border-white/60 bg-white/40 px-6 py-8 shadow-2xl backdrop-blur-2xl xl:px-10">
+          <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 via-transparent to-amber-500/5" />
+          <div className="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
             <div className="max-w-3xl">
-              <span className="inline-flex rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-sky-700">
-                Team Edition • Supabase
+              <span className="inline-flex rounded-full border border-sky-200/50 bg-sky-100/30 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-sky-700 backdrop-blur-md">
+                ✨ Team Edition • Cloud Sync
               </span>
-              <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 md:text-4xl">
-                gestor de tareas colaborativo
+              <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-950 md:text-5xl lg:text-6xl">
+                gestión de equipos <span className="text-sky-600">inteligente</span>
               </h1>
             </div>
 
