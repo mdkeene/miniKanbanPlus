@@ -12,15 +12,17 @@
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  height: 100%;
 }
 
 body {
-  margin: 0;
   min-width: 320px;
   font-family: "Outfit", "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
-  @apply bg-slate-50 text-slate-900;
+  @apply bg-white text-slate-900;
 }
 
 button,
@@ -32,8 +34,8 @@ textarea {
 
 /* Custom Scrollbar for a premium look */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -41,32 +43,36 @@ textarea {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #e2e8f0;
   border-radius: 20px;
-  border: 2px solid #f8fafc;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #cbd5e1;
 }
 
 .glass-panel {
-  @apply bg-white/70 backdrop-blur-xl border border-white/50 shadow-2xl shadow-slate-200/50;
+  @apply bg-white/70 backdrop-blur-xl border border-white/50 shadow-2xl;
 }
 
 .campo-formulario {
-  @apply w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-sky-500 focus:bg-white focus:ring-8 focus:ring-sky-500/10;
+  @apply w-full rounded-xl border-2 border-slate-100 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-sky-500 focus:bg-white focus:ring-4 focus:ring-sky-500/10;
 }
 
 .etiqueta-campo {
-  @apply mb-2 block text-xs font-bold uppercase tracking-widest text-slate-500;
+  @apply mb-1.5 block text-[11px] font-black uppercase tracking-widest text-slate-400;
 }
 
-@keyframes slide-up {
-  from { transform: translateY(10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+@keyframes slide-in-left {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
 }
 
-.animate-slide-up {
-  animation: slide-up 0.3s ease-out forwards;
+.animate-slide-in-left {
+  animation: slide-in-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
 }

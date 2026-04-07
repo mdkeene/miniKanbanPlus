@@ -367,258 +367,224 @@ export function TableroKanban() {
   const infoSemana = obtenerInfoSemana(semanaActiva);
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,_#e0f2fe_0%,_transparent_40%),radial-gradient(circle_at_bottom_right,_#fef3c7_0%,_transparent_40%),linear-gradient(180deg,_#f8fafc_0%,_#f1f5f9_100%)] text-slate-900">
-      <div className="mx-auto flex min-h-screen max-w-[98%] flex-col px-4 py-8 md:py-12 sm:px-6 lg:px-8">
-        <section className="relative overflow-hidden rounded-[40px] border border-white/60 bg-white/40 px-6 py-8 shadow-2xl backdrop-blur-2xl xl:px-10">
-          <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 via-transparent to-amber-500/5" />
-          <div className="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-            <div className="max-w-3xl">
-              <span className="inline-flex rounded-full border border-sky-200/50 bg-sky-100/30 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-sky-700 backdrop-blur-md">
-                ✨ Team Edition • Cloud Sync
+    <main className="min-h-screen bg-white text-slate-900">
+      <div className="flex h-screen flex-col overflow-hidden">
+        <header className="relative shrink-0 border-b border-slate-100 bg-slate-50/50 px-4 py-3 md:px-6">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <span className="inline-flex rounded-full bg-sky-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-sky-700">
+                ✨ Cloud Sync Active
               </span>
-              <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-950 md:text-5xl lg:text-6xl">
+              <h1 className="mt-1 text-xl font-black tracking-tighter text-slate-950 md:text-2xl">
                 gestión de equipos <span className="text-sky-600">inteligente</span>
               </h1>
             </div>
+            <div className="flex items-center gap-2">
+               <button 
+                onClick={abrirCreacionRapida}
+                className="flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-black text-white shadow-lg shadow-slate-950/10 hover:bg-slate-800 transition-all hover:-translate-y-0.5 active:translate-y-0"
+              >
+                <span>+</span> Nueva Tarea
+              </button>
+            </div>
+          </div>
+        </header>
 
-            <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center md:justify-end">
-              {/* Navegación Semanal */}
-              <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm">
-                <button
-                  onClick={() => navegarSemana(-1)}
-                  className="rounded-xl p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
-                  title="Semana anterior"
-                >
-                  ◀
-                </button>
-                <div className="flex flex-col items-center px-4 min-w-[140px]">
-                  <span className="text-sm font-bold text-slate-900">Semana {infoSemana.numero}</span>
-                  <span className="text-[10px] font-medium text-slate-500 uppercase tracking-tight">
-                    {formatearRangoSemana(infoSemana.inicio, infoSemana.fin)}
-                  </span>
+        <div className="flex-1 overflow-auto bg-white p-4 md:p-6 custom-scrollbar">
+          <div className="mx-auto w-full max-w-full">
+            <div className="flex flex-col gap-4 mb-6">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                {/* Navegación Semanal */}
+                <div className="flex items-center gap-1 rounded-2xl border border-slate-100 bg-slate-50 p-1">
+                  <button
+                    onClick={() => navegarSemana(-1)}
+                    className="h-9 w-9 flex items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm hover:text-slate-900 transition-all font-bold"
+                  >
+                    ◀
+                  </button>
+                  <div className="flex flex-col items-center px-4 min-w-[120px]">
+                    <span className="text-xs font-black text-slate-900">Semana {infoSemana.numero}</span>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase">
+                      {formatearRangoSemana(infoSemana.inicio, infoSemana.fin)}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => navegarSemana(1)}
+                    className="h-9 w-9 flex items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm hover:text-slate-900 transition-all font-bold"
+                  >
+                    ▶
+                  </button>
+                  <button
+                    onClick={irHoy}
+                    className="h-9 px-3 rounded-xl bg-sky-50 text-[10px] font-black uppercase text-sky-600 hover:bg-sky-100 transition-all ml-1"
+                  >
+                    Hoy
+                  </button>
                 </div>
-                <button
-                  onClick={() => navegarSemana(1)}
-                  className="rounded-xl p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
-                  title="Semana siguiente"
-                >
-                  ▶
-                </button>
-                <button
-                  onClick={irHoy}
-                  className="ml-1 rounded-xl bg-slate-50 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-sky-600 hover:bg-sky-50 transition-colors"
-                >
-                  Hoy
-                </button>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex items-center gap-2 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-1.5 h-11">
+                    <span className="text-[10px] font-black uppercase text-slate-400">Orden</span>
+                    <select
+                      className="bg-transparent text-sm font-black text-slate-900 outline-none cursor-pointer"
+                      value={ordenActivo}
+                      onChange={(evento) =>
+                        setOrdenActivo(evento.target.value as OrdenTablero)
+                      }
+                    >
+                      <option value="manual">Manual</option>
+                      <option value="titulo">Título</option>
+                      <option value="tipo">Tipo</option>
+                      <option value="prioridad">Prioridad</option>
+                      <option value="fechaDeseable">Fecha</option>
+                      <option value="fechaCreacion">Registro</option>
+                    </select>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setSentidoOrden(s => s === "asc" ? "desc" : "asc")}
+                    className="h-11 px-4 rounded-2xl border-2 border-slate-100 bg-white text-[11px] font-black text-slate-600 hover:bg-slate-50 transition-all"
+                  >
+                    {sentidoOrden === "asc" ? "ASC ↑" : "DESC ↓"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setAgruparPorPersona(a => !a)}
+                    className={`h-11 flex items-center gap-2 rounded-2xl border-2 px-4 text-[11px] font-black transition-all ${
+                      agruparPorPersona
+                        ? "border-sky-500 bg-sky-500 text-white shadow-lg shadow-sky-500/20"
+                        : "border-slate-100 bg-white text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    {agruparPorPersona ? "🏊 Vista Calles" : "🏢 Vista Base"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setModalCargaAbierto(true)}
+                    className="h-11 px-4 rounded-2xl bg-amber-100 text-[11px] font-black text-amber-900 hover:bg-amber-200 transition-all"
+                  >
+                    🚀 Carga Rápida
+                  </button>
+                </div>
               </div>
 
-              <label className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm">
-                <span className="font-medium text-slate-700">Ordenar por</span>
-                <select
-                  className="bg-transparent font-medium text-slate-900 outline-none"
-                  value={ordenActivo}
-                  onChange={(evento) =>
-                    setOrdenActivo(evento.target.value as OrdenTablero)
-                  }
-                >
-                  <option value="manual">Orden manual</option>
-                  <option value="titulo">Título</option>
-                  <option value="tipo">Tipo</option>
-                  <option value="prioridad">Prioridad</option>
-                  <option value="fechaDeseable">Fecha deseable</option>
-                  <option value="fechaCreacion">Fecha de creación</option>
-                </select>
-              </label>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setSentidoOrden((valorActual) =>
-                    valorActual === "asc" ? "desc" : "asc"
-                  )
-                }
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:text-slate-950"
-              >
-                {sentidoOrden === "asc" ? "Ascendente" : "Descendente"}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setAgruparPorPersona((actual) => !actual)}
-                className={`flex items-center gap-2 rounded-2xl border px-3 py-3 text-sm font-semibold shadow-sm transition hover:-translate-y-0.5 ${
-                  agruparPorPersona
-                    ? "border-sky-300 bg-sky-50 text-sky-900"
-                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-950"
-                }`}
-                title="Mostrar u ocultar carriles por persona"
-              >
-                {agruparPorPersona ? "🏊‍♀️ Calles activas" : "🏊 Vista agrupada"}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setModalCargaAbierto(true)}
-                className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-amber-100"
-              >
-                Carga rápida
-              </button>
-
-              <button
-                type="button"
-                onClick={abrirCreacionRapida}
-                className="rounded-2xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white shadow-xl shadow-sky-100 transition hover:-translate-y-0.5 hover:bg-sky-500"
-              >
-                Nueva tarea
-              </button>
-            </div>
-          </div>
-
-          {!arrastreDisponible ? (
-            <div className="relative mt-5 rounded-2xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-900">
-              El drag & drop se desactiva mientras el tablero usa un orden distinto al manual.
-            </div>
-          ) : null}
-        </section>
-
-        {/* Barra de Acciones en Lote (Flotante) */}
-        {seleccionadas.length > 0 && (
-          <div className="fixed bottom-8 left-1/2 z-[60] -translate-x-1/2 flex items-center gap-4 rounded-3xl border border-slate-200 bg-white px-6 py-4 shadow-2xl">
-            <div className="flex flex-col border-r border-slate-100 pr-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Seleccionadas</span>
-              <span className="text-sm font-black text-sky-600">{seleccionadas.length} tareas</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={duplicarSeleccionadas}
-                className="flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition-colors"
-              >
-                👯 Duplicar
-              </button>
-              <button
-                onClick={moverASemanaSiguiente}
-                className="flex items-center gap-2 rounded-xl bg-sky-500 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-sky-500/20 hover:bg-sky-600 transition-colors"
-              >
-                ➡️ Mover a prox. semana
-              </button>
-              <button
-                onClick={eliminarSeleccionadas}
-                className="flex items-center gap-2 rounded-xl bg-rose-50 px-4 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-100 transition-colors"
-              >
-                🗑️ Eliminar
-              </button>
-              <button
-                onClick={() => setSeleccionadas([])}
-                className="ml-2 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-500 hover:bg-slate-50 transition-colors"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        )}
-
-        <section className="mt-6 flex-1 overflow-x-auto pb-4">
-          {agruparPorPersona && swimlanes ? (
-            <div className="flex flex-col gap-6 min-w-max">
-              {swimlanes.map((lane) => (
-                <div
-                  key={lane.id}
-                  className="flex gap-[18px] rounded-[32px] border border-slate-200 bg-white/40 p-5 shadow-sm backdrop-blur"
-                >
-                  <div className="flex w-[140px] shrink-0 flex-col items-center justify-center rounded-[24px] border border-slate-100 bg-white p-3 shadow-sm">
-                    {lane.persona ? (
-                      <>
-                        <img
-                          src={lane.persona.foto}
-                          alt={lane.persona.nombre}
-                          className="h-[60px] w-[60px] rounded-[18px] bg-slate-100 object-cover shadow-sm"
-                        />
-                        <span className="mt-4 text-center text-[12px] font-black leading-tight text-slate-700">
-                          {lane.persona.nombre}
-                        </span>
-                        <span className="mt-2 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-[9px] font-black uppercase tracking-widest text-slate-500">
-                          {lane.persona.area || "Equipo"}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex h-[60px] w-[60px] items-center justify-center rounded-[18px] bg-slate-100 text-2xl text-slate-400">
-                          ?
-                        </div>
-                        <span className="mt-4 text-center text-[12px] font-black leading-tight text-slate-500">
-                          Sin asignar
-                        </span>
-                      </>
-                    )}
-                  </div>
-                  <div className="flex flex-1 gap-5">
-                    {columnas.map((columna) => {
-                      const tareasDeColumnaYPersona = columna.tareas.filter(
-                        (t: Tarea) => (t.personaAsignadaId || "sin-asignar") === lane.id
-                      );
-                      return (
-                        <ColumnaKanban
-                          key={`${columna.estado}-${lane.id}`}
-                          estado={columna.estado}
-                          titulo={columna.titulo}
-                          tareas={tareasDeColumnaYPersona}
-                          personas={personas}
-                          estilos={columna.estilos}
-                          arrastreDisponible={arrastreDisponible}
-                          estadoArrastre={estadoArrastre}
-                          destinoDrop={destinoDrop}
-                          personaId={lane.id === "sin-asignar" ? "" : lane.id}
-                          onAbrir={(tarea) => setTareaEnEdicion(tarea)}
-                          onEditarTitulo={guardarTituloRapido}
-                          onIniciarArrastre={iniciarArrastre}
-                          onFinalizarArrastre={finalizarArrastre}
-                          onActualizarDestino={actualizarDestino}
-                          onSoltar={completarDrop}
-                          seleccionadas={seleccionadas}
-                          alCambiarSeleccion={(id, sel) => {
-                            setSeleccionadas((actual) =>
-                              sel ? [...actual, id] : actual.filter((i) => i !== id)
-                            );
-                          }}
-                        />
-                      );
-                    })}
-                  </div>
+              {!arrastreDisponible && (
+                <div className="rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-[10px] font-bold text-amber-700 animate-pulse">
+                  ⚠️ Drag & Drop deshabilitado en orden automático.
                 </div>
-              ))}
+              )}
             </div>
-          ) : (
-            <div className="flex min-w-max gap-5">
-              {columnas.map((columna) => (
-                <ColumnaKanban
-                  key={columna.estado}
-                  estado={columna.estado}
-                  titulo={columna.titulo}
-                  tareas={columna.tareas}
-                  personas={personas}
-                  estilos={columna.estilos}
-                  arrastreDisponible={arrastreDisponible}
-                  estadoArrastre={estadoArrastre}
-                  destinoDrop={destinoDrop}
-                  onAbrir={(tarea) => setTareaEnEdicion(tarea)}
-                  onEditarTitulo={guardarTituloRapido}
-                  onIniciarArrastre={iniciarArrastre}
-                  onFinalizarArrastre={finalizarArrastre}
-                  onActualizarDestino={actualizarDestino}
-                  onSoltar={completarDrop}
-                  seleccionadas={seleccionadas}
-                  alCambiarSeleccion={(id, sel) => {
-                    setSeleccionadas((actual) =>
-                      sel ? [...actual, id] : actual.filter((i) => i !== id)
-                    );
-                  }}
-                />
-              ))}
-            </div>
-          )}
-        </section>
+
+            {/* Barra de Acciones en Lote (Flotante) */}
+            {seleccionadas.length > 0 && (
+              <div className="fixed bottom-6 left-1/2 z-[80] -translate-x-1/2 flex items-center gap-3 rounded-full border border-slate-200 bg-white/90 backdrop-blur-xl px-5 py-3 shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
+                <span className="text-xs font-black text-sky-600 px-3 border-r border-slate-100">{seleccionadas.length} seleccionadas</span>
+                <div className="flex gap-1.5">
+                  <button onClick={duplicarSeleccionadas} className="h-9 px-3 rounded-xl bg-slate-900 text-[10px] font-black text-white hover:bg-slate-800 transition-all">👯 Clonar</button>
+                  <button onClick={moverASemanaSiguiente} className="h-9 px-3 rounded-xl bg-sky-600 text-[10px] font-black text-white hover:bg-sky-500 transition-all">📅 Sig. Semana</button>
+                  <button onClick={eliminarSeleccionadas} className="h-9 px-3 rounded-xl bg-rose-600 text-[10px] font-black text-white hover:bg-rose-500 transition-all">🗑️ Eliminar</button>
+                  <button onClick={() => setSeleccionadas([])} className="h-9 px-3 rounded-xl bg-slate-100 text-[10px] font-black text-slate-500 hover:bg-slate-200 transition-all font-bold">✕</button>
+                </div>
+              </div>
+            )}
+
+            <section className="pb-10">
+              {agruparPorPersona && swimlanes ? (
+                <div className="flex flex-col gap-6">
+                  {swimlanes.map((lane) => (
+                    <div
+                      key={lane.id}
+                      className="flex flex-col gap-3 rounded-[32px] border border-slate-100 bg-slate-50/30 p-4"
+                    >
+                      <div className="flex items-center gap-3 px-2">
+                        {lane.persona ? (
+                          <div className="flex items-center gap-3">
+                            <img src={lane.persona.foto} className="h-8 w-8 rounded-xl object-cover shadow-sm bg-white" alt="" />
+                            <span className="text-sm font-black text-slate-900">{lane.persona.nombre}</span>
+                            <span className="text-[10px] font-bold text-slate-400 px-2 py-0.5 rounded-lg bg-white border border-slate-100 lowercase">{lane.persona.area}</span>
+                          </div>
+                        ) : (
+                          <span className="text-sm font-black text-slate-400">Tareas sin asignar</span>
+                        )}
+                        <div className="h-px flex-1 bg-slate-100" />
+                        <span className="text-[10px] font-bold text-slate-400">{lane.tareas.length} tareas</span>
+                      </div>
+                      
+                      <div className="flex gap-4 overflow-x-auto pb-2 custom-scrollbar">
+                        {columnas.map((columna) => {
+                          const tareasDeColumnaYPersona = columna.tareas.filter(
+                            (t: Tarea) => (t.personaAsignadaId || "sin-asignar") === lane.id
+                          );
+                          return (
+                            <ColumnaKanban
+                              key={`${columna.estado}-${lane.id}`}
+                              estado={columna.estado}
+                              titulo={columna.titulo}
+                              tareas={tareasDeColumnaYPersona}
+                              personas={personas}
+                              estilos={columna.estilos}
+                              arrastreDisponible={arrastreDisponible}
+                              estadoArrastre={estadoArrastre}
+                              destinoDrop={destinoDrop}
+                              personaId={lane.id === "sin-asignar" ? "" : lane.id}
+                              onAbrir={(tarea) => setTareaEnEdicion(tarea)}
+                              onEditarTitulo={guardarTituloRapido}
+                              onIniciarArrastre={iniciarArrastre}
+                              onFinalizarArrastre={finalizarArrastre}
+                              onActualizarDestino={actualizarDestino}
+                              onSoltar={completarDrop}
+                              seleccionadas={seleccionadas}
+                              alCambiarSeleccion={(id, sel) => {
+                                setSeleccionadas((actual) =>
+                                  sel ? [...actual, id] : actual.filter((i) => i !== id)
+                                );
+                              }}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex gap-4 overflow-x-auto overflow-y-hidden pb-6 custom-scrollbar">
+                  {columnas.map((columna) => (
+                    <ColumnaKanban
+                      key={columna.estado}
+                      estado={columna.estado}
+                      titulo={columna.titulo}
+                      tareas={columna.tareas}
+                      personas={personas}
+                      estilos={columna.estilos}
+                      arrastreDisponible={arrastreDisponible}
+                      estadoArrastre={estadoArrastre}
+                      destinoDrop={destinoDrop}
+                      onAbrir={(tarea) => setTareaEnEdicion(tarea)}
+                      onEditarTitulo={guardarTituloRapido}
+                      onIniciarArrastre={iniciarArrastre}
+                      onFinalizarArrastre={finalizarArrastre}
+                      onActualizarDestino={actualizarDestino}
+                      onSoltar={completarDrop}
+                      seleccionadas={seleccionadas}
+                      alCambiarSeleccion={(id, sel) => {
+                        setSeleccionadas((actual) =>
+                          sel ? [...actual, id] : actual.filter((i) => i !== id)
+                        );
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+        </div>
       </div>
 
-      {tareaEnEdicion ? (
+      {/* Modales */}
+      {tareaEnEdicion && (
         <ModalTarea
           modo="editar"
           tarea={tareaEnEdicion}
@@ -627,9 +593,9 @@ export function TableroKanban() {
           onGuardarEdicion={guardarEdicionCompleta}
           onEliminar={eliminarTareaBoard}
         />
-      ) : null}
+      )}
 
-      {borradorNuevaTarea ? (
+      {borradorNuevaTarea && (
         <ModalTarea
           modo="crear"
           borrador={borradorNuevaTarea}
@@ -637,36 +603,36 @@ export function TableroKanban() {
           onCerrar={() => setBorradorNuevaTarea(null)}
           onGuardarNueva={guardarNuevaTarea}
         />
-      ) : null}
+      )}
 
-      {modalPersonaAbierto ? (
+      {modalPersonaAbierto && (
         <ModalPersona
           onCerrar={() => setModalPersonaAbierto(false)}
           onGuardar={guardarNuevaPersonaBoard}
         />
-      ) : null}
+      )}
 
-      {modalCargaAbierto ? (
+      {modalCargaAbierto && (
         <ModalCargaRapida
           configuracionInicial={configuracionCargaInicial}
           onCerrar={() => setModalCargaAbierto(false)}
           onCrear={crearDesdeCargaRapida}
         />
-      ) : null}
+      )}
 
-      {mensajeSistema ? (
-        <div className="pointer-events-none fixed bottom-5 right-5 z-50">
+      {mensajeSistema && (
+        <div className="pointer-events-none fixed bottom-5 right-5 z-[100]">
           <div
-            className={`rounded-2xl border px-4 py-3 text-sm font-medium shadow-lg backdrop-blur ${
+            className={`rounded-2xl border px-6 py-4 text-xs font-black shadow-2xl backdrop-blur-xl animate-in slide-in-from-right-4 duration-300 ${
               mensajeSistema.tipo === "exito"
-                ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-                : "border-rose-200 bg-rose-50 text-rose-900"
+                ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+                : "border-rose-100 bg-rose-50 text-rose-700"
             }`}
           >
             {mensajeSistema.texto}
           </div>
         </div>
-      ) : null}
+      )}
     </main>
   );
 }

@@ -22,6 +22,7 @@ export function AppShell({
   alCambiarTab,
   children
 }: AppShellProps) {
+  const [menuAbierto, setMenuAbierto] = useState(false);
   const [titulo, setTitulo] = useState("Panel de tareas");
   const [editandoTitulo, setEditandoTitulo] = useState(false);
   const [modalPasswordAbierto, setModalPasswordAbierto] = useState(false);
@@ -53,23 +54,17 @@ export function AppShell({
     const prjs = await obtenerProyectos();
     const ps = await obtenerPersonas();
 
-    // In a production app, we'd use batch deletes. For now, we follow the pattern.
     const toDeleteTs = ts.filter(t => String(t.identificador).startsWith("TK-1"));
     const toDeletePrjs = prjs.filter(p => String(p.identificador).startsWith("PRJ-1"));
     const toDeletePs = ps.filter(p => String(p.identificador).startsWith("PR-1") && p.identificador !== sesion.usuario.identificador);
 
-    // This is slow but safe for now.
-    // In a real app we would use a proper API for this.
     setMensajeClave("Limpiando datos de ejemplo...");
     setAccionConfirmacion(null);
     
-    // We don't have delete multiple in current lib, so we skip for now or implement if needed.
-    // For this migration, we'll keep it simple and just show a message.
     setTimeout(() => window.location.reload(), 1500);
   }
 
   async function handleBorrarTodo() {
-    // Highly destructive - would need proper backend implementation.
     setAccionConfirmacion(null);
     setMensajeClave("Borrando todo el sistema...");
     setTimeout(() => window.location.reload(), 1500);
@@ -78,200 +73,204 @@ export function AppShell({
   async function handleGenerarEjemplos() {
     setAccionConfirmacion(null);
     setMensajeClave("Aplicando datos de demostración...");
-    
-    // We would need to loop and await guardarTarea/Persona/Proyecto
-    // For the sake of the build, we fix the logic to be async.
     setTimeout(() => window.location.reload(), 1500);
   }
 
   const tabs = [
-    { id: "kanban", nombre: "Panel Kanban Semanal", icono: "📅" },
+    { id: "kanban", nombre: "Kanban", icono: "📅" },
     { id: "proyectos", nombre: "Proyectos", icono: "🚀" },
     { id: "usuarios", nombre: "Usuarios", icono: "👥" },
-    { id: "dashboard", nombre: "Panel de Control", icono: "📊" }
+    { id: "dashboard", nombre: "Dashboard", icono: "📊" }
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-sky-100 selection:text-sky-900">
-      {/* Cabecera Principal - Responsive */}
-      <header className="sticky top-0 z-[60] border-b border-slate-200 bg-white/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-20 md:h-28 max-w-[98%] items-center justify-between px-4 md:px-10">
-          <div className="flex items-center gap-4 md:gap-10">
-            <div className="flex items-center gap-3 md:gap-4">
-              <Link 
-                href="/"
-                className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-sky-600 font-black text-lg md:text-xl text-white shadow-xl shadow-sky-500/20 hover:scale-105 transition-transform"
+    <div className="flex flex-col h-screen overflow-hidden bg-white text-slate-900 selection:bg-sky-100 selection:text-sky-900 font-medium">
+      {/* Drawer Menú - Hamburger */}
+      {menuAbierto && (
+        <div className="fixed inset-0 z-[100] flex animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-sm" onClick={() => setMenuAbierto(false)} />
+          <nav className="relative w-72 h-full bg-white/90 backdrop-blur-2xl border-r border-slate-100 p-6 flex flex-col shadow-2xl animate-slide-in-left">
+            <div className="flex items-center justify-between mb-10">
+              <span className="text-xl font-black tracking-tighter text-slate-950">menú navegación</span>
+              <button 
+                onClick={() => setMenuAbierto(false)} 
+                className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-all font-bold"
               >
-                MK
-              </Link>
-              <div className="flex flex-col">
-                <Link 
-                  href="/"
-                  className="text-xl md:text-3xl font-black tracking-tighter text-slate-950 hover:text-sky-600 transition-colors truncate max-w-[150px] md:max-w-none"
-                >
-                  miniKanbanPlus
-                </Link>
-                {editandoTitulo ? (
-                  <input
-                    autoFocus
-                    className="text-[10px] md:text-sm font-bold text-slate-500 outline-none border-b-2 border-sky-400 bg-transparent py-0.5"
-                    value={titulo}
-                    onChange={(e) => setTitulo(e.target.value)}
-                    onBlur={() => setEditandoTitulo(false)}
-                    onKeyDown={(e) => e.key === "Enter" && setEditandoTitulo(false)}
-                  />
-                ) : (
-                  <span 
-                    className="text-[10px] md:text-base font-black text-slate-500 cursor-pointer hover:text-sky-600 transition-colors"
-                    onClick={() => setEditandoTitulo(true)}
-                  >
-                    {titulo} <span className="text-sky-400/50 ml-1 text-xs">✎</span>
-                  </span>
-                )}
-              </div>
+                ✕
+              </button>
             </div>
-
-            {/* Navegación Desktop */}
-            <nav className="hidden items-center gap-1 md:flex xl:gap-2">
+            
+            <div className="flex-1 space-y-2">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => alCambiarTab(tab.id)}
-                  className={`group relative flex items-center gap-2 rounded-xl px-3 py-2 md:rounded-2xl md:px-5 md:py-3 text-sm md:text-lg font-black transition-all ${
+                  onClick={() => {
+                    alCambiarTab(tab.id);
+                    setMenuAbierto(false);
+                  }}
+                  className={`w-full group flex items-center gap-4 rounded-[20px] px-5 py-4 text-base font-black transition-all ${
                     tabActiva === tab.id
-                      ? "bg-slate-100 text-sky-600 shadow-inner"
+                      ? "bg-sky-50 text-sky-600 shadow-sm"
                       : "text-slate-500 hover:bg-slate-50 hover:text-slate-950"
                   }`}
                 >
-                  <span className="text-base md:text-xl transition-transform group-hover:scale-110">{tab.icono}</span>
-                  <span className="hidden lg:inline">{tab.nombre}</span>
-                  {tabActiva === tab.id && (
-                    <span className="absolute -bottom-1 left-4 right-4 h-1.5 bg-sky-500 rounded-full shadow-lg shadow-sky-500/40" />
-                  )}
+                  <span className="text-2xl transition-transform group-hover:rotate-12">{tab.icono}</span>
+                  <span>{tab.nombre}</span>
+                  {tabActiva === tab.id && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-sky-500" />}
                 </button>
               ))}
-            </nav>
-          </div>
+            </div>
 
-          <div className="flex items-center gap-3 md:gap-6">
-            <div className="flex items-center gap-2 md:gap-4 pr-3 md:pr-6 border-r border-slate-200">
-              <div className="hidden flex-col items-end sm:flex">
-                <span className="text-sm md:text-lg font-black text-slate-950 leading-tight">{sesion.usuario.nombre}</span>
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-sky-600 bg-sky-50 px-2 py-0.5 rounded-md">{sesion.usuario.rol}</span>
-              </div>
-              <div 
-                className="h-10 w-10 md:h-12 md:w-12 rounded-2xl border-2 md:border-4 border-white shadow-xl flex items-center justify-center text-sm md:text-lg font-black text-white group cursor-pointer transition-transform hover:scale-105"
-                style={{ backgroundColor: sesion.usuario.color || "#0ea5e9" }}
-                onClick={() => setModalPasswordAbierto(true)}
-              >
-                {sesion.usuario.foto ? (
-                  <img src={sesion.usuario.foto} alt="" className="h-full w-full rounded-2xl object-cover" />
-                ) : (
-                  sesion.usuario.nombre.substring(0, 2).toUpperCase()
-                )}
+            <div className="pt-6 border-t border-slate-100 flex flex-col gap-3">
+               <button
+                  onClick={() => {
+                    setMenuAbierto(false);
+                    setModalPasswordAbierto(true);
+                  }}
+                  className="w-full flex items-center gap-4 rounded-[20px] bg-slate-50 px-5 py-4 text-sm font-black text-slate-600 hover:bg-slate-100 transition-all"
+                >
+                  ⚙️ Configurar Perfil
+                </button>
+               <button
+                  onClick={alCerrarSesion}
+                  className="w-full flex items-center gap-4 rounded-[20px] bg-rose-50 px-5 py-4 text-sm font-black text-rose-600 hover:bg-rose-100 transition-all"
+                >
+                  🚪 Cerrar Sesión
+                </button>
+            </div>
+          </nav>
+        </div>
+      )}
+
+      {/* Cabecera Principal - Compacta (70px) */}
+      <header className="h-[70px] shrink-0 z-[60] border-b border-slate-100 bg-white shadow-[0_1px_5px_rgba(0,0,0,0.02)]">
+        <div className="w-full h-full flex items-center justify-between px-4 md:px-6">
+          <div className="flex items-center gap-4">
+             {/* Hamburger Button */}
+             <button 
+                onClick={() => setMenuAbierto(true)}
+                className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-950 transition-all"
+             >
+               <div className="flex flex-col gap-1 w-5">
+                 <div className="h-0.5 w-full bg-current rounded-full" />
+                 <div className="h-0.5 w-2/3 bg-current rounded-full" />
+                 <div className="h-0.5 w-full bg-current rounded-full" />
+               </div>
+             </button>
+
+            <div className="flex items-stretch gap-4 h-full">
+              <div className="flex items-center gap-3">
+                <Link 
+                  href="/"
+                  className="hidden md:flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 font-black text-sm text-white hover:scale-105 transition-transform"
+                >
+                  MK
+                </Link>
+                <div className="flex flex-col justify-center leading-none">
+                  <Link 
+                    href="/"
+                    className="text-base font-black tracking-tighter text-slate-950 hover:text-sky-600 transition-colors"
+                  >
+                    miniKanbanPlus
+                  </Link>
+                  {editandoTitulo ? (
+                    <input
+                      autoFocus
+                      className="text-[10px] font-bold text-sky-500 outline-none border-b border-sky-300 bg-transparent py-0 h-4"
+                      value={titulo}
+                      onChange={(e) => setTitulo(e.target.value)}
+                      onBlur={() => setEditandoTitulo(false)}
+                      onKeyDown={(e) => e.key === "Enter" && setEditandoTitulo(false)}
+                    />
+                  ) : (
+                    <span 
+                      className="text-[10px] font-black text-slate-400 cursor-pointer hover:text-sky-600 transition-colors"
+                      onClick={() => setEditandoTitulo(true)}
+                    >
+                      {titulo} <span className="opacity-40">✎</span>
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
-            
-            <div className="flex gap-1 md:gap-2">
-              <button
-                onClick={() => setModalPasswordAbierto(true)}
-                className="flex h-10 w-10 md:h-12 md:w-auto items-center justify-center md:px-4 gap-2 rounded-xl md:rounded-2xl border-2 border-slate-200 bg-white text-sm md:text-base font-black text-slate-700 shadow-sm transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-600"
-                title="Ajustes de mi perfil"
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="hidden flex-col items-end sm:flex leading-none">
+                <span className="text-sm font-black text-slate-950">{sesion.usuario.nombre}</span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-sky-500 bg-sky-50 px-1.5 py-0.5 rounded-md">{sesion.usuario.rol}</span>
+              </div>
+              <div 
+                className="h-9 w-9 rounded-xl border border-white shadow-sm flex items-center justify-center text-[11px] font-black text-white group cursor-pointer transition-transform hover:scale-105"
+                style={{ backgroundColor: sesion.usuario.color || "#0ea5e9" }}
+                onClick={() => setMenuAbierto(true)}
               >
-                ⚙️ <span className="hidden lg:inline">Perfil</span>
-              </button>
-              <button
-                onClick={alCerrarSesion}
-                className="flex h-10 w-10 md:h-12 md:w-auto items-center justify-center md:px-4 gap-2 rounded-xl md:rounded-2xl border-2 border-slate-200 bg-white text-sm md:text-base font-black text-slate-700 shadow-sm transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600"
-              >
-                🚪 <span className="hidden lg:inline">Salir</span>
-              </button>
+                {sesion.usuario.foto ? (
+                  <img src={sesion.usuario.foto} alt="" className="h-full w-full rounded-xl object-cover" />
+                ) : (
+                  sesion.usuario.nombre.substring(0, 1).toUpperCase()
+                )}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Modal Cambio Password */}
         {modalPasswordAbierto && (
-          <div className="fixed inset-0 z-[100] flex items-start justify-center bg-sky-950/30 backdrop-blur-md p-4 pt-32 animate-in fade-in duration-300">
-            <div className="w-full max-w-md rounded-[40px] border border-white bg-white p-10 shadow-2xl animate-in zoom-in-95 duration-200">
-              <div className="flex items-center gap-4 mb-6">
-                 <div className="h-14 w-14 rounded-2xl bg-amber-100 flex items-center justify-center text-2xl shadow-inner">🔒</div>
-                 <div>
-                    <h3 className="text-2xl font-black text-slate-950">Mi Seguridad</h3>
-                    <p className="text-base font-medium text-slate-500">Actualiza tu clave de acceso personal.</p>
-                 </div>
-              </div>
-              
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Nueva Contraseña</label>
+          <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-950/20 backdrop-blur-md p-4 animate-in fade-in duration-300">
+            <div className="w-full max-w-sm rounded-[32px] border border-white bg-white p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+               <h3 className="text-xl font-black text-slate-950 mb-4">Seguridad Perfil</h3>
+               <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="etiqueta-campo">Nueva Clave</label>
                   <input 
                     type="password"
                     value={nuevaClave}
                     onChange={e => setNuevaClave(e.target.value)}
-                    placeholder="Escribe el nuevo secreto..."
-                    className="w-full rounded-[24px] border-2 border-slate-100 bg-slate-50 px-6 py-4 text-lg font-bold text-slate-950 outline-none transition focus:border-sky-500 focus:bg-white focus:ring-8 focus:ring-sky-500/10"
+                    className="campo-formulario"
                     autoFocus
                     onKeyDown={(e) => e.key === "Enter" && handleCambiarClave()}
                   />
                 </div>
                 {mensajeClave ? (
-                  <div className="rounded-[20px] bg-emerald-50 p-4 text-center text-emerald-700 font-black text-base animate-bounce">
+                  <div className="rounded-xl bg-emerald-50 p-4 text-center text-emerald-700 font-bold text-sm">
                     {mensajeClave}
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-4 pt-2">
-                    <div className="flex gap-4">
-                      <button 
-                        onClick={handleCambiarClave}
-                        className="flex-1 rounded-[24px] bg-sky-600 py-5 text-lg font-black text-white shadow-2xl shadow-sky-200 hover:bg-sky-500 transition-all hover:-translate-y-1 active:scale-95"
-                      >
-                        Guardar Clave
-                      </button>
-                      <button 
-                        onClick={() => setModalPasswordAbierto(false)}
-                        className="flex-1 rounded-[24px] border-2 border-slate-200 bg-white py-5 text-lg font-black text-slate-600 hover:bg-slate-50 transition-all active:scale-95"
-                      >
-                        Volver
-                      </button>
-                    </div>
+                  <div className="flex flex-col gap-3">
+                    <button onClick={handleCambiarClave} className="w-full rounded-xl bg-slate-900 py-3 text-sm font-black text-white hover:bg-slate-800 transition-all">Guardar Clave</button>
+                    <button onClick={() => setModalPasswordAbierto(false)} className="w-full rounded-xl border border-slate-200 py-3 text-sm font-black text-slate-500 hover:bg-slate-50 transition-all">Cancelar</button>
+                    
                     {sesion.usuario.rol === "admin" && (
-                      <div className="mt-4 border-t border-slate-100 pt-6 space-y-3">
-                         <button 
-                          onClick={() => preConfirmarAccion(
-                            "Generar Datos de Ejemplo", 
-                            "Esto inyectará datos de demostración a tu panel actual.", 
-                            handleGenerarEjemplos
-                          )}
-                          className="w-full flex items-center justify-center gap-2 rounded-[24px] bg-sky-50 py-4 text-base font-black text-sky-600 transition-all hover:bg-sky-100 active:scale-95"
+                      <div className="mt-4 border-t border-slate-100 pt-4 space-y-2 text-center">
+                        <button 
+                          onClick={() => {
+                            setModalPasswordAbierto(false);
+                            preConfirmarAccion("Demostración", "Generar datos de ejemplo...", handleGenerarEjemplos);
+                          }} 
+                          className="w-full text-xs font-bold text-sky-600 hover:underline"
                         >
-                          ✨ Generar Datos de Ejemplo
+                          ✨ Generar Datos Ejemplo
                         </button>
-                         <div className="flex gap-3">
-                           <button 
-                            onClick={() => preConfirmarAccion(
-                              "Borrar Datos de Ejemplo", 
-                              "Esto eliminará las tareas y proyectos de demostración.", 
-                              handleBorrarEjemplos
-                            )}
-                            className="flex-1 flex items-center justify-center gap-2 rounded-[24px] bg-amber-50 py-4 text-sm font-black text-amber-600 transition-all hover:bg-amber-100 active:scale-95"
-                          >
-                            🗑️ Borrar Ejemplos
-                          </button>
-                           <button 
-                            onClick={() => preConfirmarAccion(
-                              "Borrar TODO el sistema", 
-                              "⚠️ ¡PELIGRO! Esto purgará todos los datos. Quedará de fábrica.", 
-                              handleBorrarTodo
-                            )}
-                            className="flex-1 flex items-center justify-center gap-2 rounded-[24px] bg-rose-50 py-4 text-sm font-black text-rose-600 transition-all hover:bg-rose-100 active:scale-95"
-                          >
-                            🚨 Borrar Todo
-                          </button>
-                         </div>
-                        <p className="text-center text-xs font-medium text-slate-400">
-                          Utiliza estos controles para poblar informes o empezar desde cero.
-                        </p>
+                        <button 
+                          onClick={() => {
+                            setModalPasswordAbierto(false);
+                            preConfirmarAccion("Limpieza", "Borrar datos de ejemplo...", handleBorrarEjemplos);
+                          }} 
+                          className="w-full text-xs font-bold text-amber-600 hover:underline"
+                        >
+                          🗑️ Borrar Ejemplos
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setModalPasswordAbierto(false);
+                            preConfirmarAccion("⚠️ RESET", "¡Borrar TODO el sistema!", handleBorrarTodo);
+                          }} 
+                          className="w-full text-xs font-bold text-rose-600 hover:underline hover:text-rose-700 transition-colors"
+                        >
+                          🔥 Reset Total
+                        </button>
                       </div>
                     )}
                   </div>
@@ -283,29 +282,14 @@ export function AppShell({
 
         {/* Modal Confirmación */}
         {accionConfirmacion && (
-          <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div className="w-full max-w-sm rounded-[32px] border border-white bg-white p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/30 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="w-full max-w-xs rounded-3xl border border-white bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-200">
               <div className="text-center space-y-4">
-                <div className="mx-auto h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center text-3xl">
-                  {accionConfirmacion.titulo.includes("PELIGRO") || accionConfirmacion.titulo.includes("TODO") ? "🚨" : "🤔"}
-                </div>
-                <h3 className="text-xl font-black text-slate-900">{accionConfirmacion.titulo}</h3>
-                <p className="text-sm font-medium text-slate-500 leading-relaxed">
-                  {accionConfirmacion.descripcion}
-                </p>
-                <div className="pt-4 flex flex-col gap-3">
-                  <button 
-                    onClick={accionConfirmacion.onConfirmar}
-                    className="w-full rounded-[20px] bg-slate-900 py-4 font-black text-white hover:bg-slate-800 transition-colors"
-                  >
-                    Sí, 100% Confirmado
-                  </button>
-                  <button 
-                    onClick={() => setAccionConfirmacion(null)}
-                    className="w-full rounded-[20px] border-2 border-slate-100 py-4 font-black text-slate-600 hover:bg-slate-50 transition-colors"
-                  >
-                    Cancelar
-                  </button>
+                <h3 className="text-lg font-black text-slate-900">{accionConfirmacion.titulo}</h3>
+                <p className="text-sm font-medium text-slate-500">{accionConfirmacion.descripcion}</p>
+                <div className="flex flex-col gap-2">
+                  <button onClick={accionConfirmacion.onConfirmar} className="w-full rounded-2xl bg-slate-950 py-3 text-sm font-black text-white hover:bg-slate-800 transition-colors">Confirmar</button>
+                  <button onClick={() => setAccionConfirmacion(null)} className="w-full rounded-2xl bg-slate-100 py-3 text-sm font-black text-slate-600 hover:bg-slate-200 transition-colors">Cancelar</button>
                 </div>
               </div>
             </div>
@@ -313,7 +297,7 @@ export function AppShell({
         )}
       </header>
 
-      <main className="mx-auto max-w-[98%] p-6 lg:p-10">
+      <main className="flex-1 overflow-auto bg-white">
         {children}
       </main>
     </div>
