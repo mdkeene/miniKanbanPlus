@@ -31,9 +31,7 @@ export function PaginaLogin({ alEntrar }: PaginaLoginProps) {
   }
 
   return (
-    <div className="flex h-full items-center justify-center p-4 font-sans selection:bg-sky-500/30 overflow-y-auto">
-
-      <div className="relative w-full max-w-md space-y-8 rounded-[48px] border border-slate-200 bg-white p-10 shadow-3xl xl:p-12">
+    <div className="relative w-full max-w-md space-y-8 rounded-[48px] border border-slate-200 bg-white p-10 shadow-3xl xl:p-12 font-sans selection:bg-sky-500/30">
         <div className="text-center">
           <div className="group relative inline-flex h-24 w-24 items-center justify-center rounded-[32px] bg-gradient-to-tr from-sky-500 to-indigo-600 shadow-2xl shadow-sky-200 transition-transform active:scale-95">
             <span className="text-5xl font-black text-white tracking-tighter">MK</span>
@@ -101,6 +99,5 @@ export function PaginaLogin({ alEntrar }: PaginaLoginProps) {
           </p>
         </div>
       </div>
-    </div>
   );
 }
