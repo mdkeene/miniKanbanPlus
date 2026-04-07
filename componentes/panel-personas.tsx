@@ -26,9 +26,11 @@ export function PanelPersonas({
           </h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
             Gestiona responsables del tablero y asigna cada tarea a una persona del
-            equipo. Las tareas actuales ya se reparten automáticamente entre Pepe,
-            Juan y Sara.
+            equipo. 
           </p>
+          <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-sky-50 px-3 py-1.5 text-[10px] font-bold text-sky-700 border border-sky-100 italic">
+            💡 Nota Admin: Los usuarios de Supabase aparecerán aquí automáticamente al iniciar sesión o vía SQL Trigger.
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">

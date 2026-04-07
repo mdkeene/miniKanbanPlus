@@ -1,5 +1,6 @@
 import { type Persona, type Sesion, type Usuario } from "@/tipos/tareas";
 import { supabase } from "@/lib/supabase";
+import { guardarPersona } from "@/lib/personas";
 
 const CLAVE_SESION = "miniKanbanPlus.sesion";
 
@@ -33,12 +34,17 @@ export async function login(email: string, clave: string): Promise<Sesion | null
 
   const persona: Persona = {
     identificador: data.session.user.id,
-    nombre: profile?.nombre || data.session.user.email || "Usuario",
+    nombre: profile?.nombre || data.session.user.email?.split('@')[0] || "Usuario",
     area: profile?.area || "General",
     foto: profile?.foto || "",
     rol: (profile?.rol as any) || "usuario",
     color: profile?.color || "#94a3b8"
   };
+
+  // Auto-provision if profile is missing
+  if (!profile) {
+    await guardarPersona(persona);
+  }
 
   const sesion: Sesion = {
     usuario: persona,
@@ -64,17 +70,16 @@ export async function obtenerSesion(): Promise<Sesion | null> {
     return null;
   }
 
-  // Get profile data
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', session.user.id)
     .single();
 
-  return {
+  const result: Sesion = {
     usuario: {
       identificador: session.user.id,
-      nombre: profile?.nombre || session.user.email || "Usuario",
+      nombre: profile?.nombre || session.user.email?.split('@')[0] || "Usuario",
       area: profile?.area || "General",
       foto: profile?.foto || "",
       rol: (profile?.rol as any) || "usuario",
@@ -82,6 +87,13 @@ export async function obtenerSesion(): Promise<Sesion | null> {
     },
     token: session.access_token
   };
+
+  // Auto-provision if session exists but profile doesn't (safeguard)
+  if (!profile) {
+    await guardarPersona(result.usuario);
+  }
+
+  return result;
 }
 
 export async function cerrarSesion() {
