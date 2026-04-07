@@ -1,0 +1,125 @@
+
+--------------------------------------------------
+VERSIÓN COMPACTA
+--------------------------------------------------
+
+Quiero que construyas una aplicación web básica llamada "gestor básico de tareas", con una única pantalla principal que muestre un tablero Kanban moderno, colorido, claro y profesional.
+
+Condición importante:
+- Todas las funciones, variables, componentes, comentarios, documentación e interfaz deben estar en castellano.
+
+Tecnología recomendada:
+- Next.js con App Router
+- TypeScript
+- React
+- Tailwind CSS
+- persistencia sencilla con `localStorage`
+
+No quiero autenticación, ni correo, ni base de datos compleja, ni otras secciones. Solo el Kanban.
+
+El tablero debe tener exactamente 4 columnas fijas:
+1. Definido
+2. En curso
+3. Bloqueado
+4. Terminado
+
+Las 4 columnas deben verse siempre una al lado de la otra en una sola fila. Si no caben, debe haber scroll horizontal. Nunca deben partirse en varias filas.
+
+Cada tarjeta de tarea debe tener estos campos:
+- identificador
+- fecha de creación
+- título
+- tipo
+- prioridad
+- fecha deseable de fin
+- observaciones
+- enlace
+- estado
+- índice de orden
+
+En la tarjeta solo hace falta mostrar:
+- identificador
+- título
+- prioridad
+- tipo
+- fecha deseable de fin si existe
+- fecha de creación resumida
+
+Las tareas deben poder:
+- crear
+- editar
+- eliminar
+- mover entre columnas
+- reordenar dentro de la misma columna
+
+Requisitos de UX:
+- drag & drop con feedback visual
+- indicador visual de drop
+- animaciones suaves
+- confirmación antes de eliminar
+- edición rápida inline del título
+- edición completa al pulsar una tarjeta, mediante modal o panel flotante
+
+Debe existir:
+- botón `Nueva tarea`
+- botón `Carga rápida`
+
+La `Carga rápida` debe permitir pegar varias líneas, creando una tarea por línea, y elegir por defecto:
+- tipo
+- prioridad
+- estado inicial
+- fecha deseable de fin
+
+Debe existir ordenación por:
+- orden manual
+- título
+- tipo
+- prioridad
+- fecha deseable
+- fecha de creación
+
+Debe existir un botón para alternar entre orden ascendente y descendente.
+
+Cuando el orden no sea manual, el drag & drop debe desactivarse o limitarse claramente y mostrarse un aviso visual.
+
+Diseño deseado:
+- estilo tipo SaaS moderno
+- columnas con colores diferenciados
+- cabeceras con degradado
+- tarjetas blancas compactas
+- bordes redondeados
+- sombras ligeras
+- interfaz alegre, clara y muy presentable
+
+Dentro de cada columna, las tarjetas deben ser compactas y, si el ancho lo permite, poder mostrarse hasta 2 por fila.
+
+La aplicación debe arrancar con tareas precargadas de ejemplo, realistas para entorno directivo u oficina, como:
+- preparar reunión de dirección
+- revisar indicadores mensuales
+- coordinar propuesta presupuestaria
+- actualizar cuadro de mando
+- validar cronograma de proyecto
+- cerrar informe ejecutivo
+
+Quiero código modular y fácil de explicar:
+- componente principal del tablero
+- componente de columna
+- componente de tarjeta
+- modal de edición
+- utilidades para ordenar y mover tareas
+
+La persistencia debe mantener los cambios tras recargar la página.
+
+Entregables esperados:
+- aplicación funcionando
+- código completo
+- estilos integrados
+- datos de ejemplo
+- `README.md` corto con instalación, arranque y descripción de la demo
+
+Comandos esperados:
+- `npm install`
+- `npm run dev`
+
+La solución final debe verse como una demo seria y elegante para enseñar a directivos que un panel Kanban útil puede construirse con relativa sencillez.
+

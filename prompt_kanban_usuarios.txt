@@ -1,0 +1,424 @@
+Quiero que construyas una aplicación web básica llamada "gestor básico de tareas".
+
+La aplicación debe ser una demo sencilla, clara, profesional y visualmente agradable para enseñar a directivos y equipos cómo se puede construir con relativa facilidad un panel Kanban moderno para organizar trabajo y responsables.
+
+Instrucción importante:
+- Todas las funciones, variables, componentes, comentarios, documentación e interfaz deben estar en castellano.
+- El estilo debe ser claro, agradable y presentable para una clase o demostración ejecutiva.
+
+==================================================
+1. OBJETIVO
+==================================================
+
+Quiero una aplicación centrada en un único tablero Kanban, sin autenticación, sin correo, sin backend innecesario y sin otras secciones secundarias.
+
+Además del tablero, quiero incorporar una gestión sencilla de personas para poder enseñar no solo el flujo de tareas, sino también la asignación de responsables dentro del equipo.
+
+La idea es mostrar una herramienta ligera pero creíble, visualmente cuidada y fácil de explicar en una sesión formativa.
+
+==================================================
+2. ALCANCE FUNCIONAL GENERAL
+==================================================
+
+La aplicación debe tener una única pantalla principal.
+
+Esa pantalla debe incluir:
+- una cabecera o bloque principal de presentación
+- una franja o panel superior de personas del equipo
+- un tablero Kanban visual con 4 columnas fijas
+- acciones claras para crear, editar, eliminar, ordenar y mover tareas
+
+La experiencia general debe recordar al panel de tareas del proyecto "bitacoratfx":
+- 4 columnas fijas
+- tarjetas compactas
+- diseño moderno y profesional
+- drag & drop
+- edición sencilla
+- ordenación de tareas
+- creación rápida de tareas
+- responsables visibles
+
+==================================================
+3. TABLERO KANBAN
+==================================================
+
+La aplicación mostrará un único tablero Kanban.
+
+El tablero tendrá exactamente 4 columnas fijas:
+1. Definido
+2. En curso
+3. Bloqueado
+4. Terminado
+
+Cada columna contendrá tarjetas que representan tareas.
+
+Cada tarea tendrá estos campos:
+- identificador
+- fecha de creación
+- título
+- tipo
+- prioridad
+- fecha deseable de fin
+- observaciones
+- enlace
+- estado
+- persona asignada
+- índice de orden dentro de la columna
+
+En la tarjeta no hace falta mostrar todos los campos.
+Deben verse al menos:
+- identificador
+- título
+- prioridad
+- tipo
+- fecha deseable de fin, si existe
+- fecha de creación resumida
+- persona asignada, mostrando al menos nombre y algún elemento visual de identificación
+
+==================================================
+4. GESTIÓN DE PERSONAS
+==================================================
+
+Quiero que exista una franja o panel superior dedicado a las personas del equipo.
+
+Ese bloque debe aparecer por encima del tablero Kanban y debe verse claramente separado.
+
+La aplicación debe arrancar con estas 3 personas precargadas:
+- Pepe
+- Juan
+- Sara
+
+Cada persona tendrá estos campos:
+- identificador
+- nombre
+- área
+- foto
+
+Quiero que esas personas se muestren de forma visual y agradable, por ejemplo mediante tarjetas compactas o fichas con:
+- foto o avatar
+- nombre
+- área
+- opcionalmente número de tareas asignadas
+
+Debe existir una acción clara para crear más personas.
+
+La creación de personas puede hacerse mediante modal, panel flotante o formulario inline, pero debe permitir introducir al menos:
+- nombre
+- área
+- foto o URL de foto
+
+Si no se proporciona una foto real, se puede generar un avatar visual automáticamente, siempre que la experiencia siga siendo profesional y clara.
+
+==================================================
+5. ASIGNACIÓN DE PERSONAS A TAREAS
+==================================================
+
+Cada tarea debe poder asignarse a una de las personas disponibles.
+
+Ese responsable debe poder elegirse al menos en la edición completa de la tarea.
+
+Además:
+- las tareas de ejemplo deben arrancar ya asignadas a personas
+- la asignación inicial puede hacerse aleatoriamente entre Pepe, Juan y Sara
+- la carga rápida también puede asignar automáticamente responsables si resulta práctico
+
+La persona asignada debe verse en la tarjeta y también en el formulario completo de edición.
+
+==================================================
+6. COMPORTAMIENTO DE LAS TAREAS
+==================================================
+
+Las tarjetas se podrán:
+- crear
+- editar
+- eliminar
+- mover entre columnas
+- reordenar dentro de la misma columna
+
+El movimiento debe hacerse con drag & drop.
+
+Debe existir:
+- feedback visual durante el arrastre
+- indicador visual de drop
+- animaciones suaves
+
+==================================================
+7. EDICIÓN
+==================================================
+
+Debe haber dos formas de edición:
+
+1. Edición completa
+- al pulsar sobre una tarjeta se abre un modal o panel flotante
+- ahí se podrán editar todos los campos de la tarea
+- ahí se podrá cambiar también la persona responsable
+
+2. Edición rápida inline
+- debe existir un pequeño botón de editar en cada tarjeta
+- ese botón permitirá editar rápidamente el título sin abrir el modal completo
+
+El borrado debe pedir confirmación antes de ejecutarse.
+
+==================================================
+8. CREACIÓN DE TAREAS
+==================================================
+
+Debe existir un botón `Nueva tarea`.
+
+Debe existir también un botón `Carga rápida`.
+
+La `Carga rápida` debe permitir pegar varias líneas de texto, creando una tarea por línea. Por ejemplo:
+
+- Preparar reunión de coordinación
+- Revisar planificación trimestral
+- Redactar propuesta inicial
+
+Además, en esa carga rápida debe poder definirse por defecto:
+- tipo
+- prioridad
+- estado inicial
+- fecha deseable de fin
+
+Opcionalmente, la carga rápida puede:
+- asignar automáticamente una persona
+- repartir tareas entre las personas existentes
+
+==================================================
+9. ORDENACIÓN
+==================================================
+
+Debe existir un selector para ordenar las tareas por:
+- orden manual
+- título
+- tipo
+- prioridad
+- fecha deseable
+- fecha de creación
+
+Debe existir un botón para alternar:
+- ascendente
+- descendente
+
+Cuando el orden no sea manual, el drag & drop debe quedar desactivado o claramente limitado, mostrando un aviso visual sencillo.
+
+==================================================
+10. DISEÑO Y COMPOSICIÓN VISUAL
+==================================================
+
+Quiero un diseño moderno, limpio, amable y colorido.
+
+Indicaciones visuales:
+- cada una de las 4 columnas debe tener un color distintivo
+- cabeceras en degradado suave
+- tarjetas blancas compactas con sombra ligera
+- bordes redondeados
+- tipografía clara y profesional
+- sensación visual parecida a una herramienta SaaS moderna
+- el bloque de personas también debe verse atractivo y consistente con el resto del diseño
+
+Composición exacta:
+- las 4 columnas deben verse siempre una al lado de la otra en una misma fila
+- si no cabe todo, debe aparecer scroll horizontal
+- las columnas no deben romperse en varias filas
+- dentro de cada columna, las tarjetas deben ser compactas
+- idealmente debe poder verse hasta 2 tarjetas por fila dentro de la misma columna cuando el ancho lo permita
+
+==================================================
+11. UX
+==================================================
+
+La UX debe ser muy sencilla y comprensible.
+
+Quiero:
+- interfaz fácil de entender
+- acciones claras
+- tiempos de interacción rápidos
+- mensajes de éxito y error simples
+- sin pantallas innecesarias
+- edición fluida
+- responsables visibles de forma natural
+
+==================================================
+12. DATOS DE EJEMPLO
+==================================================
+
+La aplicación debe arrancar con varias tareas precargadas de ejemplo para que el tablero se vea lleno desde el inicio.
+
+Quiero ejemplos realistas de oficina o gestión:
+- preparar reunión de dirección
+- revisar indicadores mensuales
+- coordinar propuesta presupuestaria
+- actualizar cuadro de mando
+- validar cronograma de proyecto
+- cerrar informe ejecutivo
+
+Quiero también que esas tareas aparezcan ya asignadas a Pepe, Juan y Sara, idealmente de forma repartida o aleatoria.
+
+==================================================
+13. TECNOLOGÍA RECOMENDADA
+==================================================
+
+Quiero una solución profesional pero ligera.
+
+Usa esta base salvo que haya una razón fuerte para mejorarla:
+- Next.js con App Router
+- TypeScript
+- React
+- Tailwind CSS
+- persistencia local sencilla con `localStorage`
+
+No compliques innecesariamente la arquitectura.
+Debe ser una demo que pueda arrancarse rápido en local.
+
+==================================================
+14. REQUISITOS TÉCNICOS DEL CÓDIGO
+==================================================
+
+Quiero que el código sea claro, modular y fácil de explicar en una clase.
+
+Requisitos técnicos:
+- componentes reutilizables
+- tipos bien definidos
+- nombres en castellano
+- comentarios escasos pero útiles
+- sin complejidad innecesaria
+- persistencia local de tareas y personas
+
+Estructura sugerida:
+- un componente principal para el panel Kanban
+- un componente para la franja o panel de personas
+- un componente para cada columna
+- un componente para cada tarjeta
+- un modal de edición de tarea
+- un modal o formulario de alta de persona
+- utilidades para ordenar y mover tareas
+
+==================================================
+15. PERSISTENCIA
+==================================================
+
+Para esta demo basta con persistencia sencilla en `localStorage`.
+
+El comportamiento esperado es:
+- si creo, muevo o edito tareas, al recargar la página deben seguir ahí
+- si creo personas nuevas, al recargar la página también deben seguir ahí
+- si las tareas tienen responsables asignados, esa relación debe mantenerse al recargar
+
+==================================================
+16. INSTALACIÓN Y PUESTA EN MARCHA
+==================================================
+
+La solución debe poder arrancar con algo equivalente a:
+- `npm install`
+- `npm run dev`
+
+Quiero que el `README.md` incluya una explicación corta y práctica de instalación y arranque.
+
+Además, quiero que la documentación final indique qué hacer si el usuario no tiene `npm` instalado:
+
+En Windows:
+- instalar Node.js LTS desde la web oficial de Node.js
+- durante la instalación, dejar activada la opción para añadir Node al PATH si aparece
+- cerrar y volver a abrir la terminal
+- comprobar la instalación con `node -v` y `npm -v`
+
+En macOS:
+- opción recomendada: instalar Node.js LTS desde la web oficial de Node.js
+- alternativa: instalarlo con Homebrew si ya lo tiene, usando `brew install node`
+- cerrar y volver a abrir la terminal
+- comprobar la instalación con `node -v` y `npm -v`
+
+==================================================
+17. DOCUMENTACIÓN FINAL ESPERADA
+==================================================
+
+Quiero un `README.md` corto que incluya:
+- qué hace la demo
+- cómo instalar dependencias
+- cómo arrancarla
+- qué funcionalidad principal incluye
+- qué hacer si `npm` no está disponible en Windows o macOS
+
+==================================================
+18. CRITERIO DE CALIDAD
+==================================================
+
+La solución final debe parecer una demo real y presentable para una clase con directivos.
+
+No quiero:
+- una prueba técnica fea
+- una interfaz improvisada
+- un backend innecesario
+- autenticación
+- panel de usuarios complejo
+- base de datos compleja
+- funcionalidades fuera del foco principal
+
+Sí quiero:
+- una demo clara
+- una demo bonita
+- una demo fácil de explicar
+- una demo útil para enseñar Kanban y asignación de responsables
+
+==================================================
+19. VERSIÓN COMPACTA
+==================================================
+
+Quiero que construyas una aplicación web básica llamada "gestor básico de tareas", con una única pantalla principal que muestre un tablero Kanban moderno, colorido, claro y profesional.
+
+Condiciones importantes:
+- todas las funciones, variables, componentes, comentarios, documentación e interfaz deben estar en castellano
+- no quiero autenticación, correo, backend innecesario ni base de datos compleja
+- quiero persistencia sencilla con `localStorage`
+
+Tecnología recomendada:
+- Next.js con App Router
+- TypeScript
+- React
+- Tailwind CSS
+
+La aplicación debe tener:
+- una franja superior de personas del equipo
+- tres personas precargadas llamadas Pepe, Juan y Sara
+- posibilidad de crear más personas
+- cada persona con nombre, área y foto
+- un tablero Kanban con 4 columnas fijas: Definido, En curso, Bloqueado y Terminado
+- tareas con identificador, fecha de creación, título, tipo, prioridad, fecha deseable de fin, observaciones, enlace, estado, persona asignada e índice de orden
+- tarjetas compactas que muestren al menos identificador, título, prioridad, tipo, fecha resumida y persona asignada
+
+Las tareas deben poder:
+- crear
+- editar
+- eliminar
+- mover entre columnas
+- reordenar dentro de la misma columna
+
+Debe existir:
+- drag & drop con feedback visual
+- indicador visual de drop
+- animaciones suaves
+- edición completa en modal
+- edición rápida inline del título
+- confirmación antes de eliminar
+- botón `Nueva tarea`
+- botón `Carga rápida`
+- ordenación por orden manual, título, tipo, prioridad, fecha deseable y fecha de creación
+- botón de ascendente o descendente
+
+Las tareas de ejemplo deben arrancar ya asignadas a Pepe, Juan y Sara, idealmente de forma repartida o aleatoria.
+
+Las columnas deben verse siempre en una sola fila, con scroll horizontal si no caben.
+
+Quiero un diseño tipo SaaS moderno:
+- columnas con colores diferenciados
+- cabeceras con degradado
+- tarjetas blancas compactas
+- bordes redondeados
+- sombras ligeras
+- interfaz agradable y muy presentable
+
+Quiero también un `README.md` corto que explique:
+- cómo instalar
+- cómo arrancar
+- qué hace la demo
+- qué hacer si no se tiene `npm` instalado en Windows o macOS

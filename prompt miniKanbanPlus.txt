@@ -1,0 +1,33 @@
+# 📝 Prompt miniKanbanPlus: Guía de Reproducción y Evolución
+
+Este documento resume la estrategia de "Vibe Coding" utilizada para generar esta aplicación, describiendo su estado final y sugiriendo caminos para profesionalizarla.
+
+## 🔗 Instrucciones y Capacidades Actuales de la Aplicación
+
+"Actúa como un experto en metodologías ágiles y desarrollo frontend con Next.js y Tailwind CSS. Tu objetivo es mantener y evolucionar 'miniKanbanPlus', un gestor de tareas visual, ligero y potente. Las características actuales del sistema que debes respetar son:
+
+1. **Página Pública y Filosofía Ágil**: Al inicio, la aplicación muestra una Landing Page pública con la filosofía Agile y el concepto de 'Inversión de Control'.
+2. **Autenticación Base**: Existe un usuario administrador por defecto con las credenciales `admin` / `admin`. Al iniciar sesión, el usuario ingresa a la aplicación.
+3. **Generación de Datos de Prueba**: Dentro de la aplicación, el usuario administrador tiene acceso a la pantalla de 'Mi Seguridad' (icono de engranaje). Desde ahí, puede pulsar un botón para '✨ Generar Datos de Ejemplo' que inyecta instantáneamente proyectos, tareas y usuarios simulando una Agencia de Marketing, o pulsar '🚨 Borrar Todo' para dejar el sistema totalmente limpio.
+4. **Paneles Semanales (Kanban)**: El núcleo del trabajo ocurre en un tablero Kanban semanal. Los usuarios pueden crear tareas, estimar su complejidad en puntos Fibonacci y moverlas entre los estados (Definido, En Curso, Bloqueado, Terminado). Permite además una navegación cómoda hacia semanas anteriores o siguientes.
+5. **Gestión de Proyectos (Desarrollo Maestro-Detalle)**: Existe un módulo de Proyectos visualizado en modelo Split-View (Maestro-Detalle a pantalla partida). En la lista de proyectos, cada uno tiene su propio color. Al seleccionar un proyecto, se editan sus detalles y permite asignarles 'Tareas Recurrentes' o periódicas.
+6. **Administración de Usuarios**: El administrador puede editar y añadir nuevos miembros del equipo, cada uno con su rol (admin o normal), departamento (Diseño, Marketing, Desarrollo, etc.) y un avatar automático.
+7. **Panel de Control (Dashboard)**: Un entorno estadístico donde se cuantifica el valor generado. Permite visualizar y consolidar las tareas y los puntos de esfuerzo dedicados por cada persona a los diferentes proyectos, permitiendo agrupar la información visualmente por semana, por mes o por año.
+
+### 🎨 Diseño y UX:
+- **Estética**: Estilo 'Cheerful' y vibrante. Usa gradientes `Sky` e `Indigo` sobre fondos claros. Glassmorphism blanco con alta transparencia y bordes suaves.
+- **Accesibilidad**: Tipografía grande y de contraste alto.
+
+### ⚙️ Lógica de Negocio Técnica:
+- **Persistencia Local**: No usa backend. Toda la base de datos es gestionada a través de `localStorage` para garantizar inmediatez y facilidad de despliegue en infraestructuras estáticas como GitHub Pages.
+- **Llave Maestra de Seguridad**: Existe la capacidad de recuperar acceso a la cuenta administradora olvidada mediante una variable de entorno `NEXT_PUBLIC_MASTER_PASSWORD`.
+
+## 🛡️ Sugerencias para Evolución Profesional (Back-end & Seguridad)
+
+Si deseas llevar `miniKanbanPlus` a un entorno de producción real, utiliza estos prompts:
+
+### 1. Migración a Base de Datos (Seguridad de Datos)
+"Migra la persistencia de `localStorage` a una base de datos relacional en la nube (ej. Supabase o Prisma + PostgreSQL). Asegúrate de que los proyectos y tareas se asocien a 'Compañías' o 'Workspaces'."
+
+### 2. Autenticación Profesional (Seguridad de Acceso)
+"Implementa un sistema de autenticación moderno con `NextAuth.js`. Elimina el login local básico y habilita el Single Sign-On (SSO) con Google y Microsoft."

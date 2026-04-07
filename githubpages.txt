@@ -1,0 +1,350 @@
+Desplegar un sitio en GitHub Pages con Next.js y GitHub Actions
+===============================================================
+
+Este documento explica de forma clara y directa los pasos necesarios para desplegar un sitio web en GitHub Pages usando un proyecto basado en Next.js con exportación estática y automatización mediante GitHub Actions.
+
+
+1. OBJETIVO
+===========
+
+La idea es que el repositorio quede preparado para que, cada vez que se haga `push` a la rama principal, GitHub construya automáticamente el sitio y lo publique en GitHub Pages.
+
+El resultado final es:
+- código alojado en GitHub
+- build automática con GitHub Actions
+- publicación automática en GitHub Pages
+
+
+2. CUÁNDO TIENE SENTIDO ESTE ENFOQUE
+====================================
+
+Este modelo es apropiado cuando:
+- el sitio puede publicarse como contenido estático
+- no hace falta un backend propio
+- no hay base de datos en servidor
+- se quiere un despliegue sencillo y automático
+
+Para una aplicación demo, documentación, landing page o sitio corporativo ligero, GitHub Pages es una solución muy cómoda.
+
+
+3. FICHEROS IMPLICADOS
+======================
+
+Para desplegar correctamente un proyecto de este tipo en GitHub Pages, normalmente intervienen estos ficheros:
+
+1. `next.config.ts`
+   Sirve para configurar la exportación estática, la ruta base del proyecto y otros ajustes específicos de GitHub Pages.
+
+2. `.github/workflows/deploy-pages.yml`
+   Es el workflow de GitHub Actions que construye el proyecto y lo publica en GitHub Pages.
+
+3. `public/.nojekyll`
+   Evita que GitHub Pages procese el sitio con Jekyll. Es recomendable cuando se publican ficheros generados por frameworks modernos.
+
+4. `package.json`
+   Debe contener los scripts necesarios para construir el proyecto, normalmente `npm run build`.
+
+5. Carpeta de salida del sitio estático
+   En Next.js exportado suele ser `out/`. Esa carpeta es la que GitHub Actions sube como artefacto para Pages.
+
+
+4. CONFIGURACIÓN DEL PROYECTO
+=============================
+
+El proyecto debe estar preparado para exportarse como sitio estático.
+
+En el caso de Next.js, conviene:
+- habilitar `output: "export"` para la build de GitHub Pages
+- activar `trailingSlash` si se desea una exportación más compatible con Pages
+- usar `basePath` y `assetPrefix` cuando el repositorio no sea del tipo `usuario.github.io`
+- marcar las imágenes como no optimizadas si se usa el sistema de imágenes de Next.js
+
+Además:
+- el proyecto debe compilar correctamente en local
+- el comando `npm run build` debe generar una salida estática válida
+
+
+5. WORKFLOW DE GITHUB ACTIONS
+=============================
+
+La publicación automática se apoya en un workflow definido en:
+
+`/.github/workflows/deploy-pages.yml`
+
+Ese workflow suele incluir dos trabajos:
+
+1. `build`
+   Hace checkout del repositorio, instala dependencias, genera la build estática y sube el artefacto.
+
+2. `deploy`
+   Publica ese artefacto en GitHub Pages.
+
+Elementos habituales del workflow:
+- disparador por `push` a `main`
+- ejecución manual opcional con `workflow_dispatch`
+- permisos para `pages: write` e `id-token: write`
+- uso de `actions/checkout`
+- uso de `actions/setup-node`
+- uso de `actions/configure-pages`
+- uso de `actions/upload-pages-artifact`
+- uso de `actions/deploy-pages`
+
+
+6. EJEMPLO DE WORKFLOW
+======================
+
+Un ejemplo típico de workflow sería este:
+
+```yaml
+name: Desplegar en GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Configurar Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Generar sitio estático
+        run: npm run build
+        env:
+          GH_PAGES: "true"
+          NODE_ENV: production
+
+      - name: Subir artefacto
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./out
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Publicar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+```
+
+
+7. PASOS EN LOCAL
+=================
+
+Antes de subir el proyecto a GitHub conviene preparar y validar el despliegue en local.
+
+Pasos recomendados:
+
+1. Instalar dependencias
+
+```bash
+npm install
+```
+
+2. Comprobar que el proyecto funciona en desarrollo
+
+```bash
+npm run dev
+```
+
+3. Comprobar que la build normal funciona
+
+```bash
+npm run build
+```
+
+4. Comprobar la build de exportación para Pages
+
+```bash
+GH_PAGES=true npm run build
+```
+
+5. Verificar que se genera correctamente la carpeta `out/`
+
+
+8. PASOS EN GITHUB
+==================
+
+Una vez que el proyecto está listo, hay que hacer varias acciones dentro de GitHub.
+
+### Paso 1. Subir el repositorio
+
+El código debe estar en un repositorio de GitHub.
+
+Ejemplo:
+
+```bash
+git init
+git add .
+git commit -m "Preparar despliegue en GitHub Pages"
+git branch -M main
+git remote add origin https://github.com/USUARIO/REPOSITORIO.git
+git push -u origin main
+```
+
+### Paso 2. Activar GitHub Pages
+
+Dentro del repositorio en GitHub:
+
+1. Entrar en `Settings`
+2. Entrar en `Pages`
+3. Ir a `Build and deployment`
+4. En `Source`, seleccionar `GitHub Actions`
+
+Con esto GitHub queda configurado para publicar el sitio desde workflows en lugar de desde una rama estática.
+
+### Paso 3. Lanzar el workflow
+
+Normalmente basta con hacer `push` a `main`, porque el workflow está configurado para ejecutarse automáticamente en cada push a esa rama.
+
+También puede lanzarse manualmente desde:
+
+1. pestaña `Actions`
+2. seleccionar el workflow `Desplegar en GitHub Pages`
+3. pulsar `Run workflow`
+
+### Paso 4. Esperar la publicación
+
+GitHub ejecutará:
+- checkout del repositorio
+- instalación de dependencias
+- build del sitio
+- subida del artefacto
+- despliegue en GitHub Pages
+
+Cuando termine, la URL publicada aparecerá:
+- en la página del workflow
+- en `Settings > Pages`
+
+
+9. URL FINAL DEL SITIO
+======================
+
+La URL depende del nombre del repositorio.
+
+### Caso 1. Repositorio especial de usuario u organización
+
+Si el repositorio se llama:
+
+`usuario.github.io`
+
+la URL será:
+
+`https://usuario.github.io/`
+
+### Caso 2. Repositorio de proyecto
+
+Si el repositorio se llama por ejemplo:
+
+`miniKanbanPlus`
+
+la URL será:
+
+`https://usuario.github.io/miniKanbanPlus/`
+
+Por eso es importante configurar bien `basePath` y `assetPrefix` cuando se trata de un repositorio de proyecto.
+
+
+10. QUÉ HACE CADA PARTE DEL DESPLIEGUE
+======================================
+
+### `actions/checkout`
+
+Descarga el repositorio dentro del runner de GitHub Actions.
+
+### `actions/setup-node`
+
+Instala y configura la versión de Node.js necesaria para construir el proyecto.
+
+### `actions/configure-pages`
+
+Prepara la integración con GitHub Pages.
+
+### `actions/upload-pages-artifact`
+
+Sube la salida estática del proyecto como artefacto listo para publicación.
+
+### `actions/deploy-pages`
+
+Publica ese artefacto en GitHub Pages.
+
+
+11. QUÉ REVISAR SI EL SITIO NO SE VE BIEN
+=========================================
+
+Si el despliegue termina correctamente pero el sitio no carga bien, normalmente conviene revisar:
+
+- que `npm run build` funcione en local
+- que la carpeta `out/` se genere correctamente
+- que `basePath` y `assetPrefix` estén bien configurados
+- que el workflow publique `./out`
+- que en `Settings > Pages` la fuente sea `GitHub Actions`
+- que la rama configurada en el workflow sea la correcta
+
+
+12. RECOMENDACIONES FINALES
+===========================
+
+- usar una rama principal clara, normalmente `main`
+- mantener el workflow dentro del propio repositorio
+- validar siempre la build local antes del push
+- documentar en el README cómo se despliega
+- si el proyecto es de tipo repositorio de proyecto, comprobar la URL final con su subruta
+
+
+13. RESUMEN RÁPIDO
+==================
+
+Para desplegar un sitio en GitHub Pages con este enfoque:
+
+1. preparar el proyecto para exportación estática
+2. configurar `next.config.ts`
+3. crear `public/.nojekyll`
+4. crear `.github/workflows/deploy-pages.yml`
+5. subir el repositorio a GitHub
+6. activar `GitHub Actions` como fuente en `Settings > Pages`
+7. hacer `push` a `main`
+8. esperar a que GitHub construya y publique el sitio
+
+Con eso el despliegue queda automatizado y mantenible.
