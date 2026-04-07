@@ -102,3 +102,5 @@ export function crearTareaPeriodicaVacia(): TareaPeriodica {
     activo: true
   };
 }
+
+export const proyectosEjemplo: Proyecto[] = [];

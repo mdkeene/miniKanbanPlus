@@ -15,9 +15,17 @@ export function TabDashboard() {
   const [offset, setOffset] = useState(0);
 
   useEffect(() => {
-    setTareas(obtenerTareas());
-    setProyectos(obtenerProyectos());
-    setPersonas(obtenerPersonas());
+    async function cargar() {
+      const [ts, prjs, ps] = await Promise.all([
+        obtenerTareas(),
+        obtenerProyectos(),
+        obtenerPersonas()
+      ]);
+      setTareas(ts);
+      setProyectos(prjs);
+      setPersonas(ps);
+    }
+    cargar();
   }, []);
 
   const stats = useMemo(() => {

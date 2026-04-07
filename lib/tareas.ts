@@ -15,7 +15,8 @@ import {
   limpiarTextoPlano,
   limitesSeguridad,
   normalizarUrlNavegable,
-  normalizarEnteroSeguro
+  normalizarEnteroSeguro,
+  limitarColeccion
 } from "@/lib/seguridad";
 
 export const almacenamientoTareas = "miniKanbanPlus.tareas.v3";
@@ -194,7 +195,7 @@ export function normalizarIndices(tareas: Tarea[], estado: EstadoKanban): Tarea[
 }
 
 export function normalizarTareasPersistidas(tareas: any[]): Tarea[] {
-  return limitarColeccion(tareas, limitesSeguridad.tareasMaximasTotal).map((t) => ({
+  return limitarColeccion(tareas, limitesSeguridad.tareasMaximas).map((t) => ({
     identificador: String(t?.identificador || generarIdentificador()),
     fechaCreacion: String(t?.fechaCreacion || new Date().toISOString()),
     titulo: limpiarTextoPlano(t?.titulo, limitesSeguridad.tituloMaximo) || "Tarea sin título",

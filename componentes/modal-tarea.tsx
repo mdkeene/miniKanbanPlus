@@ -80,7 +80,11 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setProyectos(obtenerProyectos());
+    async function cargar() {
+      const p = await obtenerProyectos();
+      setProyectos(p);
+    }
+    cargar();
   }, []);
 
   function actualizarCampo<Clave extends keyof BorradorTarea>(
