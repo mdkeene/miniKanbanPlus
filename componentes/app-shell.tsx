@@ -197,9 +197,9 @@ export function AppShell({
                 <span className="text-[9px] font-black uppercase tracking-widest text-sky-500 bg-sky-50 px-1.5 py-0.5 rounded-md">{sesion.usuario.rol}</span>
               </div>
               <div 
-                className="h-9 w-9 rounded-xl border border-white shadow-sm flex items-center justify-center text-[11px] font-black text-white group cursor-pointer transition-transform hover:scale-105"
+                className="h-10 w-10 rounded-xl border border-white shadow-sm flex items-center justify-center text-[11px] font-black text-white group cursor-pointer transition-all hover:scale-110 active:scale-95 hover:shadow-lg hover:shadow-sky-500/20"
                 style={{ backgroundColor: sesion.usuario.color || "#0ea5e9" }}
-                onClick={() => setMenuAbierto(true)}
+                onClick={() => setModalPasswordAbierto(true)}
               >
                 {sesion.usuario.foto ? (
                   <img src={sesion.usuario.foto} alt="" className="h-full w-full rounded-xl object-cover" />

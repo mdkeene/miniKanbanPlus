@@ -129,6 +129,7 @@ export function TableroKanban() {
   const [seleccionadas, setSeleccionadas] = useState<string[]>([]);
   const [agruparPorPersona, setAgruparPorPersona] = useState(false);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
+  const [swimlanesColapsados, setSwimlanesColapsados] = useState<string[]>([]);
 
   useEffect(() => {
     async function inicializar() {
@@ -363,6 +364,21 @@ export function TableroKanban() {
     setSemanaActiva(obtenerSemanaId());
   }
 
+  function toggleSwimlane(id: string) {
+    setSwimlanesColapsados(actual => 
+      actual.includes(id) ? actual.filter(item => item !== id) : [...actual, id]
+    );
+  }
+
+  function toggleTodoSwimlanes() {
+    if (!swimlanes) return;
+    if (swimlanesColapsados.length === swimlanes.length) {
+      setSwimlanesColapsados([]);
+    } else {
+      setSwimlanesColapsados(swimlanes.map(l => l.id));
+    }
+  }
+
   if (!hidratado || cargando) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
@@ -509,6 +525,16 @@ export function TableroKanban() {
                     {agruparPorPersona ? "🏊 Calles" : "🏢 Base"}
                   </button>
 
+                  {agruparPorPersona && swimlanes && (
+                    <button
+                      onClick={toggleTodoSwimlanes}
+                      title="Colapsar/Expandir Todo"
+                      className="h-11 w-11 flex items-center justify-center rounded-2xl border-2 border-slate-100 bg-white text-slate-500 hover:border-sky-200 hover:text-sky-600 transition-all font-bold"
+                    >
+                      {swimlanesColapsados.length === swimlanes.length ? "↕️" : "↔️"}
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     onClick={() => setModalCargaAbierto(true)}
@@ -545,9 +571,17 @@ export function TableroKanban() {
                   {swimlanes.map((lane) => (
                     <div
                       key={lane.id}
-                      className="flex flex-col gap-3 rounded-[32px] border border-slate-100 bg-slate-50/30 p-4"
+                      className={`flex flex-col gap-3 rounded-[32px] border border-slate-100 p-4 transition-all ${
+                        swimlanesColapsados.includes(lane.id) ? "bg-slate-50/10 opacity-70" : "bg-slate-50/30"
+                      }`}
                     >
-                      <div className="flex items-center gap-3 px-2">
+                      <div 
+                        className="flex items-center gap-3 px-2 cursor-pointer group"
+                        onClick={() => toggleSwimlane(lane.id)}
+                      >
+                        <div className={`flex h-6 w-6 items-center justify-center rounded-lg bg-white border border-slate-100 text-[10px] transition-transform ${swimlanesColapsados.includes(lane.id) ? "-rotate-90" : "rotate-0"}`}>
+                          ▼
+                        </div>
                         {lane.persona ? (
                           <div className="flex items-center gap-3">
                             <img src={lane.persona.foto} className="h-8 w-8 rounded-xl object-cover shadow-sm bg-white" alt="" />
@@ -561,7 +595,8 @@ export function TableroKanban() {
                         <span className="text-[10px] font-bold text-slate-400">{lane.tareas.length} tareas</span>
                       </div>
                       
-                      <div className="flex gap-4 overflow-x-auto pb-2 custom-scrollbar">
+                      {!swimlanesColapsados.includes(lane.id) && (
+                        <div className="flex gap-4 overflow-x-auto pb-2 custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-300">
                         {columnas.map((columna) => {
                           const tareasDeColumnaYPersona = columna.tareas.filter(
                             (t: Tarea) => (t.personaAsignadaId || "sin-asignar") === lane.id
@@ -593,7 +628,8 @@ export function TableroKanban() {
                             />
                           );
                         })}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
