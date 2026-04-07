@@ -11,6 +11,7 @@ export function TabUsuarios() {
   
   const [nombre, setNombre] = useState("");
   const [area, setArea] = useState("");
+  const [email, setEmail] = useState("");
   const [rol, setRol] = useState<RolUsuario>("usuario");
   const [color, setColor] = useState("#0ea5e9");
   const [foto, setFoto] = useState("");
@@ -31,6 +32,7 @@ export function TabUsuarios() {
       identificador: editandoUsuario?.identificador || crypto.randomUUID(),
       nombre,
       area,
+      email,
       rol,
       color,
       foto,
@@ -58,6 +60,7 @@ export function TabUsuarios() {
     setEditandoUsuario(null);
     setNombre("");
     setArea("");
+    setEmail("");
     setRol("usuario");
     setColor("#0ea5e9");
     setFoto("");
@@ -68,10 +71,12 @@ export function TabUsuarios() {
     setEditandoUsuario(p);
     setNombre(p.nombre);
     setArea(p.area);
+    setEmail(p.email || "");
     setRol(p.rol || "usuario");
     setColor(p.color || "#0ea5e9");
     setFoto(p.foto || "");
     setClave(p.clave || "");
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function simularSubida() {
@@ -139,6 +144,15 @@ export function TabUsuarios() {
               />
             </div>
             <div className="space-y-1">
+              <label className="text-xs font-black uppercase tracking-widest text-sky-600 ml-1">Email (Login)</label>
+              <input 
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="ejemplo@innovaexport.com"
+                className="w-full rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-base font-semibold text-sky-900 outline-none focus:border-sky-400"
+              />
+            </div>
+            <div className="space-y-1">
               <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Nivel</label>
               <select 
                 value={rol}
@@ -190,7 +204,7 @@ export function TabUsuarios() {
                       <AvatarPersona nombre={u.nombre} foto={u.foto} tamano="pequeno" />
                       <div className="flex flex-col">
                         <span className="text-lg font-black text-slate-900 leading-tight">{u.nombre}</span>
-                        <span className="text-[9px] font-bold text-slate-400 uppercase">{u.identificador}</span>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase">{u.email}</span>
                       </div>
                     </div>
                   </td>
