@@ -33,20 +33,13 @@ export function PaginaLogin({ alEntrar }: PaginaLoginProps) {
   return (
     <div className="relative w-full max-w-md space-y-8 rounded-[48px] border border-slate-200 bg-white p-10 shadow-3xl xl:p-12 font-sans selection:bg-sky-500/30">
         <div className="text-center">
-          <div className="flex justify-center mb-8">
+          <div className="flex justify-center">
             <img 
               src="https://www.innovaexport.com/wp-content/uploads/2022/10/logo-ide_compartir_link_web-1.jpg" 
               alt="InnovaExport Logo" 
-              className="h-24 w-auto rounded-2xl shadow-xl transition-transform hover:scale-105"
+              className="h-28 w-auto rounded-3xl shadow-2xl transition-transform hover:scale-105"
             />
           </div>
-          <h1 className="mt-4 text-3xl font-black tracking-tight text-slate-950 uppercase border-b-4 border-sky-500 inline-block px-2">
-            Gestión de Equipos
-          </h1>
-          <p className="mt-6 text-sm font-bold text-slate-500 leading-relaxed italic">
-            Visualización y coordinación de alto rendimiento.<br />
-            Impulsado por InnovaExport.
-          </p>
         </div>
 
         <form className="mt-12 space-y-6" onSubmit={manejarEnvio}>
@@ -94,11 +87,6 @@ export function PaginaLogin({ alEntrar }: PaginaLoginProps) {
           </button>
         </form>
 
-        <div className="pt-4 text-center">
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-300">
-            v2.0 • 2026 miniKanbanPlus SDK
-          </p>
-        </div>
       </div>
   );
 }
