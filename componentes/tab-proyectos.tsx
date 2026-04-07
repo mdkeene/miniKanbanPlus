@@ -21,7 +21,6 @@ import {
   eliminarTareaPeriodica,
   crearTareaPeriodicaVacia
 } from "@/lib/proyectos";
-import { generarIdentificador } from "@/lib/tareas";
 import { obtenerPersonas } from "@/lib/personas";
 
 export function TabProyectos() {
@@ -40,11 +39,18 @@ export function TabProyectos() {
   const [formularioTP, setFormularioTP] = useState<TareaPeriodica>(crearTareaPeriodicaVacia());
 
   useEffect(() => {
-    setProyectos(obtenerProyectos());
-    setPersonas(obtenerPersonas());
+    async function cargar() {
+      const [ps, prjs] = await Promise.all([
+        obtenerPersonas(),
+        obtenerProyectos()
+      ]);
+      setPersonas(ps);
+      setProyectos(prjs);
+    }
+    cargar();
   }, []);
 
-  function handleGuardarProyecto() {
+  async function handleGuardarProyecto() {
     if (!nuevoNombre.trim()) return;
     
     const proyecto: Proyecto = editandoProyecto ? {
@@ -53,22 +59,24 @@ export function TabProyectos() {
       descripcion: nuevaDescripcion,
       color: nuevoColor
     } : {
-      identificador: `PRJ-${generarIdentificador().split("-")[1]}`,
+      identificador: `PRJ-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
       nombre: nuevoNombre,
       descripcion: nuevaDescripcion,
       color: nuevoColor,
       tareasPeriodicas: []
     };
 
-    guardarProyecto(proyecto);
-    setProyectos(obtenerProyectos());
+    await guardarProyecto(proyecto);
+    const prjs = await obtenerProyectos();
+    setProyectos(prjs);
     cancelarEdicion();
   }
 
-  function handleEliminarProyecto(id: string) {
+  async function handleEliminarProyecto(id: string) {
     if (!confirm("¿Estás seguro de eliminar este proyecto y sus tareas periódicas?")) return;
-    eliminarProyecto(id);
-    setProyectos(obtenerProyectos());
+    await eliminarProyecto(id);
+    const prjs = await obtenerProyectos();
+    setProyectos(prjs);
   }
 
   function cancelarEdicion() {
@@ -233,7 +241,7 @@ export function TabProyectos() {
                   No hay tareas periódicas configuradas en este proyecto.
                 </p>
               ) : (
-                proyectos.find(p => p.identificador === editandoProyecto.identificador)?.tareasPeriodicas.map(tarea => (
+                proyectos.find(p => p.identificador === editandoProyecto.identificador)?.tareasPeriodicas.map((tarea: TareaPeriodica) => (
                   <div 
                     key={tarea.identificador} 
                     className="group flex flex-col justify-between gap-3 rounded-[24px] border border-slate-200 bg-slate-50 p-5 transition-all hover:bg-white hover:shadow-md hover:-translate-y-0.5"
@@ -268,10 +276,11 @@ export function TabProyectos() {
                           ✏️
                         </button>
                         <button 
-                          onClick={() => {
+                          onClick={async () => {
                             if (confirm("¿Eliminar esta tarea periódica?")) {
-                              eliminarTareaPeriodica(editandoProyecto.identificador, tarea.identificador);
-                              setProyectos(obtenerProyectos());
+                              await eliminarTareaPeriodica(editandoProyecto.identificador, tarea.identificador);
+                              const updatedPrjs = await obtenerProyectos();
+                              setProyectos(updatedPrjs);
                             }
                           }}
                           className="rounded-lg bg-white shadow-sm border border-slate-200 p-2 text-slate-500 hover:border-rose-300 hover:text-rose-600 transition-colors"
@@ -378,10 +387,11 @@ export function TabProyectos() {
                 Cancelar
               </button>
               <button 
-                onClick={() => {
+                onClick={async () => {
                   if (!formularioTP.titulo.trim()) return;
-                  actualizarTareaPeriodica(proyectoParaTarea.identificador, formularioTP);
-                  setProyectos(obtenerProyectos());
+                  await actualizarTareaPeriodica(proyectoParaTarea!.identificador, formularioTP);
+                  const updatedPrjs = await obtenerProyectos();
+                  setProyectos(updatedPrjs);
                   setProyectoParaTarea(null);
                 }}
                 className="rounded-2xl bg-sky-600 px-8 py-3 text-sm font-bold text-white shadow-xl shadow-sky-100 hover:bg-sky-500 transition-all hover:-translate-y-0.5"

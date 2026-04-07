@@ -1,100 +1,89 @@
 import { type Proyecto, type TareaPeriodica } from "@/tipos/tareas";
+import { supabase } from "@/lib/supabase";
 
-const CLAVE_PROYECTOS = "miniKanbanPlus.proyectos.v3";
+export async function obtenerProyectos(): Promise<Proyecto[]> {
+  const { data, error } = await supabase
+    .from("projects")
+    .select("*")
+    .order("nombre", { ascending: true });
 
-export const proyectosEjemplo: Proyecto[] = [
-  {
-    identificador: "PRJ-1001",
-    nombre: "Desarrollo de página web de cliente uno",
-    descripcion: "Diseño, desarrollo y lanzamiento de portal web corporativo.",
-    color: "#0ea5e9",
-    tareasPeriodicas: []
-  },
-  {
-    identificador: "PRJ-1002",
-    nombre: "Labores de marketing y SEO para el cliente B",
-    descripcion: "Estrategia de posicionamiento, campañas publicitarias y métricas.",
-    color: "#8b5cf6",
-    tareasPeriodicas: []
-  },
-  {
-    identificador: "PRJ-1003",
-    nombre: "Labores administrativas",
-    descripcion: "Facturación, revisión de bancos y líneas de crédito.",
-    color: "#10b981",
-    tareasPeriodicas: [
-      {
-        identificador: "TP-001",
-        titulo: "Generar pagos y revisar nóminas",
-        tipo: "Planificacion",
-        prioridad: "ALTA",
-        complejidad: 3,
-        frecuencia: "Semanal",
-        activo: true
-      }
-    ]
-  }
-];
-
-export function obtenerProyectos(): Proyecto[] {
-  if (typeof window === "undefined") return [];
-  const raw = window.localStorage.getItem(CLAVE_PROYECTOS);
-  if (!raw) return [];
-  try {
-    return JSON.parse(raw) as Proyecto[];
-  } catch {
+  if (error) {
+    console.error("Error al obtener proyectos:", error);
     return [];
   }
+
+  return (data || []).map(p => ({
+    identificador: p.identificador,
+    nombre: p.nombre,
+    descripcion: p.descripcion,
+    color: p.color,
+    tareasPeriodicas: p.tareas_periodicas || []
+  }));
 }
 
-export function guardarProyectos(proyectos: Proyecto[]) {
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem(CLAVE_PROYECTOS, JSON.stringify(proyectos));
-  }
+export async function guardarProyecto(proyecto: Proyecto): Promise<void> {
+  const { error } = await supabase
+    .from("projects")
+    .upsert({
+      identificador: proyecto.identificador,
+      nombre: proyecto.nombre,
+      descripcion: proyecto.descripcion,
+      color: proyecto.color,
+      tareas_periodicas: proyecto.tareasPeriodicas || []
+    });
+
+  if (error) throw error;
 }
 
-export function guardarProyecto(proyecto: Proyecto) {
-  const proyectos = obtenerProyectos();
-  const indice = proyectos.findIndex(p => p.identificador === proyecto.identificador);
-  if (indice >= 0) {
-    proyectos[indice] = proyecto;
-  } else {
-    proyectos.push(proyecto);
-  }
-  guardarProyectos(proyectos);
+export async function eliminarProyecto(identificador: string): Promise<void> {
+  const { error } = await supabase
+    .from("projects")
+    .delete()
+    .eq("identificador", identificador);
+
+  if (error) throw error;
 }
 
-export function eliminarProyecto(identificador: string) {
-  const proyectos = obtenerProyectos().filter(p => p.identificador !== identificador);
-  guardarProyectos(proyectos);
-}
-
-export function actualizarTareaPeriodica(proyectoId: string, tarea: TareaPeriodica) {
-  const proyectos = obtenerProyectos();
-  const proyecto = proyectos.find(p => p.identificador === proyectoId);
+export async function actualizarTareaPeriodica(
+  proyectoId: string,
+  tarea: TareaPeriodica
+): Promise<void> {
+  const proyectos = await obtenerProyectos();
+  const proyecto = proyectos.find((p) => p.identificador === proyectoId);
   if (!proyecto) return;
-  
-  const indice = proyecto.tareasPeriodicas.findIndex(t => t.identificador === tarea.identificador);
-  if (indice >= 0) {
-    proyecto.tareasPeriodicas[indice] = tarea;
+
+  const index = proyecto.tareasPeriodicas.findIndex(
+    (t) => t.identificador === tarea.identificador
+  );
+
+  const nuevasTareas = [...proyecto.tareasPeriodicas];
+  if (index >= 0) {
+    nuevasTareas[index] = tarea;
   } else {
-    proyecto.tareasPeriodicas.push(tarea);
+    nuevasTareas.push(tarea);
   }
-  guardarProyecto(proyecto);
+
+  await guardarProyecto({ ...proyecto, tareasPeriodicas: nuevasTareas });
 }
 
-export function eliminarTareaPeriodica(proyectoId: string, tareaId: string) {
-  const proyectos = obtenerProyectos();
-  const proyecto = proyectos.find(p => p.identificador === proyectoId);
+export async function eliminarTareaPeriodica(
+  proyectoId: string,
+  tareaId: string
+): Promise<void> {
+  const proyectos = await obtenerProyectos();
+  const proyecto = proyectos.find((p) => p.identificador === proyectoId);
   if (!proyecto) return;
-  
-  proyecto.tareasPeriodicas = proyecto.tareasPeriodicas.filter(t => t.identificador !== tareaId);
-  guardarProyecto(proyecto);
+
+  const nuevasTareas = proyecto.tareasPeriodicas.filter(
+    (t) => t.identificador !== tareaId
+  );
+
+  await guardarProyecto({ ...proyecto, tareasPeriodicas: nuevasTareas });
 }
 
 export function crearProyectoVacio(): Proyecto {
   return {
-    identificador: `PRJ-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+    identificador: crypto.randomUUID(),
     nombre: "",
     descripcion: "",
     color: "#0ea5e9",

@@ -17,35 +17,41 @@ export function TabUsuarios() {
   const [clave, setClave] = useState("");
 
   useEffect(() => {
-    setUsuarios(obtenerPersonas());
+    async function cargar() {
+      const ps = await obtenerPersonas();
+      setUsuarios(ps);
+    }
+    cargar();
   }, []);
 
-  function handleGuardar() {
+  async function handleGuardar() {
     if (!nombre.trim() || !area.trim()) return;
 
     const persona: Persona = {
-      identificador: editandoUsuario?.identificador || `USR-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+      identificador: editandoUsuario?.identificador || crypto.randomUUID(),
       nombre,
       area,
       rol,
       color,
       foto,
-      clave: clave || "1234" // Clave por defecto si no se especifica
+      clave: clave || "1234"
     };
 
-    guardarPersona(persona);
-    setUsuarios(obtenerPersonas());
+    await guardarPersona(persona);
+    const ps = await obtenerPersonas();
+    setUsuarios(ps);
     cancelarBorrador();
   }
 
-  function handleEliminar(id: string) {
-    if (id === "USR-ADMIN" || id === "PR-ADMIN") {
+  async function handleEliminar(id: string) {
+    if (id === "PR-ADMIN") {
       alert("No se puede eliminar al administrador principal.");
       return;
     }
     if (!confirm("¿Eliminar este usuario?")) return;
-    eliminarPersona(id);
-    setUsuarios(obtenerPersonas());
+    await eliminarPersona(id);
+    const ps = await obtenerPersonas();
+    setUsuarios(ps);
   }
 
   function cancelarBorrador() {

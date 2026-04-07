@@ -1,4 +1,71 @@
 import type { BorradorPersona, Persona, Tarea } from "@/tipos/tareas";
+import { supabase } from "@/lib/supabase";
+export function crearPersonaDesdeBorrador(
+  borrador: BorradorPersona,
+  indiceColor: number
+): Persona {
+  const nombre = limpiarTextoPlano(borrador.nombre, limitesSeguridad.nombreMaximo);
+
+  return {
+    identificador: generarIdentificadorPersona(),
+    nombre,
+    area: limpiarTextoPlano(borrador.area, limitesSeguridad.areaMaxima),
+    foto: normalizarUrlImagen(borrador.foto) || crearFotoAvatar(nombre, indiceColor),
+    color: borrador.color || gamasColor[indiceColor % gamasColor.length].fondoA,
+    rol: borrador.rol || "usuario",
+    clave: borrador.clave || ""
+  };
+}
+
+export function normalizarPersonas(personas: Persona[]) {
+  return limitarColeccion(personas, limitesSeguridad.personasMaximas).map(
+    (persona, indice) => {
+      const nombre = limpiarTextoPlano(persona?.nombre, limitesSeguridad.nombreMaximo);
+      const area = limpiarTextoPlano(persona?.area, limitesSeguridad.areaMaxima);
+
+      return {
+        identificador: limpiarTextoPlano(
+          persona?.identificador,
+          limitesSeguridad.nombreMaximo
+        ) || generarIdentificadorPersona(),
+        nombre: nombre || `Persona ${indice + 1}`,
+        area: area || "Área no definida",
+        foto:
+          normalizarUrlImagen(persona?.foto) || crearFotoAvatar(nombre || "Persona", indice),
+        color: persona?.color || gamasColor[indice % gamasColor.length].fondoA,
+        rol: persona?.rol || "usuario",
+        clave: persona?.clave || ""
+      };
+    }
+  );
+}
+
+export function sincronizarTareasConPersonas(tareas: Tarea[], personas: Persona[]) {
+  const identificadores = new Set(personas.map((persona) => persona.identificador));
+
+  return tareas.map((tarea) => {
+    if (tarea.personaAsignadaId && identificadores.has(tarea.personaAsignadaId)) {
+      return tarea;
+    }
+
+    return {
+      ...tarea,
+      personaAsignadaId: obtenerIdentificadorPersonaAleatorio(personas)
+    };
+  });
+}
+
+export const personasEjemplo: Persona[] = [
+  {
+    identificador: "PR-ADMIN",
+    nombre: "Dirección",
+    area: "Administración",
+    foto: "",
+    color: "#0ea5e9",
+    rol: "admin"
+  }
+];
+
 import {
   limpiarTextoPlano,
   limitesSeguridad,
@@ -69,106 +136,45 @@ export function crearBorradorPersona(): BorradorPersona {
   };
 }
 
-export function crearPersonaDesdeBorrador(
-  borrador: BorradorPersona,
-  indiceColor: number
-): Persona {
-  const nombre = limpiarTextoPlano(borrador.nombre, limitesSeguridad.nombreMaximo);
+export async function obtenerPersonas(): Promise<Persona[]> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*');
 
-  return {
-    identificador: generarIdentificadorPersona(),
-    nombre,
-    area: limpiarTextoPlano(borrador.area, limitesSeguridad.areaMaxima),
-    foto: normalizarUrlImagen(borrador.foto) || crearFotoAvatar(nombre, indiceColor),
-    color: borrador.color || gamasColor[indiceColor % gamasColor.length].fondoA,
-    rol: borrador.rol || "usuario",
-    clave: borrador.clave || ""
-  };
+  if (error || !data) return [];
+
+  return data.map((p, idx) => ({
+    identificador: p.id,
+    nombre: p.nombre,
+    area: p.area,
+    foto: p.foto || crearFotoAvatar(p.nombre, idx),
+    color: p.color,
+    rol: p.rol as any
+  }));
 }
 
-export const personasEjemplo: Persona[] = [
-  {
-    identificador: "PR-ADMIN",
-    nombre: "Dirección",
-    area: "Administración",
-    foto: "",
-    color: "#0ea5e9",
-    rol: "admin"
-  },
-  {
-    identificador: "PR-1001",
-    nombre: "Laura",
-    area: "Diseño Gráfico",
-    foto: crearFotoAvatar("Laura", 0),
-    color: "#0ea5e9",
-    rol: "usuario"
-  },
-  {
-    identificador: "PR-1002",
-    nombre: "Carlos",
-    area: "Desarrollo",
-    foto: crearFotoAvatar("Carlos", 1),
-    color: "#f59e0b",
-    rol: "usuario"
-  },
-  {
-    identificador: "PR-1003",
-    nombre: "Elena",
-    area: "Lanzamiento y QA",
-    foto: crearFotoAvatar("Elena", 4),
-    color: "#8b5cf6",
-    rol: "usuario"
-  },
-  {
-    identificador: "PR-1004",
-    nombre: "Marcos",
-    area: "Marketing",
-    foto: crearFotoAvatar("Marcos", 2),
-    color: "#10b981",
-    rol: "usuario"
-  },
-  {
-    identificador: "PR-1005",
-    nombre: "Sofía",
-    area: "Publicidad",
-    foto: crearFotoAvatar("Sofía", 3),
-    color: "#ec4899",
-    rol: "usuario"
-  }
-];
+export async function guardarPersona(persona: Persona) {
+  const { error } = await supabase
+    .from('profiles')
+    .upsert({
+      id: persona.identificador,
+      nombre: persona.nombre,
+      area: persona.area,
+      foto: persona.foto,
+      color: persona.color,
+      rol: persona.rol
+    });
 
-
-export function obtenerPersonas(): Persona[] {
-  if (typeof window === "undefined") return [personasEjemplo[0]];
-  const raw = window.localStorage.getItem(almacenamientoPersonas);
-  if (!raw) return [personasEjemplo[0]];
-  try {
-    return JSON.parse(raw) as Persona[];
-  } catch {
-    return [personasEjemplo[0]];
-  }
+  if (error) console.error("Error saving profile:", error.message);
 }
 
-export function guardarPersonas(personas: Persona[]) {
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem(almacenamientoPersonas, JSON.stringify(personas));
-  }
-}
+export async function eliminarPersona(identificador: string) {
+  const { error } = await supabase
+    .from('profiles')
+    .delete()
+    .eq('id', identificador);
 
-export function guardarPersona(persona: Persona) {
-  const personas = obtenerPersonas();
-  const indice = personas.findIndex(p => p.identificador === persona.identificador);
-  if (indice >= 0) {
-    personas[indice] = persona;
-  } else {
-    personas.push(persona);
-  }
-  guardarPersonas(personas);
-}
-
-export function eliminarPersona(identificador: string) {
-  const personas = obtenerPersonas().filter(p => p.identificador !== identificador);
-  guardarPersonas(personas);
+  if (error) console.error("Error deleting profile:", error.message);
 }
 
 export function obtenerPersonaAleatoria(personas: Persona[]) {
@@ -181,46 +187,23 @@ export function obtenerIdentificadorPersonaAleatorio(personas: Persona[]) {
   return obtenerPersonaAleatoria(personas)?.identificador ?? "";
 }
 
-export function sincronizarTareasConPersonas(tareas: Tarea[], personas: Persona[]) {
-  const identificadores = new Set(personas.map((persona) => persona.identificador));
+export async function buscarPersonaPorId(id: string): Promise<Persona | undefined> {
+  const { data } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', id)
+    .single();
 
-  return tareas.map((tarea) => {
-    if (tarea.personaAsignadaId && identificadores.has(tarea.personaAsignadaId)) {
-      return tarea;
-    }
+  if (!data) return undefined;
 
-    return {
-      ...tarea,
-      personaAsignadaId: obtenerIdentificadorPersonaAleatorio(personas)
-    };
-  });
-}
-
-export function buscarPersonaPorId(id: string): Persona | undefined {
-  return obtenerPersonas().find((p) => p.identificador === id);
-}
-
-export function normalizarPersonas(personas: Persona[]) {
-  return limitarColeccion(personas, limitesSeguridad.personasMaximas).map(
-    (persona, indice) => {
-      const nombre = limpiarTextoPlano(persona?.nombre, limitesSeguridad.nombreMaximo);
-      const area = limpiarTextoPlano(persona?.area, limitesSeguridad.areaMaxima);
-
-      return {
-        identificador: limpiarTextoPlano(
-          persona?.identificador,
-          limitesSeguridad.nombreMaximo
-        ) || generarIdentificadorPersona(),
-        nombre: nombre || `Persona ${indice + 1}`,
-        area: area || "Área no definida",
-        foto:
-          normalizarUrlImagen(persona?.foto) || crearFotoAvatar(nombre || "Persona", indice),
-        color: persona?.color || gamasColor[indice % gamasColor.length].fondoA,
-        rol: persona?.rol || "usuario",
-        clave: persona?.clave || ""
-      };
-    }
-  );
+  return {
+    identificador: data.id,
+    nombre: data.nombre,
+    area: data.area,
+    foto: data.foto || crearFotoAvatar(data.nombre, 0),
+    color: data.color,
+    rol: data.rol as any
+  };
 }
 
 export function obtenerGamaColorRandom() {

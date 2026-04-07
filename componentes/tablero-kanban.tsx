@@ -12,18 +12,23 @@ import {
   normalizarPersonas,
   obtenerIdentificadorPersonaAleatorio,
   personasEjemplo,
-  sincronizarTareasConPersonas
+  sincronizarTareasConPersonas,
+  obtenerPersonas,
+  guardarPersona as guardarPersonaLib
 } from "@/lib/personas";
 import {
   agruparPorEstado,
   almacenamientoTareas,
   crearBorradorVacio,
   crearTareaDesdeBorrador,
-  moverTarea,
   normalizarIndices,
   normalizarTareasPersistidas,
   obtenerSiguienteIndice,
-  tareasEjemplo
+  tareasEjemplo,
+  obtenerTareas,
+  guardarTarea as guardarTareaLib,
+  eliminarTarea as eliminarTareaLib,
+  moverTarea as moverTareaLib
 } from "@/lib/tareas";
 import {
   limpiarTextoPlano,
@@ -105,6 +110,7 @@ export function TableroKanban() {
   const [tareas, setTareas] = useState<Tarea[]>([]);
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [hidratado, setHidratado] = useState(false);
+  const [cargando, setCargando] = useState(true);
   const [semanaActiva, setSemanaActiva] = useState(obtenerSemanaId());
   const [ordenActivo, setOrdenActivo] = useState<OrdenTablero>("manual");
   const [sentidoOrden, setSentidoOrden] = useState<SentidoOrden>("asc");
@@ -119,80 +125,36 @@ export function TableroKanban() {
   const [agruparPorPersona, setAgruparPorPersona] = useState(false);
 
   useEffect(() => {
-    const almacenamientoPersonasLocal =
-      typeof window !== "undefined"
-        ? window.localStorage.getItem(almacenamientoPersonas)
-        : null;
-
-    const personasBase = (() => {
-      if (!almacenamientoPersonasLocal) {
-        return personasEjemplo;
-      }
-
+    async function inicializar() {
       try {
-        return normalizarPersonas(JSON.parse(almacenamientoPersonasLocal) as Persona[]);
-      } catch {
-        return personasEjemplo;
+        const [ps, ts] = await Promise.all([
+          import("@/lib/personas").then(m => m.obtenerPersonas()),
+          import("@/lib/tareas").then(m => m.obtenerTareas())
+        ]);
+        setPersonas(ps);
+        setTareas(ts);
+      } catch (e) {
+        console.error("Error al cargar datos:", e);
+      } finally {
+        setCargando(false);
+        setHidratado(true);
       }
-    })();
-
-    const almacenamiento =
-      typeof window !== "undefined"
-        ? window.localStorage.getItem(almacenamientoTareas)
-        : null;
-
-    setPersonas(personasBase);
-
-    if (!almacenamiento) {
-      setTareas(sincronizarTareasConPersonas(tareasEjemplo, personasBase));
-      setHidratado(true);
-      return;
     }
-
-    try {
-      const recuperadas = JSON.parse(almacenamiento) as Tarea[];
-      setTareas(
-        normalizarIndices(
-          sincronizarTareasConPersonas(
-            normalizarTareasPersistidas(recuperadas),
-            personasBase
-          )
-        )
-      );
-    } catch {
-      setTareas(sincronizarTareasConPersonas(tareasEjemplo, personasBase));
-    } finally {
-      setHidratado(true);
-    }
+    inicializar();
   }, []);
 
   useEffect(() => {
-    if (!hidratado || typeof window === "undefined") {
-      return;
-    }
-
-    window.localStorage.setItem(almacenamientoTareas, JSON.stringify(tareas));
-  }, [hidratado, tareas]);
-
-  useEffect(() => {
-    if (!hidratado || typeof window === "undefined") {
-      return;
-    }
-
-    window.localStorage.setItem(almacenamientoPersonas, JSON.stringify(personas));
-  }, [hidratado, personas]);
-
-  useEffect(() => {
-    if (!mensajeSistema) {
-      return;
-    }
-
-    const temporizador = window.setTimeout(() => {
-      setMensajeSistema(null);
-    }, 2400);
-
+    if (!mensajeSistema) return;
+    const temporizador = window.setTimeout(() => setMensajeSistema(null), 2400);
     return () => window.clearTimeout(temporizador);
   }, [mensajeSistema]);
+
+  // (Helper function to refresh data)
+  async function recargarTareas() {
+    const { obtenerTareas } = await import("@/lib/tareas");
+    const ts = await obtenerTareas();
+    setTareas(ts);
+  }
 
   const tareasSemanales = useMemo(
     () => tareas.filter((t) => t.semanaId === semanaActiva),
@@ -210,37 +172,20 @@ export function TableroKanban() {
     [ordenActivo, sentidoOrden, tareasSemanales]
   );
 
-  const tareasPorPersona = useMemo(
-    () =>
-      tareasSemanales.reduce<Record<string, number>>((acumulado, tarea) => {
-        acumulado[tarea.personaAsignadaId] =
-          (acumulado[tarea.personaAsignadaId] ?? 0) + 1;
-        return acumulado;
-      }, {}),
-    [tareasSemanales]
-  );
-
   const arrastreDisponible = ordenActivo === "manual";
 
   const swimlanes = useMemo(() => {
     if (!agruparPorPersona) return null;
-
     const porPersona: Record<string, Tarea[]> = {};
     tareasSemanales.forEach((t) => {
       const pid = t.personaAsignadaId || "sin-asignar";
       if (!porPersona[pid]) porPersona[pid] = [];
       porPersona[pid].push(t);
     });
-
     const lanes = Object.keys(porPersona).map((pid) => {
       const p = personas.find((pe) => pe.identificador === pid);
-      return {
-        id: pid,
-        persona: p,
-        tareas: porPersona[pid],
-      };
+      return { id: pid, persona: p, tareas: porPersona[pid] };
     });
-
     return lanes.sort((a, b) => {
       if (a.id === "sin-asignar") return 1;
       if (b.id === "sin-asignar") return -1;
@@ -249,211 +194,136 @@ export function TableroKanban() {
   }, [agruparPorPersona, tareasSemanales, personas]);
 
   function abrirCreacionRapida() {
-    setBorradorNuevaTarea(crearBorradorVacio("DEFINIDO", personas, semanaActiva));
+    setBorradorNuevaTarea(crearBorradorVacio("DEFINIDO", semanaActiva));
   }
 
-  function guardarNuevaTarea(borrador: BorradorTarea) {
+  async function guardarNuevaTarea(borrador: BorradorTarea) {
     const indiceOrden = obtenerSiguienteIndice(tareas, borrador.estado);
     const nuevaTarea = crearTareaDesdeBorrador(borrador, indiceOrden);
 
-    setTareas((estadoActual) => normalizarIndices([...estadoActual, nuevaTarea]));
+    await guardarTareaLib(nuevaTarea);
+    await recargarTareas();
     setBorradorNuevaTarea(null);
     setMensajeSistema({ tipo: "exito", texto: "Tarea creada correctamente." });
   }
 
-  function guardarEdicionCompleta(tareaActualizada: Tarea) {
-    setTareas((estadoActual) => {
-      const anterior = estadoActual.find(
-        (tarea) => tarea.identificador === tareaActualizada.identificador
-      );
-
-      if (!anterior) {
-        return estadoActual;
-      }
-
-      const resto = estadoActual.filter(
-        (tarea) => tarea.identificador !== tareaActualizada.identificador
-      );
-
-      const indiceOrden =
-        anterior.estado === tareaActualizada.estado
-          ? anterior.indiceOrden
-          : obtenerSiguienteIndice(resto, tareaActualizada.estado);
-
-      return normalizarIndices([
-        ...resto,
-        {
-          ...tareaActualizada,
-          indiceOrden
-        }
-      ]);
-    });
-
+  async function guardarEdicionCompleta(tareaActualizada: Tarea) {
+    await guardarTareaLib(tareaActualizada);
+    await recargarTareas();
     setTareaEnEdicion(null);
     setMensajeSistema({ tipo: "exito", texto: "Cambios guardados." });
   }
 
-  function guardarTituloRapido(identificador: string, titulo: string) {
+  async function guardarTituloRapido(identificador: string, titulo: string) {
     const tituloLimpio = limpiarTextoPlano(titulo, limitesSeguridad.tituloMaximo);
-
     if (!tituloLimpio) {
       setMensajeSistema({ tipo: "error", texto: "El título no puede quedar vacío." });
       return;
     }
-
-    setTareas((estadoActual) =>
-      estadoActual.map((tarea) =>
-        tarea.identificador === identificador
-          ? {
-              ...tarea,
-              titulo: tituloLimpio
-            }
-          : tarea
-      )
-    );
-    setMensajeSistema({ tipo: "exito", texto: "Título actualizado." });
+    const tarea = tareas.find(t => t.identificador === identificador);
+    if (tarea) {
+      await guardarTareaLib({ ...tarea, titulo: tituloLimpio });
+      await recargarTareas();
+      setMensajeSistema({ tipo: "exito", texto: "Título actualizado." });
+    }
   }
 
-  function eliminarTarea(identificador: string) {
-    const confirmar = window.confirm(
-      "Esta acción eliminará la tarea. ¿Quieres continuar?"
-    );
-
-    if (!confirmar) {
-      return;
-    }
-
-    setTareas((estadoActual) =>
-      normalizarIndices(
-        estadoActual.filter((tarea) => tarea.identificador !== identificador)
-      )
-    );
+  async function eliminarTareaBoard(identificador: string) {
+    const confirmar = window.confirm("Esta acción eliminará la tarea. ¿Quieres continuar?");
+    if (!confirmar) return;
+    await eliminarTareaLib(identificador);
+    await recargarTareas();
     setTareaEnEdicion(null);
     setMensajeSistema({ tipo: "exito", texto: "Tarea eliminada." });
   }
 
-  function crearDesdeCargaRapida(configuracion: ConfiguracionCargaRapida) {
+  async function crearDesdeCargaRapida(configuracion: ConfiguracionCargaRapida) {
     const titulos = limitarColeccion(
-      configuracion.lineas
-        .split("\n")
-        .map((linea) =>
-          limpiarTextoPlano(
-            linea.replace(/^[\s*-]+/, ""),
-            limitesSeguridad.tituloMaximo
-          )
-        )
-        .filter(Boolean),
+      configuracion.lineas.split("\n").map(l => limpiarTextoPlano(l.replace(/^[\s*-]+/, ""), limitesSeguridad.tituloMaximo)).filter(Boolean),
       limitesSeguridad.lineasCargaRapidaMaximas
     );
 
     if (titulos.length === 0) {
-      setMensajeSistema({
-        tipo: "error",
-        texto: "Pega al menos una línea con un título de tarea."
-      });
+      setMensajeSistema({ tipo: "error", texto: "Pega al menos una línea con un título de tarea." });
       return;
     }
 
-    setTareas((estadoActual) => {
-      const base = [...estadoActual];
+    let tempTareas = [...tareas];
+    for (const titulo of titulos) {
+      const nt = crearTareaDesdeBorrador({
+        titulo,
+        tipo: configuracion.tipo,
+        prioridad: configuracion.prioridad,
+        complejidad: 1,
+        estado: configuracion.estado,
+        fechaDeseableFin: configuracion.fechaDeseableFin,
+        observaciones: "",
+        enlace: "",
+        personaAsignadaId: obtenerIdentificadorPersonaAleatorio(personas),
+        semanaId: semanaActiva
+      }, obtenerSiguienteIndice(tempTareas, configuracion.estado));
+      await guardarTareaLib(nt);
+      tempTareas.push(nt);
+    }
 
-      titulos.forEach((titulo) => {
-        const nuevaTarea = crearTareaDesdeBorrador(
-          {
-            titulo,
-            tipo: configuracion.tipo,
-            prioridad: configuracion.prioridad,
-            complejidad: 1,
-            estado: configuracion.estado,
-            fechaDeseableFin: configuracion.fechaDeseableFin,
-            observaciones: "",
-            enlace: "",
-            personaAsignadaId: obtenerIdentificadorPersonaAleatorio(personas),
-            semanaId: semanaActiva
-          },
-          obtenerSiguienteIndice(base, configuracion.estado)
-        );
-
-        base.push(nuevaTarea);
-      });
-
-      return normalizarIndices(base);
-    });
-
+    await recargarTareas();
     setModalCargaAbierto(false);
-    setMensajeSistema({
-      tipo: "exito",
-      texto: `${titulos.length} tareas creadas mediante carga rápida.`
-    });
+    setMensajeSistema({ tipo: "exito", texto: `${titulos.length} tareas creadas.` });
   }
 
-  function guardarNuevaPersona(borrador: BorradorPersona) {
+  async function guardarNuevaPersonaBoard(borrador: BorradorPersona) {
     const nuevaPersona = crearPersonaDesdeBorrador(borrador, personas.length);
-
-    setPersonas((estadoActual) => [...estadoActual, nuevaPersona]);
-    setTareas((estadoActual) =>
-      estadoActual.map((tarea) =>
-        !tarea.personaAsignadaId
-          ? { ...tarea, personaAsignadaId: nuevaPersona.identificador }
-          : tarea
-      )
-    );
+    await guardarPersonaLib(nuevaPersona);
+    const ps = await obtenerPersonas();
+    setPersonas(ps);
     setModalPersonaAbierto(false);
     setMensajeSistema({ tipo: "exito", texto: "Persona creada correctamente." });
   }
 
   function iniciarArrastre(identificador: string, origen: EstadoKanban) {
-    if (!arrastreDisponible) {
-      return;
-    }
-
+    if (!arrastreDisponible) return;
     setEstadoArrastre({ identificador, origen });
   }
 
-  function moverASemanaSiguiente() {
+  async function moverASemanaSiguiente() {
     if (seleccionadas.length === 0) return;
     const proximaSemana = obtenerSemanaRelativa(semanaActiva, 1);
     
-    setTareas(actual => {
-      return actual.map(t => {
-        if (seleccionadas.includes(t.identificador)) {
-          return { ...t, semanaId: proximaSemana };
-        }
-        return t;
-      });
-    });
+    for (const id of seleccionadas) {
+      const t = tareas.find(item => item.identificador === id);
+      if (t) await guardarTareaLib({ ...t, semanaId: proximaSemana });
+    }
     
+    await recargarTareas();
     setSeleccionadas([]);
-    setMensajeSistema({ tipo: "exito", texto: `${seleccionadas.length} tareas movidas a la semana siguiente.` });
+    setMensajeSistema({ tipo: "exito", texto: "Tareas movidas." });
   }
 
-  function eliminarSeleccionadas() {
+  async function eliminarSeleccionadas() {
     if (seleccionadas.length === 0) return;
     if (!confirm(`¿Estás seguro de eliminar ${seleccionadas.length} tareas?`)) return;
-    setTareas(actual => actual.filter(t => !seleccionadas.includes(t.identificador)));
+    for (const id of seleccionadas) await eliminarTareaLib(id);
+    await recargarTareas();
     setSeleccionadas([]);
-    setMensajeSistema({ tipo: "exito", texto: `${seleccionadas.length} tareas eliminadas.` });
+    setMensajeSistema({ tipo: "exito", texto: "Tareas eliminadas." });
   }
 
-  function duplicarSeleccionadas() {
+  async function duplicarSeleccionadas() {
     if (seleccionadas.length === 0) return;
-    setTareas(actual => {
-      const nuevas: Tarea[] = [];
-      actual.forEach(t => {
-        nuevas.push(t);
-        if (seleccionadas.includes(t.identificador)) {
-          nuevas.push({ 
-            ...t, 
-            identificador: generarIdentificador(), 
-            titulo: `${t.titulo} (copia)`,
-            fechaCreacion: new Date().toISOString()
-          });
-        }
-      });
-      return nuevas;
-    });
+    for (const id of seleccionadas) {
+      const t = tareas.find(item => item.identificador === id);
+      if (t) {
+        await guardarTareaLib({ 
+          ...t, 
+          identificador: generarIdentificador(), 
+          titulo: `${t.titulo} (copia)`,
+          fechaCreacion: new Date().toISOString()
+        });
+      }
+    }
+    await recargarTareas();
     setSeleccionadas([]);
-    setMensajeSistema({ tipo: "exito", texto: `${seleccionadas.length} tareas duplicadas.` });
+    setMensajeSistema({ tipo: "exito", texto: "Tareas duplicadas." });
   }
 
   function finalizarArrastre() {
@@ -462,21 +332,14 @@ export function TableroKanban() {
   }
 
   function actualizarDestino(destino: DestinoArrastre) {
-    if (!arrastreDisponible || !estadoArrastre) {
-      return;
-    }
-
+    if (!arrastreDisponible || !estadoArrastre) return;
     setDestinoDrop(destino);
   }
 
-  function completarDrop() {
-    if (!arrastreDisponible || !estadoArrastre || !destinoDrop) {
-      return;
-    }
-
-    setTareas((estadoActual) =>
-      moverTarea(estadoActual, estadoArrastre.identificador, destinoDrop)
-    );
+  async function completarDrop() {
+    if (!arrastreDisponible || !estadoArrastre || !destinoDrop) return;
+    await moverTareaLib(estadoArrastre.identificador, destinoDrop);
+    await recargarTareas();
     setMensajeSistema({ tipo: "exito", texto: "Tarea reubicada." });
     setEstadoArrastre(null);
     setDestinoDrop(null);
@@ -490,8 +353,15 @@ export function TableroKanban() {
     setSemanaActiva(obtenerSemanaId());
   }
 
-  if (!hidratado) {
-    return <div className="min-h-screen bg-slate-50" />;
+  if (!hidratado || cargando) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-sky-500 border-t-transparent"></div>
+          <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Cargando Tablero...</span>
+        </div>
+      </div>
+    );
   }
 
   const infoSemana = obtenerInfoSemana(semanaActiva);
@@ -504,10 +374,10 @@ export function TableroKanban() {
           <div className="relative flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
             <div className="max-w-3xl">
               <span className="inline-flex rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-sky-700">
-                miniKanbanPlus
+                Team Edition • Supabase
               </span>
               <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 md:text-4xl">
-                gestor básico de tareas
+                gestor de tareas colaborativo
               </h1>
             </div>
 
@@ -605,14 +475,13 @@ export function TableroKanban() {
 
           {!arrastreDisponible ? (
             <div className="relative mt-5 rounded-2xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-900">
-              El drag & drop se desactiva mientras el tablero usa un orden distinto
-              al manual.
+              El drag & drop se desactiva mientras el tablero usa un orden distinto al manual.
             </div>
           ) : null}
         </section>
 
         {/* Barra de Acciones en Lote (Flotante) */}
-        {seleccionadas.length > 0 && hidratado && (
+        {seleccionadas.length > 0 && (
           <div className="fixed bottom-8 left-1/2 z-[60] -translate-x-1/2 flex items-center gap-4 rounded-3xl border border-slate-200 bg-white px-6 py-4 shadow-2xl">
             <div className="flex flex-col border-r border-slate-100 pr-4">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Seleccionadas</span>
@@ -646,7 +515,6 @@ export function TableroKanban() {
             </div>
           </div>
         )}
-
 
         <section className="mt-6 flex-1 overflow-x-auto pb-4">
           {agruparPorPersona && swimlanes ? (
@@ -685,7 +553,7 @@ export function TableroKanban() {
                   <div className="flex flex-1 gap-5">
                     {columnas.map((columna) => {
                       const tareasDeColumnaYPersona = columna.tareas.filter(
-                        (t) => (t.personaAsignadaId || "sin-asignar") === lane.id
+                        (t: Tarea) => (t.personaAsignadaId || "sin-asignar") === lane.id
                       );
                       return (
                         <ColumnaKanban
@@ -757,7 +625,7 @@ export function TableroKanban() {
           personas={personas}
           onCerrar={() => setTareaEnEdicion(null)}
           onGuardarEdicion={guardarEdicionCompleta}
-          onEliminar={eliminarTarea}
+          onEliminar={eliminarTareaBoard}
         />
       ) : null}
 
@@ -774,7 +642,7 @@ export function TableroKanban() {
       {modalPersonaAbierto ? (
         <ModalPersona
           onCerrar={() => setModalPersonaAbierto(false)}
-          onGuardar={guardarNuevaPersona}
+          onGuardar={guardarNuevaPersonaBoard}
         />
       ) : null}
 
