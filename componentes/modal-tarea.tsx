@@ -35,6 +35,8 @@ type PropiedadesEditar = PropiedadesBase & {
   tarea: Tarea;
   onGuardarEdicion: (tarea: Tarea) => void;
   onEliminar: (identificador: string) => void;
+  alPromoverASprint?: (tarea: Tarea) => void;
+  alMoverABacklog?: (tarea: Tarea) => void;
 };
 
 type PropiedadesModalTarea = PropiedadesCrear | PropiedadesEditar;
@@ -54,7 +56,9 @@ const etiquetasEstado: Record<EstadoKanban, string> = {
   DEFINIDO: "Definido",
   EN_CURSO: "En curso",
   BLOQUEADO: "Bloqueado",
-  TERMINADO: "Terminado"
+  TERMINADO: "Terminado",
+  IDEA: "Idea (Sin fecha ni responsable)",
+  BACKLOG: "Backlog (Priorizado, sin fecha)"
 };
 
 export function ModalTarea(propiedades: PropiedadesModalTarea) {
@@ -77,7 +81,8 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
     
     // Modo crear
     const borrador = { ...propiedades.borrador };
-    if (!borrador.personaAsignadaId && propiedades.personas.length > 0) {
+    // Michael: Las ideas no necesitan dueño inicial
+    if (borrador.estado !== "IDEA" && !borrador.personaAsignadaId && propiedades.personas.length > 0) {
       borrador.personaAsignadaId = propiedades.personas[0].identificador;
     }
     return borrador;
@@ -111,8 +116,9 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
       return;
     }
 
-    if (propiedades.personas.length > 0 && !formulario.personaAsignadaId) {
-      setError("Debes asignar una persona responsable.");
+    // Las ideas se permiten sin asignar
+    if (formulario.estado !== "IDEA" && propiedades.personas.length > 0 && !formulario.personaAsignadaId) {
+      setError("Debes asignar una persona responsable para tareas fuera de IDEAS.");
       return;
     }
 
@@ -273,6 +279,7 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
                 }
                 className="campo-formulario font-bold"
               >
+                <option value="">(Sin asignar - Solo Ideas)</option>
                 {propiedades.personas.map((persona) => (
                   <option key={persona.identificador} value={persona.identificador}>
                     {persona.nombre} ({persona.area})
@@ -334,15 +341,35 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
         {/* Footer del Modal */}
         <div className="border-t border-slate-100 bg-slate-50/50 p-6 md:p-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
+            <div className="flex flex-wrap gap-2">
               {propiedades.modo === "editar" && (
-                <button
-                  type="button"
-                  onClick={() => propiedades.onEliminar(propiedades.tarea.identificador)}
-                  className="w-full rounded-2xl bg-rose-50 px-6 py-4 text-sm font-black text-rose-600 transition hover:bg-rose-100 sm:w-auto"
-                >
-                  🗑️ Eliminar Tarea
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => propiedades.onEliminar(propiedades.tarea.identificador)}
+                    className="flex-1 rounded-2xl bg-rose-50 px-6 py-4 text-sm font-black text-rose-600 transition hover:bg-rose-100 sm:flex-none"
+                  >
+                    🗑️ Eliminar
+                  </button>
+                  {propiedades.tarea.estado === "BACKLOG" && propiedades.alPromoverASprint && (
+                    <button
+                      type="button"
+                      onClick={() => propiedades.alPromoverASprint!(propiedades.tarea)}
+                      className="flex-1 rounded-2xl bg-sky-600 px-6 py-4 text-sm font-black text-white shadow-xl shadow-sky-500/20 transition hover:bg-sky-500 sm:flex-none"
+                    >
+                      🏎️ Pasar a Sprint
+                    </button>
+                  )}
+                  {(propiedades.tarea.estado !== "IDEA" && propiedades.tarea.estado !== "BACKLOG") && propiedades.alMoverABacklog && (
+                    <button
+                      type="button"
+                      onClick={() => propiedades.alMoverABacklog!(propiedades.tarea)}
+                      className="flex-1 rounded-2xl bg-indigo-50 px-6 py-4 text-sm font-black text-indigo-600 transition hover:bg-indigo-100 sm:flex-none"
+                    >
+                      📦 Retornar al Backlog
+                    </button>
+                  )}
+                </>
               )}
             </div>
 

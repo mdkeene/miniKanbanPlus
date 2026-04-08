@@ -2,7 +2,9 @@ export const estadosKanban = [
   "DEFINIDO",
   "EN_CURSO",
   "BLOQUEADO",
-  "TERMINADO"
+  "TERMINADO",
+  "IDEA",
+  "BACKLOG"
 ] as const;
 
 export type EstadoKanban = (typeof estadosKanban)[number];
@@ -73,8 +75,6 @@ export type Tarea = {
 };
 
 export type BorradorTarea = Omit<Tarea, "identificador" | "fechaCreacion" | "indiceOrden">;
-
-export type FrecuenciaTarea = "Semanal" | "Quincenal" | "Mensual";
 
 export type TareaPeriodica = {
   identificador: string;

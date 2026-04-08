@@ -62,7 +62,9 @@ const etiquetasEstado: Record<EstadoKanban, string> = {
   DEFINIDO: "Definido",
   EN_CURSO: "En curso",
   BLOQUEADO: "Bloqueado",
-  TERMINADO: "Terminado"
+  TERMINADO: "Terminado",
+  IDEA: "Idea",
+  BACKLOG: "Backlog"
 };
 
 const estilosEstado: Record<
@@ -87,6 +89,16 @@ const estilosEstado: Record<
   TERMINADO: {
     fondo: "bg-emerald-50",
     borde: "border-emerald-400",
+    brillo: "bg-white"
+  },
+  IDEA: {
+    fondo: "bg-violet-50",
+    borde: "border-violet-300",
+    brillo: "bg-white"
+  },
+  BACKLOG: {
+    fondo: "bg-indigo-50",
+    borde: "border-indigo-400",
     brillo: "bg-white"
   }
 };
@@ -247,7 +259,11 @@ export function TableroKanban() {
       const coincideSemana = t.semanaId === semanaActiva;
       const coincideProyecto = filtroProyecto === "todos" || t.proyectoId === filtroProyecto;
       const coincidePersona = filtroPersona === "todos" || (t.personaAsignadaId || "sin-asignar") === filtroPersona;
-      return coincideSemana && coincideProyecto && coincidePersona;
+      
+      // Excluir estados estratégicos del tablero semanal
+      const esEstadoEstrategico = t.estado === "IDEA" || t.estado === "BACKLOG";
+      
+      return coincideSemana && coincideProyecto && coincidePersona && !esEstadoEstrategico;
     });
   }, [tareas, semanaActiva, filtroProyecto, filtroPersona]);
 
@@ -324,7 +340,14 @@ export function TableroKanban() {
     await eliminarTareaLib(identificador);
     await recargarTareas();
     setTareaEnEdicion(null);
-    setMensajeSistema({ tipo: "exito", texto: "Tarea eliminada." });
+    setMensajeSistema({ texto: "Título acualizado", tipo: "exito" });
+  }
+
+  async function manejarMoverABacklog(tarea: Tarea) {
+    const tareaActualizada = { ...tarea, estado: "BACKLOG" as const };
+    await guardarTareaLib(tareaActualizada);
+    setTareaEnEdicion(null);
+    setMensajeSistema({ texto: "Tarea enviada al Backlog", tipo: "exito" });
   }
 
   async function crearDesdeCargaRapida(configuracion: ConfiguracionCargaRapida) {
@@ -745,6 +768,7 @@ export function TableroKanban() {
           onCerrar={() => setTareaEnEdicion(null)}
           onGuardarEdicion={guardarEdicionCompleta}
           onEliminar={eliminarTareaBoard}
+          alMoverABacklog={manejarMoverABacklog}
         />
       )}
 
