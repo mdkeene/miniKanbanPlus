@@ -103,18 +103,17 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
   const estadosDisponibles = estadosKanban.filter(estado => {
     if (!propiedades.modoBloqueado) return true;
     
-    // Si estamos editando y la tarea ya estaba en el tablero semanal, permitimos todo el Kanban
-    if (propiedades.modo === "editar" && esEstadoKanban(propiedades.tarea.estado)) {
-      return true;
+    const esSemanasEstrategia = propiedades.modo === "editar" 
+      ? propiedades.tarea.semanaId === "ESTRATEGIA"
+      : propiedades.borrador.semanaId === "ESTRATEGIA";
+
+    // Si estamos en el Backlog/Estrategia durante el bloqueo, restringimos a Backlog/Idea
+    if (esSemanasEstrategia) {
+      return ["IDEA", "BACKLOG"].includes(estado);
     }
 
-    // Para tareas nuevas o tareas que están en Backlog/Idea, solo permitimos Backlog/Idea
-    // Excepción: Si es una Tarea Urgente que se está creando (ya viene como DEFINIDO)
-    if (propiedades.modo === "crear" && formulario.esUrgente) {
-      return esEstadoKanban(estado);
-    }
-
-    return ["IDEA", "BACKLOG"].includes(estado);
+    // Si estamos en el Tablero de la Semana, permitimos todo (será Urgente)
+    return true;
   });
 
   function guardar() {
@@ -222,6 +221,16 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
                     if (deKanbanABacklog) actualizarCampo("esDevuelto", true);
                     if (deKanbanAIdea) actualizarCampo("esSpillover", true);
                   }
+
+                  // Si se crea una tarea en el tablero semanal durante el bloqueo, marcar como Urgente
+                  if (propiedades.modo === "crear" && propiedades.modoBloqueado) {
+                    const esSemanasEstrategia = propiedades.borrador.semanaId === "ESTRATEGIA";
+                    if (!esSemanasEstrategia && esEstadoKanban(nuevoEstado)) {
+                      actualizarCampo("esUrgente", true);
+                      actualizarCampo("prioridad", "URGENTE");
+                    }
+                  }
+
                   actualizarCampo("estado", nuevoEstado);
                 }}
                 className="campo-formulario"
