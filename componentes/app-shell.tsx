@@ -145,7 +145,7 @@ export function AppShell({
 
   const tabs = [
     { id: "kanban", nombre: "Kanban", icono: "📅" },
-    { id: "backlog", nombre: "Estrategia", icono: "📦" },
+    { id: "backlog", nombre: "Backlog", icono: "📦" },
     { id: "proyectos", nombre: "Proyectos", icono: "🚀" },
     { id: "usuarios", nombre: "Usuarios", icono: "👥" },
     { id: "dashboard", nombre: "Dashboard", icono: "📊" }
