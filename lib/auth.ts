@@ -57,7 +57,17 @@ export async function login(email: string, clave: string): Promise<Sesion | null
 
   // SECURITY CHECK: Si después de todo no hay perfil, es que NO está invitado.
   if (!profile) {
-    console.warn("Acceso denegado: Email no invitado.");
+    console.warn("Acceso denegado: Perfil no encontrado para este usuario.");
+    await supabase.auth.signOut();
+    return null;
+  }
+
+  // DOUBLE-CHECK FIREWALL: Comparación estricta de emails para evitar typos
+  const emailAuth = data.session.user.email?.toLowerCase();
+  const emailInvitado = profile.email?.toLowerCase();
+
+  if (emailAuth !== emailInvitado) {
+    console.error("ALERTA DE SEGURIDAD: Email de Auth no coincide con Email de Invitación.", { emailAuth, emailInvitado });
     await supabase.auth.signOut();
     return null;
   }
@@ -122,7 +132,20 @@ export async function obtenerSesion(): Promise<Sesion | null> {
 
   // SECURITY FIREWALL: Si hay sesión de Auth pero NO hay perfil invitado, expulsión inmediata.
   if (!profile) {
-    console.error("Sesión huérfana detectada. Expulsando...");
+    console.error("Sesión huérfana detectada o no invitado. Expulsando...");
+    await supabase.auth.signOut();
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(CLAVE_SESION);
+    }
+    return null;
+  }
+
+  // DOUBLE-CHECK FIREWALL: Comparación estricta de emails
+  const emailAuth = session.user.email?.toLowerCase();
+  const emailInvitado = profile.email?.toLowerCase();
+
+  if (emailAuth !== emailInvitado) {
+    console.error("ALERTA: Se detectó un desajuste de identidad en la sesión.", { emailAuth, emailInvitado });
     await supabase.auth.signOut();
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(CLAVE_SESION);
