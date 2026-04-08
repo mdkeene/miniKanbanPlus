@@ -25,6 +25,7 @@ type PropiedadesColumnaKanban = {
   seleccionadas: string[];
   alCambiarSeleccion: (identificador: string, seleccionada: boolean) => void;
   modoBloqueado?: boolean;
+  claseAncho?: string;
 };
 
 export function ColumnaKanban({
@@ -45,14 +46,15 @@ export function ColumnaKanban({
   onSoltar,
   seleccionadas,
   alCambiarSeleccion,
-  modoBloqueado = false
+  modoBloqueado = false,
+  claseAncho
 }: PropiedadesColumnaKanban) {
   const destinoCoincide = destinoDrop?.estado === estado && destinoDrop?.personaId === personaId;
   const mostrarHuecoFinal = destinoCoincide && destinoDrop.indice === tareas.length;
 
   return (
     <section
-      className={`flex w-[340px] shrink-0 flex-col rounded-[28px] border-2 ${estilos.borde} ${estilos.brillo} p-4 transition-all md:w-[360px] 2xl:w-[420px]`}
+      className={`flex ${claseAncho || "w-[340px] md:w-[360px] 2xl:w-[420px]"} shrink-0 flex-col rounded-[28px] border-2 ${estilos.borde} ${estilos.brillo} p-4 transition-all`}
       onDragOver={(evento) => {
         if (!arrastreDisponible || !estadoArrastre) {
           return;

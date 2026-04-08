@@ -374,6 +374,7 @@ export function TabBacklog() {
                           );
                         }}
                         modoBloqueado={modoBloqueado}
+                        claseAncho="w-full"
                       />
                     </div>
 
@@ -405,6 +406,7 @@ export function TabBacklog() {
                           );
                         }}
                         modoBloqueado={modoBloqueado}
+                        claseAncho="w-full"
                       />
                     </div>
                   </div>
@@ -413,9 +415,9 @@ export function TabBacklog() {
             ))}
           </div>
         ) : (
-          <div className="flex gap-8 h-full min-w-max pb-4">
+          <div className="flex gap-8 h-full pb-4">
             {/* Columna de Ideas (30%) */}
-            <div className="flex flex-col w-[30vw] min-w-[320px]">
+            <div className="flex flex-col flex-[3] min-w-[320px]">
                <div className="mb-4 flex items-center justify-between px-2">
                   <span className="text-xs font-black uppercase tracking-widest text-violet-400">Captura de Ideas</span>
                   <span className="px-2 py-0.5 rounded-md bg-violet-100 text-violet-600 text-[10px] font-black">{ideas.length}</span>
@@ -442,11 +444,12 @@ export function TabBacklog() {
                     );
                   }}
                   modoBloqueado={modoBloqueado}
+                  claseAncho="w-full"
                />
             </div>
 
             {/* Columna de Backlog (70%) */}
-            <div className="flex flex-col w-[60vw] min-w-[600px]">
+            <div className="flex flex-col flex-[7] min-w-[600px]">
                <div className="mb-4 flex items-center justify-between px-2">
                   <span className="text-xs font-black uppercase tracking-widest text-indigo-400">Planificación Estratégica</span>
                   <span className="px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-600 text-[10px] font-black">{backlog.length}</span>
@@ -474,6 +477,7 @@ export function TabBacklog() {
                       );
                     }}
                     modoBloqueado={modoBloqueado}
+                    claseAncho="w-full"
                  />
                  
                  {/* Overlay informativo para Backlog */}
