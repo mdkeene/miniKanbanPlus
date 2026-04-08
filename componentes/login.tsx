@@ -16,6 +16,14 @@ export function PaginaLogin({ alEntrar }: PaginaLoginProps) {
   const [cargando, setCargando] = useState(false);
   const [estado, setEstado] = useState<EstadoLogin>("idle");
   const [error, setError] = useState("");
+  const [welcomeGif, setWelcomeGif] = useState<string | null>(null);
+
+  const welcomeGifs = [
+    "https://media.giphy.com/media/mCbUi0FyYhHHhutEV8/giphy.gif",
+    "https://media.giphy.com/media/XD9o33QG9BoMis7iM4/giphy.gif",
+    "https://media.giphy.com/media/ggtpYV17RP9lTbc542/giphy.gif",
+    "https://media.giphy.com/media/VPcVGQVX5WOMU/giphy.gif"
+  ];
 
   async function manejarAcceso(e: React.FormEvent) {
     e.preventDefault();
@@ -27,8 +35,9 @@ export function PaginaLogin({ alEntrar }: PaginaLoginProps) {
         // Flujo de activación
         const sesion = await registrar(usuario, clave);
         if (sesion) {
+          setWelcomeGif(welcomeGifs[Math.floor(Math.random() * welcomeGifs.length)]);
           setEstado("exito");
-          setTimeout(() => alEntrar(sesion), 1500);
+          setTimeout(() => alEntrar(sesion), 3000);
         }
       } else {
         // Flujo de login normal
@@ -69,10 +78,19 @@ export function PaginaLogin({ alEntrar }: PaginaLoginProps) {
 
         <div className="bg-white/40 backdrop-blur-xl border border-white rounded-[32px] p-8 shadow-2xl shadow-slate-200/50">
           {estado === "exito" ? (
-             <div className="text-center py-10 space-y-4">
-                <div className="text-4xl animate-bounce">🚀</div>
-                <h3 className="text-xl font-black text-slate-900">¡Bienvenido al Equipo!</h3>
-                <p className="text-sm font-medium text-slate-500">Activando tu espacio de trabajo...</p>
+             <div className="text-center py-6 space-y-6 animate-in zoom-in duration-500">
+                <div className="relative mx-auto w-48 h-48 md:w-56 md:h-56">
+                  <div className="absolute -inset-4 bg-sky-500/20 blur-2xl rounded-full animate-pulse" />
+                  <img 
+                    src={welcomeGif || ""} 
+                    className="relative w-full h-full object-cover rounded-[32px] border-4 border-white shadow-2xl" 
+                    alt="Welcome" 
+                  />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">¡Bienvenido al Equipo!</h3>
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-sky-500">Activando tu espacio de trabajo...</p>
+                </div>
              </div>
           ) : (
             <form className="space-y-6" onSubmit={manejarAcceso}>

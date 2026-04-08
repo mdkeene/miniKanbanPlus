@@ -149,6 +149,8 @@ export function TableroKanban() {
   const [usuarioActual, setUsuarioActual] = useState<Persona | null>(null);
   const [celebracionGif, setCelebracionGif] = useState<string | null>(null);
   const [accionEnCursoGif, setAccionEnCursoGif] = useState<string | null>(null);
+  const [accionBloqueadoGif, setAccionBloqueadoGif] = useState<string | null>(null);
+  const [accionEjecucionGif, setAccionEjecucionGif] = useState<string | null>(null);
 
   useEffect(() => {
     async function inicializar() {
@@ -283,6 +285,31 @@ export function TableroKanban() {
     }, 2800);
   }
 
+  // Función para cuando una tarea se bloquea
+  function lanzarAccionBloqueado() {
+    const gifsBloqueado = [
+      "https://media.giphy.com/media/H6cmWzp6LGFvqjidB7/giphy.gif",
+      "https://media.giphy.com/media/QPQ3xlJhqR1BXl89RG/giphy.gif",
+      "https://media.giphy.com/media/FoH28ucxZFJZu/giphy.gif"
+    ];
+    const randomGif = gifsBloqueado[Math.floor(Math.random() * gifsBloqueado.length)];
+    setAccionBloqueadoGif(randomGif);
+    setTimeout(() => setAccionBloqueadoGif(null), 3500);
+  }
+
+  // Función para cuando se bloquea el tablero para ejecución
+  function lanzarAccionEjecucion() {
+    const gifsEjecucion = [
+      "https://media.giphy.com/media/NpsofYoHrC8mg8DjOu/giphy.gif",
+      "https://media.giphy.com/media/W3Ch3vjHi5FGefDT0G/giphy.gif",
+      "https://media.giphy.com/media/OYEWmemzoX3LOTRkE1/giphy.gif",
+      "https://media.giphy.com/media/3o6Zt7YY1Acfyp5rYA/giphy.gif"
+    ];
+    const randomGif = gifsEjecucion[Math.floor(Math.random() * gifsEjecucion.length)];
+    setAccionEjecucionGif(randomGif);
+    setTimeout(() => setAccionEjecucionGif(null), 4000);
+  }
+
   useEffect(() => {
     if (!mensajeSistema) return;
     const temporizador = window.setTimeout(() => setMensajeSistema(null), 2400);
@@ -381,6 +408,10 @@ export function TableroKanban() {
 
     if (tareaActualizada.estado === "EN_CURSO" && tareaAnterior?.estado === "DEFINIDO") {
       lanzarAccionEnCurso();
+    }
+
+    if (tareaActualizada.estado === "BLOQUEADO" && tareaAnterior?.estado !== "BLOQUEADO") {
+      lanzarAccionBloqueado();
     }
   }
 
@@ -527,6 +558,11 @@ export function TableroKanban() {
     if (destinoDrop.estado === "EN_CURSO" && estadoArrastre.origen === "DEFINIDO") {
       lanzarAccionEnCurso();
     }
+
+    // ROADBLOCK: Cuando algo se bloquea
+    if (destinoDrop.estado === "BLOQUEADO" && estadoArrastre.origen !== "BLOQUEADO") {
+      lanzarAccionBloqueado();
+    }
     
     // SPILLOVER LOGIC: Si el tablero está bloqueado y movemos de Kanban a Backlog/Idea
     const esEstadoKanbanOriginal = ["DEFINIDO", "EN_CURSO", "BLOQUEADO", "TERMINADO"].includes(estadoArrastre.origen);
@@ -607,6 +643,7 @@ export function TableroKanban() {
                 await actualizarConfigTablero(nuevoEstado);
                 setModoBloqueado(nuevoEstado);
                 setMensajeSistema({ tipo: "exito", texto: nuevoEstado ? "Tablero BLOQUEADO para ejecución." : "Tablero abierto para PLANIFICACIÓN." });
+                if (nuevoEstado) lanzarAccionEjecucion();
               }}
               className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${
                 modoBloqueado 
@@ -988,6 +1025,49 @@ export function TableroKanban() {
                <div className="bg-white px-10 py-4 rounded-2xl shadow-2xl border-2 border-amber-100 flex flex-col items-center gap-1">
                   <span className="text-3xl font-black text-slate-900 tracking-tighter uppercase">¡A POR ELLO!</span>
                   <span className="text-xs font-bold text-amber-600 uppercase tracking-widest">Progreso en marcha ⚡</span>
+               </div>
+             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Overlay de Roadblock - Tarea Bloqueada */}
+      {accionBloqueadoGif && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[2px] animate-in fade-in duration-500" />
+          <div className="relative animate-in zoom-in duration-500">
+             <div className="absolute -inset-10 bg-rose-500/30 blur-3xl rounded-full animate-pulse" />
+             <div className="relative flex flex-col items-center gap-6">
+               <img 
+                 src={accionBloqueadoGif} 
+                 alt="Problema" 
+                 className="h-64 md:h-[350px] w-auto rounded-[32px] shadow-2xl border-8 border-white object-cover"
+               />
+               <div className="bg-white px-10 py-4 rounded-2xl shadow-2xl border-2 border-rose-100 flex flex-col items-center gap-1">
+                  <span className="text-3xl font-black text-slate-900 tracking-tighter uppercase">¡TENEMOS UN PROBLEMA!</span>
+                  <span className="text-xs font-bold text-rose-600 uppercase tracking-widest">Algo ha detenido el progreso 🛑</span>
+               </div>
+             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Overlay de Ejecución - Tablero Bloqueado */}
+      {accionEjecucionGif && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xl animate-in fade-in duration-700" />
+          <div className="relative animate-in zoom-in slide-in-from-top-20 duration-500">
+             <div className="absolute -inset-20 bg-sky-500/20 blur-[100px] rounded-full animate-pulse" />
+             <div className="relative flex flex-col items-center gap-8">
+               <img 
+                 src={accionEjecucionGif} 
+                 alt="Ejecución" 
+                 className="h-80 md:h-[450px] w-auto rounded-[40px] shadow-2xl border-4 border-slate-800 object-cover"
+               />
+               <div className="flex flex-col items-center gap-2">
+                  <span className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase text-center drop-shadow-2xl">MODO EJECUCIÓN ACTIVADO</span>
+                  <div className="h-1 w-32 bg-sky-500 rounded-full animate-width duration-1000" />
+                  <span className="text-sm font-bold text-sky-400 uppercase tracking-[0.3em] mt-2">No hay vuelta atrás. Concéntrate.</span>
                </div>
              </div>
           </div>
