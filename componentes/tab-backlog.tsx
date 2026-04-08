@@ -30,15 +30,20 @@ export function TabBacklog() {
 
   useEffect(() => {
     async function cargarDatos() {
-      const [ts, ps, prjs] = await Promise.all([
-        obtenerTareas(),
-        obtenerPersonas(),
-        obtenerProyectos()
-      ]);
-      setTareas(ts);
-      setPersonas(ps);
-      setProyectos(prjs);
-      setCargando(false);
+      try {
+        const [ts, ps, prjs] = await Promise.all([
+          obtenerTareas(),
+          obtenerPersonas(),
+          obtenerProyectos()
+        ]);
+        setTareas(ts || []);
+        setPersonas(ps || []);
+        setProyectos(prjs || []);
+      } catch (error) {
+        console.error("Error cargando datos del Backlog:", error);
+      } finally {
+        setCargando(false);
+      }
     }
     cargarDatos();
 
