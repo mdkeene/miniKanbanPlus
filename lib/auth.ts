@@ -34,9 +34,16 @@ export async function login(email: string, clave: string): Promise<Sesion | null
     .eq('id', data.session.user.id)
     .single();
 
+  // Auditoría Nivel 3: ¿Qué estamos encontrando?
+  if (profileData) {
+    console.info("⚡ AUDITORÍA DE SEGURIDAD (Login): Perfil encontrado por ID.");
+    console.table(profileData);
+  }
+
   let profile = profileData;
 
-  // Smart Link: Si no hay perfil por ID, buscar por Email
+  // Smart Link Check: Comentado temporalmente por seguridad extrema Nivel 3
+  /*
   if (!profile && data.session.user.email) {
     const { data: profileByEmail } = await supabase
       .from('profiles')
@@ -45,29 +52,24 @@ export async function login(email: string, clave: string): Promise<Sesion | null
       .single();
 
     if (profileByEmail) {
-      // Vincular el perfil manualmente creado con el UID de Auth
-      await supabase
-        .from('profiles')
-        .update({ id: data.session.user.id })
-        .eq('id', profileByEmail.id);
-      
-      profile = { ...profileByEmail, id: data.session.user.id };
+      console.warn("🛡️ VINCULACIÓN AUTOMÁTICA DETECTADA:", profileByEmail.email);
     }
   }
+  */
 
-  // SECURITY CHECK: Si después de todo no hay perfil, es que NO está invitado.
+  // SECURITY CHECK: Si después de todo no hay perfil por ID, es que NO está invitado.
   if (!profile) {
-    console.warn("Acceso denegado: Perfil no encontrado para este usuario.");
+    console.error("⛔ ACCESO DENEGADO: No existe un perfil vinculado a este ID de Auth.", { email: data.session.user.email });
     await supabase.auth.signOut();
     return null;
   }
 
   // DOUBLE-CHECK FIREWALL: Comparación estricta de emails para evitar typos
-  const emailAuth = data.session.user.email?.toLowerCase();
-  const emailInvitado = profile.email?.toLowerCase();
+  const emailAuth = data.session.user.email?.toLowerCase().trim();
+  const emailInvitado = profile.email?.toLowerCase().trim();
 
   if (emailAuth !== emailInvitado) {
-    console.error("ALERTA DE SEGURIDAD: Email de Auth no coincide con Email de Invitación.", { emailAuth, emailInvitado });
+    console.error("🚨 ALERTA DE SEGURIDAD: Discrepancia crítica de identidad.", { auth: emailAuth, invitado: emailInvitado });
     await supabase.auth.signOut();
     return null;
   }
@@ -111,9 +113,16 @@ export async function obtenerSesion(): Promise<Sesion | null> {
     .eq('id', session.user.id)
     .single();
 
+  // Auditoría Nivel 3: Recuperación de Sesión
+  if (profileData) {
+    console.info("⚡ AUDITORÍA DE SEGURIDAD (ObtenerSesion): Perfil activo.");
+    console.table(profileData);
+  }
+
   let profile = profileData;
 
-  // Smart Link Check en la sesión continuada (por si se acaba de registrar)
+  // Smart Link Check: Comentado temporalmente por seguridad extrema Nivel 3
+  /*
   if (!profile && session.user.email) {
     const { data: profileByEmail } = await supabase
       .from('profiles')
@@ -122,13 +131,10 @@ export async function obtenerSesion(): Promise<Sesion | null> {
       .single();
 
     if (profileByEmail) {
-      await supabase
-        .from('profiles')
-        .update({ id: session.user.id })
-        .eq('id', profileByEmail.id);
-      profile = { ...profileByEmail, id: session.user.id };
+      profile = profileByEmail;
     }
   }
+  */
 
   // SECURITY FIREWALL: Si hay sesión de Auth pero NO hay perfil invitado, expulsión inmediata.
   if (!profile) {
@@ -141,8 +147,8 @@ export async function obtenerSesion(): Promise<Sesion | null> {
   }
 
   // DOUBLE-CHECK FIREWALL: Comparación estricta de emails
-  const emailAuth = session.user.email?.toLowerCase();
-  const emailInvitado = profile.email?.toLowerCase();
+  const emailAuth = session.user.email?.toLowerCase().trim();
+  const emailInvitado = profile.email?.toLowerCase().trim();
 
   if (emailAuth !== emailInvitado) {
     console.error("ALERTA: Se detectó un desajuste de identidad en la sesión.", { emailAuth, emailInvitado });
