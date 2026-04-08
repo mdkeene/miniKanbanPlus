@@ -147,6 +147,7 @@ export function TableroKanban() {
   const [swimlanesExpandidos, setSwimlanesExpandidos] = useState<string[]>([]);
   const [modoBloqueado, setModoBloqueado] = useState(false);
   const [usuarioActual, setUsuarioActual] = useState<Persona | null>(null);
+  const [celebracionGif, setCelebracionGif] = useState<string | null>(null);
 
   useEffect(() => {
     async function inicializar() {
@@ -471,6 +472,18 @@ export function TableroKanban() {
 
   async function completarDrop() {
     if (!arrastreDisponible || !estadoArrastre || !destinoDrop) return;
+
+    // CELEBRATION LOGIC: Si la tarea va a TERMINADO
+    if (destinoDrop.estado === "TERMINADO" && estadoArrastre.origen !== "TERMINADO") {
+      const gifs = [
+        "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExamNsaWUwYWs4azZtYTFkdXk5ZnplNWQ3Nnp2Y2p2cXZvOTZuYnIzYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l2QEdoFAgf1zmhEK4/giphy.gif",
+        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3gxOG11cDJ0NTVpOTI2Zms3OG05enFvZmd1MHVsdGcweG1zcHZrciZlcD12MV9naWZzX3NlYXJjaCZjdD1n/sfxlOSTXORjOobH2QG/giphy.gif",
+        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3gxOG11cDJ0NTVpOTI2Zms3OG05enFvZmd1MHVsdGcweG1zcHZrciZlcD12MV9naWZzX3NlYXJjaCZjdD1n/5LcfoE5u34kfNvW1Oi/giphy.gif"
+      ];
+      const randomGif = gifs[Math.floor(Math.random() * gifs.length)];
+      setCelebracionGif(randomGif);
+      setTimeout(() => setCelebracionGif(null), 3000);
+    }
     
     // SPILLOVER LOGIC: Si el tablero está bloqueado y movemos de Kanban a Backlog/Idea
     const esEstadoKanbanOriginal = ["DEFINIDO", "EN_CURSO", "BLOQUEADO", "TERMINADO"].includes(estadoArrastre.origen);

@@ -173,12 +173,23 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
               <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
                 {esEditar ? "Actualizar información" : "Captura los detalles"}
               </h2>
-              <div className="mt-2 flex gap-2">
-                {formulario.esUrgente && (
-                  <span className="rounded-lg bg-rose-500 px-2 py-0.5 text-[10px] font-black text-white">🚨 TAREA URGENTE</span>
+              <div className="mt-2 flex items-center gap-3">
+                {(formulario.esUrgente || formulario.prioridad === 'URGENTE') && (
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={[
+                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNjZidDRpajlhbjYwZ3p0bGN1eXFpcnN6djN4emFqNGhoemV2NDFqaCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/snEeOh54kCFxe/giphy.gif",
+                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbWFpYjFiNDV0cWtmanF5MDZheDQxZTM5NGtzZHdmMzZqYmhvcmgweiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/4fpYYc2GGxIB10f0t6/giphy.gif",
+                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcDlqOWlzcjZsY204OXRrZzc5cDIyZzF0dTB0YjI3eW9mZ2hneXd6OCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/mLOhDIEtkM92K3qtOM/giphy.gif"
+                      ][(formulario.titulo.length) % 3]} 
+                      alt="Emergency" 
+                      className="h-12 w-12 rounded-xl object-cover border-2 border-rose-500 shadow-lg shadow-rose-500/20"
+                    />
+                    <span className="rounded-lg bg-rose-500 px-3 py-1 text-xs font-black text-white animate-pulse shadow-sm shadow-rose-200">🚨 TAREA URGENTE</span>
+                  </div>
                 )}
                 {formulario.esSpillover && (
-                  <span className="rounded-lg bg-amber-500 px-2 py-0.5 text-[10px] font-black text-white">📦 SPILLOVER</span>
+                  <span className="rounded-lg bg-amber-500 px-3 py-1 text-xs font-black text-white shadow-sm shadow-amber-200">📦 SPILLOVER</span>
                 )}
               </div>
             </div>
