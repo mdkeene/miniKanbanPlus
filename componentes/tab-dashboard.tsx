@@ -66,7 +66,11 @@ export function TabDashboard() {
 
     const total = tareasPeriodo.length;
     const completadas = tareasPeriodo.filter(t => t.estado === "TERMINADO").length;
+    const devueltas = tareasPeriodo.filter(t => t.esDevuelto).length;
+    const spillovers = tareasPeriodo.filter(t => t.esSpillover).length;
+    const urgentes = tareasPeriodo.filter(t => t.esUrgente).length;
     const pendientes = total - completadas;
+    
     const puntosTotales = tareasPeriodo.reduce((sum, t) => sum + (t.complejidad || 0), 0);
     const puntosCompletados = tareasPeriodo
       .filter(t => t.estado === "TERMINADO")
@@ -77,7 +81,8 @@ export function TabDashboard() {
       return {
         ...p,
         count: tareasProy.length,
-        puntos: tareasProy.reduce((sum, t) => sum + (t.complejidad || 0), 0)
+        puntos: tareasProy.reduce((sum, t) => sum + (t.complejidad || 0), 0),
+        urgentes: tareasProy.filter(t => t.esUrgente).length
       };
     }).filter(p => p.count > 0);
 
@@ -85,6 +90,11 @@ export function TabDashboard() {
       const tareasPers = tareasPeriodo.filter(t => t.personaAsignadaId === per.identificador);
       const puntosPers = tareasPers.reduce((sum, t) => sum + (t.complejidad || 0), 0);
       
+      const pCompletadas = tareasPers.filter(t => t.estado === "TERMINADO").length;
+      const pDevueltas = tareasPers.filter(t => t.esDevuelto).length;
+      const pSpillovers = tareasPers.filter(t => t.esSpillover).length;
+      const pUrgentes = tareasPers.filter(t => t.esUrgente).length;
+
       const desgloseProyectos = proyectos.map(proy => {
         const tProy = tareasPers.filter(t => t.proyectoId === proy.identificador);
         return {
@@ -107,6 +117,10 @@ export function TabDashboard() {
         ...per,
         count: tareasPers.length,
         puntos: puntosPers,
+        completadas: pCompletadas,
+        devueltas: pDevueltas,
+        spillovers: pSpillovers,
+        urgentes: pUrgentes,
         desgloseProyectos
       };
     }).filter(p => p.count > 0);
@@ -115,6 +129,9 @@ export function TabDashboard() {
       etiquetaPeriodo,
       total,
       completadas,
+      devueltas,
+      spillovers,
+      urgentes,
       pendientes,
       puntosTotales,
       puntosCompletados,
@@ -190,93 +207,161 @@ export function TabDashboard() {
       </div>
 
       <div className="grid gap-10 lg:grid-cols-2">
-        {/* Distribución por Proyecto */}
+        {/* Distribución por Proyecto - SALUD DEL PROYECTO */}
         <section className="rounded-[40px] border border-white bg-white p-10 shadow-panel">
           <div className="flex items-center justify-between mb-8">
-            <h3 className="text-2xl font-black text-slate-900 tracking-tight">Carga por Proyecto</h3>
-            <span className="rounded-full bg-slate-100 px-4 py-1 text-xs font-black text-slate-500 uppercase">Resumen</span>
+            <h3 className="text-2xl font-black text-slate-900 tracking-tight">Salud por Proyecto</h3>
+            <span className="rounded-full bg-slate-100 px-4 py-1 text-xs font-black text-slate-500 uppercase">Resumen de Carga</span>
           </div>
-          <div className="space-y-8">
+          <div className="space-y-6">
             {stats.porProyecto.length === 0 ? (
               <p className="text-base text-slate-400 italic">No hay datos por proyecto esta semana.</p>
             ) : (
-              stats.porProyecto.map(p => (
-                <div key={p.identificador} className="space-y-3">
-                  <div className="flex justify-between text-base font-black text-slate-900">
-                    <span>{p.nombre}</span>
-                    <span className="text-slate-400">{p.puntos} pts</span>
-                  </div>
-                  <div className="h-4 w-full rounded-full bg-slate-50 overflow-hidden">
-                    <div 
-                      className="h-full transition-all duration-1000 shadow-inner" 
-                      style={{ 
-                        width: `${(p.puntos / stats.puntosTotales) * 100}%`,
-                        backgroundColor: p.color
-                      }}
-                    />
-                  </div>
-                </div>
-              ))
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <th className="pb-4">Proyecto</th>
+                      <th className="pb-4 text-center">Tareas</th>
+                      <th className="pb-4 text-center">Urgentes</th>
+                      <th className="pb-4 text-right">Carga (pts)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {stats.porProyecto.map(p => (
+                      <tr key={p.identificador} className="group">
+                        <td className="py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="h-3 w-3 rounded-full" style={{ backgroundColor: p.color }} />
+                            <span className="font-black text-slate-900">{p.nombre}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 text-center font-bold text-slate-600">{p.count}</td>
+                        <td className="py-4 text-center">
+                          {p.urgentes > 0 ? (
+                            <span className="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-black text-rose-600">
+                              🚨 {p.urgentes}
+                            </span>
+                          ) : (
+                            <span className="text-slate-300">-</span>
+                          )}
+                        </td>
+                        <td className="py-4 text-right font-black text-slate-900">{p.puntos}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </section>
 
-        {/* Distribución por Persona - RENDIMIENTO COMPARATIVO */}
+        {/* Detalle de Rendimiento Individual */}
         <section className="rounded-[40px] border border-white bg-white p-10 shadow-panel">
           <div className="flex items-center justify-between mb-8">
-            <h3 className="text-2xl font-black text-slate-900 tracking-tight">Rendimiento por Persona</h3>
-            <span className="rounded-full bg-sky-50 px-4 py-1 text-xs font-black text-sky-600 uppercase">Proyectos</span>
+            <h3 className="text-2xl font-black text-slate-900 tracking-tight">Detalle por Persona</h3>
+            <span className="rounded-full bg-sky-50 px-4 py-1 text-xs font-black text-sky-600 uppercase">Métricas</span>
           </div>
-          <div className="grid gap-6">
+          <div className="space-y-6">
             {stats.porPersona.length === 0 ? (
               <p className="text-base text-slate-400 italic">No hay asignaciones en este periodo.</p>
             ) : (
-              stats.porPersona.sort((a, b) => b.puntos - a.puntos).map((p, idx) => (
-                <div key={p.identificador} className="group relative flex flex-col gap-4 rounded-3xl border-2 border-slate-50 bg-white p-6 transition-all hover:border-sky-100 hover:shadow-xl">
-                  <div className="flex items-center gap-6">
-                    {/* Rank Badge */}
-                    <div className="absolute -top-3 -left-3 flex h-8 w-8 items-center justify-center rounded-xl bg-sky-600 text-xs font-black text-white shadow-lg">
-                      #{idx + 1}
-                    </div>
-                    
-                    <div className="h-16 w-16 rounded-2xl border-4 border-white shadow-xl flex shrink-0 items-center justify-center font-black text-xl text-white overflow-hidden" style={{ backgroundColor: p.color || "#0ea5e9" }}>
-                      {p.foto ? <img src={p.foto} className="h-full w-full object-cover" /> : p.nombre[0]}
-                    </div>
-                    
-                    <div className="flex-1">
-                      <div className="text-xl font-black text-slate-900">{p.nombre}</div>
-                      <div className="text-sm font-bold text-slate-500 uppercase tracking-widest">{p.area}</div>
-                    </div>
-                    
-                    <div className="text-right flex flex-col items-end shrink-0">
-                      <div className="text-3xl font-black text-sky-600">{p.puntos}</div>
-                      <div className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Puntos</div>
-                    </div>
-                  </div>
-
-                  {/* Desglose por Proyecto */}
-                  <div className="mt-2 space-y-2 border-t border-slate-100 pt-4">
-                    <p className="text-xs font-black uppercase text-slate-400 tracking-wider mb-3">Distribución de Proyectos</p>
-                    {p.desgloseProyectos.map(dp => (
-                       <div key={dp.nombre} className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2">
-                             <div className="h-2 w-2 rounded-full" style={{ backgroundColor: dp.color }} />
-                             <span className="font-bold text-slate-700 truncate max-w-[200px]">{dp.nombre}</span>
-                          </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <th className="pb-4">Persona</th>
+                      <th className="pb-4 text-center">Done</th>
+                      <th className="pb-4 text-center">D/S</th>
+                      <th className="pb-4 text-center">Urg</th>
+                      <th className="pb-4 text-right">Pts</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {stats.porPersona.sort((a, b) => b.puntos - a.puntos).map(p => (
+                      <tr key={p.identificador} className="group">
+                        <td className="py-4">
                           <div className="flex items-center gap-3">
-                             <span className="font-black text-slate-900">{dp.puntos} pts</span>
-                             <div className="h-1.5 w-16 rounded-full bg-slate-100 overflow-hidden">
-                                <div className="h-full" style={{ width: `${(dp.puntos / p.puntos) * 100}%`, backgroundColor: dp.color }} />
-                             </div>
+                            <div className="h-8 w-8 rounded-lg flex shrink-0 items-center justify-center font-black text-xs text-white" style={{ backgroundColor: p.color || "#0ea5e9" }}>
+                              {p.nombre[0]}
+                            </div>
+                            <span className="font-bold text-slate-900">{p.nombre}</span>
                           </div>
-                       </div>
+                        </td>
+                        <td className="py-4 text-center">
+                          <span className="font-black text-emerald-600">{p.completadas}</span>
+                        </td>
+                        <td className="py-4 text-center">
+                          {(p.devueltas + p.spillovers) > 0 ? (
+                            <span className="font-bold text-slate-500">{p.devueltas + p.spillovers}</span>
+                          ) : (
+                            <span className="text-slate-200">-</span>
+                          )}
+                        </td>
+                        <td className="py-4 text-center">
+                          {p.urgentes > 0 ? (
+                            <span className="font-black text-rose-600">{p.urgentes}</span>
+                          ) : (
+                            <span className="text-slate-200">-</span>
+                          )}
+                        </td>
+                        <td className="py-4 text-right font-black text-slate-900">{p.puntos}</td>
+                      </tr>
                     ))}
-                  </div>
-                </div>
-              ))
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </section>
+      </div>
+
+      {/* Tarjetas Visuales Detalladas (Manteniendo el diseño premiun previo) */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {stats.porPersona.map((p) => (
+          <div key={p.identificador} className="flex flex-col gap-4 rounded-3xl border-2 border-slate-50 bg-white p-6 transition-all hover:border-sky-100 hover:shadow-xl">
+             <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-2xl flex shrink-0 items-center justify-center font-black text-lg text-white" style={{ backgroundColor: p.color || "#0ea5e9" }}>
+                  {p.foto ? <img src={p.foto} className="h-full w-full object-cover" /> : p.nombre[0]}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-lg font-black text-slate-900 truncate">{p.nombre}</div>
+                  <div className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{p.area}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-black text-sky-600">{p.puntos}</div>
+                  <div className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Puntos</div>
+                </div>
+             </div>
+
+             <div className="grid grid-cols-3 gap-2 py-3 border-y border-slate-50">
+               <div className="text-center">
+                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Completadas</p>
+                 <p className="font-black text-emerald-600">{p.completadas}</p>
+               </div>
+               <div className="text-center border-x border-slate-50">
+                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Devueltas</p>
+                 <p className="font-black text-slate-900">{p.devueltas + p.spillovers}</p>
+               </div>
+               <div className="text-center">
+                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Urgentes</p>
+                 <p className="font-black text-rose-600">{p.urgentes}</p>
+               </div>
+             </div>
+
+             <div className="space-y-2">
+                {p.desgloseProyectos.slice(0, 3).map(dp => (
+                   <div key={dp.nombre} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2 truncate">
+                         <div className="h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: dp.color }} />
+                         <span className="font-bold text-slate-600 truncate">{dp.nombre}</span>
+                      </div>
+                      <span className="font-black text-slate-900">{dp.puntos} pts</span>
+                   </div>
+                ))}
+             </div>
+          </div>
+        ))}
       </div>
     </div>
   );
