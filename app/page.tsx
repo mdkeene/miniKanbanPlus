@@ -8,6 +8,7 @@ import { TableroKanban } from "@/componentes/tablero-kanban";
 import { TabProyectos } from "@/componentes/tab-proyectos";
 import { TabUsuarios } from "@/componentes/tab-usuarios";
 import { TabDashboard } from "@/componentes/tab-dashboard";
+import { TabBacklog } from "@/componentes/tab-backlog";
 import { obtenerSesion, cerrarSesion } from "@/lib/auth";
 import { type Sesion } from "@/tipos/tareas";
 
@@ -48,6 +49,7 @@ export default function PaginaInicio() {
       alCambiarTab={setTabActiva}
     >
       {tabActiva === "kanban" && <TableroKanban />}
+      {tabActiva === "backlog" && <TabBacklog />}
       {tabActiva === "proyectos" && <TabProyectos />}
       {tabActiva === "usuarios" && <TabUsuarios />}
       {tabActiva === "dashboard" && <TabDashboard />}
