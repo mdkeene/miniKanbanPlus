@@ -100,7 +100,33 @@ export function TabBacklog() {
   }, [tareas, filtroProyecto, filtroPersona]);
 
   const ideas = useMemo(() => tareasFiltradas.filter(t => t.estado === "IDEA"), [tareasFiltradas]);
-  const backlog = useMemo(() => tareasFiltradas.filter(t => t.estado === "BACKLOG"), [tareasFiltradas]);
+  
+  const ordenarTareas = (lista: Tarea[]) => {
+    const pVal: Record<string, number> = { "URGENTE": 4, "ALTA": 3, "MEDIA": 2, "BAJA": 1 };
+    
+    return [...lista].sort((a, b) => {
+      // 1. Deadline (si tienen)
+      if (a.fechaDeseableFin && b.fechaDeseableFin) {
+        const dA = new Date(a.fechaDeseableFin).getTime();
+        const dB = new Date(b.fechaDeseableFin).getTime();
+        if (dA !== dB) return dA - dB;
+      } else if (a.fechaDeseableFin) {
+        return -1;
+      } else if (b.fechaDeseableFin) {
+        return 1;
+      }
+
+      // 2. Prioridad
+      const pA = pVal[a.prioridad] || 0;
+      const pB = pVal[b.prioridad] || 0;
+      if (pA !== pB) return pB - pA; // Mayor prioridad primero
+
+      // 3. Todo lo demás (Título)
+      return (a.titulo || "").localeCompare(b.titulo || "");
+    });
+  };
+
+  const backlog = useMemo(() => ordenarTareas(tareasFiltradas.filter(t => t.estado === "BACKLOG")), [tareasFiltradas]);
 
   const swimlanes = useMemo(() => {
     if (!agruparPorPersona) return null;
@@ -112,7 +138,7 @@ export function TabBacklog() {
     });
     const lanes = Object.keys(porPersona).map((pid) => {
       const p = personas.find((pe) => pe.identificador === pid);
-      return { id: pid, persona: p, tareas: porPersona[pid] };
+      return { id: pid, persona: p, tareas: ordenarTareas(porPersona[pid]) };
     });
     return lanes.sort((a, b) => {
       if (a.id === "sin-asignar") return 1;
