@@ -177,6 +177,19 @@ export async function guardarPersona(persona: Persona) {
 }
 
 export async function eliminarPersona(identificador: string): Promise<{ success: boolean; error?: string }> {
+  // 🛡️ REASIGNACIÓN PREVENTIVA (Superpoder de Borrado)
+  // Antes de borrar, pasamos sus tareas al administrador para evitar bloqueos
+  if (identificador !== "PR-ADMIN") {
+    const { error: errorReasignacion } = await supabase
+      .from('tareas')
+      .update({ personaAsignadaId: 'PR-ADMIN' })
+      .eq('personaAsignadaId', identificador);
+    
+    if (errorReasignacion) {
+      console.warn("Aviso: No se pudieron reasignar tareas automáticamente:", errorReasignacion.message);
+    }
+  }
+
   // Intentar borrar el perfil
   const { error } = await supabase
     .from('profiles')
