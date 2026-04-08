@@ -176,13 +176,28 @@ export async function guardarPersona(persona: Persona) {
   }
 }
 
-export async function eliminarPersona(identificador: string) {
+export async function eliminarPersona(identificador: string): Promise<{ success: boolean; error?: string }> {
+  // Intentar borrar el perfil
   const { error } = await supabase
     .from('profiles')
     .delete()
     .eq('id', identificador);
 
-  if (error) console.error("Error deleting profile:", error.message);
+  if (error) {
+    console.error("DEBUG: Error deleting profile:", error.message, error.details);
+    
+    // Detectar si el error es por tareas asignadas (Foreign Key Constraint)
+    if (error.code === '23503') {
+      return { 
+        success: false, 
+        error: "No se puede borrar el usuario porque tiene tareas asignadas. Por favor, reasigna sus tareas primero." 
+      };
+    }
+
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
 }
 
 export function obtenerPersonaAleatoria(personas: Persona[]) {

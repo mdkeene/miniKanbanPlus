@@ -79,7 +79,14 @@ export function TabUsuarios() {
       return;
     }
     if (!confirm("¿Eliminar este usuario?")) return;
-    await eliminarPersona(id);
+    
+    const resultado = await eliminarPersona(id);
+    
+    if (!resultado.success) {
+      alert("🚨 BLOQUEO DE SEGURIDAD: " + resultado.error);
+      return;
+    }
+
     const ps = await obtenerPersonas();
     setUsuarios(ps);
   }
