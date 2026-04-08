@@ -177,23 +177,23 @@ export async function guardarPersona(persona: Persona) {
 }
 
 export async function eliminarPersona(identificador: string): Promise<{ success: boolean; error?: string }> {
-  // 🛡️ REASIGNACIÓN DINÁMICA (Superpoder de Borrado v2)
+  // 🛡️ REASIGNACIÓN DINÁMICA (Superpoder de Borrado v3)
   // 1. Buscamos al primer administrador real disponible
   const { data: adminData } = await supabase
     .from('profiles')
     .select('id')
     .eq('rol', 'admin')
-    .neq('id', identificador) // No nos reasignamos a nosotros mismos si nos estamos borrando
+    .neq('id', identificador)
     .limit(1)
     .single();
 
   const idDestino = adminData?.id || null;
 
-  // 2. Intentamos mover las tareas al administrador real o dejarlas sin asignar
+  // 2. Intentamos mover las tareas al administrador real en la tabla CORRECTA ('tasks')
   const { error: errorReasignacion } = await supabase
-    .from('tareas')
-    .update({ personaAsignadaId: idDestino })
-    .eq('personaAsignadaId', identificador);
+    .from('tasks')
+    .update({ persona_asignada_id: idDestino })
+    .eq('persona_asignada_id', identificador);
   
   if (errorReasignacion) {
     console.warn("Aviso: No se pudieron reasignar tareas automáticamente. Intentando borrado forzado...", errorReasignacion.message);
