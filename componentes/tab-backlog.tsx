@@ -445,6 +445,7 @@ export function TabBacklog() {
                   }}
                   modoBloqueado={modoBloqueado}
                   claseAncho="w-full"
+                  claseGrid="grid-cols-1 md:grid-cols-2"
                />
             </div>
 
@@ -478,6 +479,7 @@ export function TabBacklog() {
                     }}
                     modoBloqueado={modoBloqueado}
                     claseAncho="w-full"
+                    claseGrid="grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
                  />
                  
                  {/* Overlay informativo para Backlog */}

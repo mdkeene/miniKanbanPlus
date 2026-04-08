@@ -26,6 +26,7 @@ type PropiedadesColumnaKanban = {
   alCambiarSeleccion: (identificador: string, seleccionada: boolean) => void;
   modoBloqueado?: boolean;
   claseAncho?: string;
+  claseGrid?: string;
 };
 
 export function ColumnaKanban({
@@ -47,7 +48,8 @@ export function ColumnaKanban({
   seleccionadas,
   alCambiarSeleccion,
   modoBloqueado = false,
-  claseAncho
+  claseAncho,
+  claseGrid
 }: PropiedadesColumnaKanban) {
   const destinoCoincide = destinoDrop?.estado === estado && destinoDrop?.personaId === personaId;
   const mostrarHuecoFinal = destinoCoincide && destinoDrop.indice === tareas.length;
@@ -88,7 +90,7 @@ export function ColumnaKanban({
         </div>
       </header>
 
-      <div className="mt-4 grid min-h-[220px] grid-cols-1 gap-3 2xl:grid-cols-2">
+      <div className={`mt-4 grid min-h-[220px] gap-3 ${claseGrid || "grid-cols-1 2xl:grid-cols-2"}`}>
         {tareas.map((tarea, indice) => {
           const mostrarHueco =
             destinoCoincide &&
