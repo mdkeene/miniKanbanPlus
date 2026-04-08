@@ -17,12 +17,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 2. Create a trigger that executes the function every time a user is created in Auth
--- RUN THIS IN YOUR SUPABASE SQL EDITOR
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_auth_user();
+-- 2. (DESACTIVADO) Create a trigger that executes the function every time a user is created in Auth
+-- Comentado para evitar que cualquiera pueda crear una cuenta sin invitación.
+-- DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+-- CREATE TRIGGER on_auth_user_created
+--   AFTER INSERT ON auth.users
+--   FOR EACH ROW EXECUTE FUNCTION public.handle_new_auth_user();
 
 -- 3. (Optional) Run this to provision any existing users who are already in Auth but missing a profile
 -- INSERT INTO public.profiles (id, nombre, area, color, rol)

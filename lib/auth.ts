@@ -204,7 +204,8 @@ export async function registrar(email: string, clave: string): Promise<Sesion | 
     throw new Error("Se requiere confirmación por email o la cuenta no pudo crearse.");
   }
 
-  // Ahora que estamos "logueados", comprobamos si Michael lo invitó (existe en profiles)
+  // SECURITY CHECK: Ahora que estamos "logueados" en Auth, comprobamos si Michael lo invitó.
+  // Buscamos un perfil que coincida con el email Y que NO esté ya vinculado a otro UID.
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
@@ -212,12 +213,14 @@ export async function registrar(email: string, clave: string): Promise<Sesion | 
     .single();
 
   if (!profile) {
-    // SECURITY FIREWALL: No estaba invitado. Borramos su rastro y fuera.
+    // SECURITY FIREWALL: No estaba invitado. 
+    console.error("ALERTA: Intento de registro no autorizado detectado.", { email });
     await supabase.auth.signOut();
     throw new Error("Lo sentimos, este email no ha sido invitado por Michael al sistema.");
   }
 
-  // ÉXITO: Estaba invitado. Vinculamos el perfil con el nuevo UID de Auth.
+  // ÉXITO: Estaba invitado (o tenía un perfil previo). 
+  // Vinculamos el perfil con el nuevo UID de Auth.
   await supabase
     .from('profiles')
     .update({ id: data.session.user.id })
