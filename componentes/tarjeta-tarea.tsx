@@ -79,20 +79,7 @@ export function TarjetaTarea({
               {tarea.identificador}
             </span>
           </div>
-          <div className="flex gap-1 items-center">
-            {(tarea.esUrgente || tarea.prioridad === 'URGENTE') && (
-              <div className="relative group/siren">
-                <img 
-                  src={[
-                    "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNjZidDRpajlhbjYwZ3p0bGN1eXFpcnN6djN4emFqNGhoemV2NDFqaCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/snEeOh54kCFxe/giphy.gif",
-                    "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbWFpYjFiNDV0cWtmanF5MDZheDQxZTM5NGtzZHdmMzZqYmhvcmgweiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/4fpYYc2GGxIB10f0t6/giphy.gif",
-                    "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcDlqOWlzcjZsY204OXRrZzc5cDIyZzF0dTB0YjI3eW9mZ2hneXd6OCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/mLOhDIEtkM92K3qtOM/giphy.gif"
-                  ][Math.abs(tarea.identificador.split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % 3]} 
-                  alt="Siren" 
-                  className="h-8 w-8 rounded-lg object-cover shadow-sm border border-rose-200"
-                />
-              </div>
-            )}
+          <div className="flex gap-1">
             {tarea.esUrgente && (
               <span className="flex h-5 items-center rounded-lg bg-rose-500 px-1.5 text-[8px] font-black text-white shadow-sm shadow-rose-200">
                 🚨 URGENTE

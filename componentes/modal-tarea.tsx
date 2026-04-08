@@ -74,6 +74,7 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
   
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [error, setError] = useState("");
+  const [hoverGuardar, setHoverGuardar] = useState(false);
 
   useEffect(() => {
     async function cargar() {
@@ -175,7 +176,7 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
               </h2>
               <div className="mt-2 flex items-center gap-3">
                 {(formulario.esUrgente || formulario.prioridad === 'URGENTE') && (
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     <img 
                       src={[
                         "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNjZidDRpajlhbjYwZ3p0bGN1eXFpcnN6djN4emFqNGhoemV2NDFqaCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/snEeOh54kCFxe/giphy.gif",
@@ -183,9 +184,12 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
                         "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcDlqOWlzcjZsY204OXRrZzc5cDIyZzF0dTB0YjI3eW9mZ2hneXd6OCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/mLOhDIEtkM92K3qtOM/giphy.gif"
                       ][(formulario.titulo.length) % 3]} 
                       alt="Emergency" 
-                      className="h-12 w-12 rounded-xl object-cover border-2 border-rose-500 shadow-lg shadow-rose-500/20"
+                      className="h-20 w-20 rounded-2xl object-cover border-4 border-rose-500 shadow-2xl shadow-rose-500/40"
                     />
-                    <span className="rounded-lg bg-rose-500 px-3 py-1 text-xs font-black text-white animate-pulse shadow-sm shadow-rose-200">🚨 TAREA URGENTE</span>
+                    <div className="flex flex-col">
+                       <span className="rounded-lg bg-rose-500 px-3 py-1 text-xs font-black text-white animate-pulse shadow-sm shadow-rose-200">🚨 TAREA URGENTE</span>
+                       <span className="text-[10px] font-bold text-rose-600 mt-1 uppercase tracking-tight">Atención: Esto notificará como prioridad máxima</span>
+                    </div>
                   </div>
                 )}
                 {formulario.esSpillover && (
@@ -402,13 +406,32 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
               <button
                 type="button"
                 onClick={guardar}
-                className="rounded-2xl bg-slate-950 px-10 py-3 text-sm font-black text-white shadow-2xl shadow-slate-900/10 transition hover:bg-slate-800 hover:-translate-y-0.5 active:translate-y-0"
+                onMouseEnter={() => (formulario.esUrgente || formulario.prioridad === 'URGENTE') && setHoverGuardar(true)}
+                onMouseLeave={() => setHoverGuardar(false)}
+                className="rounded-2xl bg-slate-950 px-10 py-3 text-sm font-black text-white shadow-2xl shadow-slate-900/10 transition hover:bg-slate-800 hover:-translate-y-0.5 active:translate-y-0 relative"
               >
                 {esEditar ? "Guardar Cambios" : "Crear Tarea"}
               </button>
             </div>
           </div>
         </div>
+
+        {/* Overlay de Advertencia Urgente al Hover */}
+        {hoverGuardar && (
+          <div className="absolute inset-0 z-[110] flex items-center justify-center bg-rose-950/80 backdrop-blur-sm animate-in fade-in duration-300 pointer-events-none">
+            <div className="flex flex-col items-center gap-6">
+              <img 
+                src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNjZidDRpajlhbjYwZ3p0bGN1eXFpcnN6djN4emFqNGhoemV2NDFqaCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/snEeOh54kCFxe/giphy.gif"
+                alt="PELIGRO"
+                className="h-64 w-64 rounded-3xl border-4 border-white shadow-2xl"
+              />
+              <div className="text-center space-y-2">
+                <h3 className="text-4xl font-black text-white tracking-tighter">¡ESTO ES UNA EMERGENCIA!</h3>
+                <p className="text-rose-200 font-bold uppercase tracking-widest">¿ESTÁS SEGURO DE QUE ESTA TAREA ES PRIORIDAD MÁXIMA?</p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
