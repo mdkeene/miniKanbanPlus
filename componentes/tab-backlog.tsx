@@ -3,13 +3,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { ColumnaKanban } from "@/componentes/columna-kanban";
 import { ModalTarea } from "@/componentes/modal-tarea";
+import { ModalCargaRapida } from "@/componentes/modal-carga-rapida";
 import { 
   obtenerTareas, 
   guardarTarea as guardarTareaLib,
   eliminarTarea as eliminarTareaLib,
   crearBorradorVacio,
   crearTareaDesdeBorrador,
-  obtenerSiguienteIndice
+  obtenerSiguienteIndice,
+  normalizarTareaDesdeSupabase,
+  generarOcurrenciasRecurrentes
 } from "@/lib/tareas";
 import { obtenerPersonas } from "@/lib/personas";
 import { obtenerProyectos } from "@/lib/proyectos";
@@ -38,6 +41,7 @@ export function TabBacklog() {
   const [swimlanesExpandidos, setSwimlanesExpandidos] = useState<string[]>([]);
   const [modoBloqueado, setModoBloqueado] = useState(false);
   const [seleccionadas, setSeleccionadas] = useState<string[]>([]);
+  const [modalCargaAbierto, setModalCargaAbierto] = useState(false);
 
   useEffect(() => {
     async function cargarDatos() {
@@ -67,16 +71,15 @@ export function TabBacklog() {
         { event: '*', schema: 'public', table: 'tasks' },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            const p = payload.new as any;
-            const nueva: Tarea = { ...p, identificador: p.id };
+            const nueva = normalizarTareaDesdeSupabase(payload.new);
             setTareas(actuales => {
               if (actuales.find(t => t.identificador === nueva.identificador)) return actuales;
               return [...actuales, nueva];
             });
           } else if (payload.eventType === 'UPDATE') {
-            const p = payload.new as any;
+            const actualizada = normalizarTareaDesdeSupabase(payload.new);
             setTareas(actuales => actuales.map(t => 
-              t.identificador === p.id ? { ...t, ...p, identificador: p.id } : t
+              t.identificador === actualizada.identificador ? actualizada : t
             ));
           } else if (payload.eventType === 'DELETE') {
             setTareas(actuales => actuales.filter(t => t.identificador !== payload.old.id));
@@ -159,6 +162,9 @@ export function TabBacklog() {
       const indice = obtenerSiguienteIndice(tareas, borrador.estado);
       const nuevaTarea = crearTareaDesdeBorrador(borrador, indice);
       await guardarTareaLib(nuevaTarea);
+      if (nuevaTarea.esRecurrente) {
+        await generarOcurrenciasRecurrentes(nuevaTarea);
+      }
     } else {
       await guardarTareaLib(borrador);
     }
@@ -180,6 +186,32 @@ export function TabBacklog() {
     if (!confirmar) return;
     await eliminarTareaLib(id);
     setTareaEditando(null);
+  }
+
+  async function crearDesdeCargaRapida(configuracion: any) {
+    const titulos = configuracion.lineas.split("\n").map((l: string) => l.trim()).filter(Boolean);
+
+    if (titulos.length === 0) return;
+
+    let tempTareas = [...tareas];
+    for (const titulo of titulos) {
+      const borrador: BorradorTarea = {
+        ...crearBorradorVacio(),
+        titulo,
+        prioridad: configuracion.prioridad,
+        estado: configuracion.estado,
+        fechaDeseableFin: configuracion.fechaDeseableFin,
+        semanaId: "ESTRATEGIA",
+        proyectoId: filtroProyecto !== "todos" ? filtroProyecto : undefined
+      };
+      
+      const indice = obtenerSiguienteIndice(tempTareas, borrador.estado);
+      const nuevaTarea = crearTareaDesdeBorrador(borrador, indice);
+      await guardarTareaLib(nuevaTarea);
+      tempTareas.push(nuevaTarea);
+    }
+
+    setModalCargaAbierto(false);
   }
 
   if (cargando) {
@@ -208,6 +240,12 @@ export function TabBacklog() {
             </div>
             
             <div className="flex flex-wrap items-center gap-2">
+              <button 
+                onClick={() => setModalCargaAbierto(true)}
+                className="px-6 py-3 rounded-2xl bg-amber-500 text-white font-black text-sm shadow-xl shadow-amber-500/20 hover:bg-amber-400 transition-all hover:-translate-y-0.5"
+              >
+                🚀 Carga Rápida
+              </button>
               <button 
                 onClick={() => setCreandoNueva("IDEA")}
                 className="px-6 py-3 rounded-2xl bg-violet-600 text-white font-black text-sm shadow-xl shadow-violet-500/20 hover:bg-violet-500 transition-all hover:-translate-y-0.5"
@@ -376,8 +414,8 @@ export function TabBacklog() {
           </div>
         ) : (
           <div className="flex gap-8 h-full min-w-max pb-4">
-            {/* Columna de Ideas */}
-            <div className="flex flex-col w-[400px]">
+            {/* Columna de Ideas (30%) */}
+            <div className="flex flex-col w-[30vw] min-w-[320px]">
                <div className="mb-4 flex items-center justify-between px-2">
                   <span className="text-xs font-black uppercase tracking-widest text-violet-400">Captura de Ideas</span>
                   <span className="px-2 py-0.5 rounded-md bg-violet-100 text-violet-600 text-[10px] font-black">{ideas.length}</span>
@@ -407,8 +445,8 @@ export function TabBacklog() {
                />
             </div>
 
-            {/* Columna de Backlog */}
-            <div className="flex flex-col w-[400px]">
+            {/* Columna de Backlog (70%) */}
+            <div className="flex flex-col w-[60vw] min-w-[600px]">
                <div className="mb-4 flex items-center justify-between px-2">
                   <span className="text-xs font-black uppercase tracking-widest text-indigo-400">Planificación Estratégica</span>
                   <span className="px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-600 text-[10px] font-black">{backlog.length}</span>
@@ -475,6 +513,20 @@ export function TabBacklog() {
           personas={personas}
           onCerrar={() => setCreandoNueva(null)}
           onGuardarNueva={handleGuardarTarea}
+        />
+      )}
+
+      {modalCargaAbierto && (
+        <ModalCargaRapida 
+          configuracionInicial={{
+            lineas: "",
+            tipo: "Planificacion",
+            prioridad: "MEDIA",
+            estado: "BACKLOG",
+            fechaDeseableFin: ""
+          }}
+          onCerrar={() => setModalCargaAbierto(false)}
+          onCrear={crearDesdeCargaRapida}
         />
       )}
     </div>

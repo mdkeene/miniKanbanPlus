@@ -66,7 +66,10 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
         estado: propiedades.tarea.estado,
         personaAsignadaId: propiedades.tarea.personaAsignadaId,
         semanaId: propiedades.tarea.semanaId,
-        proyectoId: propiedades.tarea.proyectoId
+        proyectoId: propiedades.tarea.proyectoId,
+        esRecurrente: propiedades.tarea.esRecurrente,
+        frecuenciaRecurrencia: propiedades.tarea.frecuenciaRecurrencia,
+        fechaFinRecurrencia: propiedades.tarea.fechaFinRecurrencia
       };
     }
     return { ...propiedades.borrador };
@@ -300,6 +303,48 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
               />
             </div>
 
+            <div className="md:col-span-2 border-t border-slate-50 pt-4 flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="esRecurrente"
+                  checked={formulario.esRecurrente}
+                  onChange={(e) => actualizarCampo("esRecurrente", e.target.checked)}
+                  className="h-5 w-5 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                />
+                <label htmlFor="esRecurrente" className="text-sm font-black text-slate-800 uppercase tracking-tighter cursor-pointer">
+                  🔄 Tarea Recurrente (Autogenerar)
+                </label>
+              </div>
+
+              {formulario.esRecurrente && (
+                <div className="grid gap-4 sm:grid-cols-2 animate-in slide-in-from-top-2 duration-300">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest pl-1">Frecuencia</label>
+                    <select
+                      value={formulario.frecuenciaRecurrencia || "Semanal"}
+                      onChange={(e) => actualizarCampo("frecuenciaRecurrencia", e.target.value as any)}
+                      className="campo-formulario bg-sky-50/20 border-sky-100"
+                    >
+                      <option value="Semanal">Cada Semana</option>
+                      <option value="Quincenal">Cada Quincena</option>
+                      <option value="Mensual">Cada Mes</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest pl-1">Hasta el día</label>
+                    <input
+                      type="date"
+                      value={formulario.fechaFinRecurrencia || ""}
+                      onChange={(e) => actualizarCampo("fechaFinRecurrencia", e.target.value)}
+                      className="campo-formulario bg-sky-50/20 border-sky-100 [color-scheme:light]"
+                      min={new Date().toISOString().split('T')[0]}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="md:col-span-2">
               <label className="etiqueta-campo">Proyecto de Referencia</label>
               <select
@@ -412,7 +457,7 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
                 type="button"
                 onClick={guardar}
                 onMouseEnter={() => {
-                  if (formulario.esUrgente || formulario.prioridad === 'URGENTE') {
+                  if (propiedades.modo === "crear" && (formulario.esUrgente || formulario.prioridad === 'URGENTE')) {
                     setGifEmergencia(gifsEmergencia[Math.floor(Math.random() * gifsEmergencia.length)]);
                     setHoverGuardar(true);
                   }

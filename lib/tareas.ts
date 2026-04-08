@@ -25,21 +25,13 @@ export function generarIdentificador() {
   return `TK-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 }
 
-export async function obtenerTareas(): Promise<Tarea[]> {
-  const { data, error } = await supabase
-    .from('tasks')
-    .select('*')
-    .order('indice_orden', { ascending: true });
-
-  if (error || !data) return [];
-
-  return data.map(t => ({
+export function normalizarTareaDesdeSupabase(t: any): Tarea {
+  return {
     identificador: t.id,
     fechaCreacion: t.fecha_creacion,
     titulo: t.titulo,
     tipo: t.tipo as any,
     prioridad: t.prioridad as any,
-    complejidad: t.complejidad as any,
     fechaDeseableFin: t.fecha_deseable_fin || "",
     observaciones: t.observaciones || "",
     enlace: t.enlace || "",
@@ -50,8 +42,22 @@ export async function obtenerTareas(): Promise<Tarea[]> {
     proyectoId: t.proyecto_id,
     esUrgente: t.es_urgente,
     esSpillover: t.es_spillover,
-    esDevuelto: t.es_devuelto
-  }));
+    esDevuelto: t.es_devuelto,
+    esRecurrente: t.es_recurrente,
+    frecuenciaRecurrencia: t.frecuencia_recurrencia,
+    fechaFinRecurrencia: t.fecha_fin_recurrencia
+  };
+}
+
+export async function obtenerTareas(): Promise<Tarea[]> {
+  const { data, error } = await supabase
+    .from('tasks')
+    .select('*')
+    .order('indice_orden', { ascending: true });
+
+  if (error || !data) return [];
+
+  return data.map(normalizarTareaDesdeSupabase);
 }
 
 export async function guardarTarea(tarea: Tarea) {
@@ -63,7 +69,6 @@ export async function guardarTarea(tarea: Tarea) {
       titulo: tarea.titulo,
       tipo: tarea.tipo || "Ejecución",
       prioridad: tarea.prioridad,
-      complejidad: tarea.complejidad || 1,
       fecha_deseable_fin: tarea.fechaDeseableFin || null,
       observaciones: tarea.observaciones,
       enlace: tarea.enlace,
@@ -75,7 +80,10 @@ export async function guardarTarea(tarea: Tarea) {
       team_id: '00000000-0000-0000-0000-000000000001',
       es_urgente: tarea.esUrgente ?? false,
       es_spillover: tarea.esSpillover ?? false,
-      es_devuelto: tarea.esDevuelto ?? false
+      es_devuelto: tarea.esDevuelto ?? false,
+      es_recurrente: tarea.esRecurrente ?? false,
+      frecuencia_recurrencia: tarea.frecuenciaRecurrencia || null,
+      fecha_fin_recurrencia: tarea.fechaFinRecurrencia || null
     });
 
   if (error) {
@@ -208,7 +216,6 @@ export function normalizarTareasPersistidas(tareas: any[]): Tarea[] {
     titulo: limpiarTextoPlano(t?.titulo, limitesSeguridad.tituloMaximo) || "Tarea sin título",
     tipo: (tiposTarea.includes(t?.tipo) ? t?.tipo : "Planificacion") as any,
     prioridad: (prioridadesTarea.includes(t?.prioridad) ? t?.prioridad : "MEDIA") as any,
-    complejidad: normalizarEnteroSeguro(t?.complejidad, 1) as any,
     fechaDeseableFin: String(t?.fechaDeseableFin || ""),
     observaciones: limpiarTextoMultilinea(t?.observaciones, limitesSeguridad.observacionesMaximas),
     enlace: normalizarUrlNavegable(t?.enlace),
@@ -244,5 +251,48 @@ export function formatearFechaMedia(fechaIso: string) {
     }).format(new Date(fechaIso));
   } catch {
     return "Fecha inválida";
+  }
+}
+export async function generarOcurrenciasRecurrentes(tareaBase: Tarea) {
+  if (!tareaBase.esRecurrente || !tareaBase.frecuenciaRecurrencia || !tareaBase.fechaFinRecurrencia) return;
+
+  const fechaFin = new Date(tareaBase.fechaFinRecurrencia);
+  let fechaActual = new Date(tareaBase.fechaDeseableFin || tareaBase.fechaCreacion);
+
+  // Generar tareas hasta la fecha fin
+  const nuevasTareas: Tarea[] = [];
+  
+  while (true) {
+    // Avanzar la fecha según frecuencia
+    if (tareaBase.frecuenciaRecurrencia === 'Semanal') {
+      fechaActual.setDate(fechaActual.getDate() + 7);
+    } else if (tareaBase.frecuenciaRecurrencia === 'Quincenal') {
+      fechaActual.setDate(fechaActual.getDate() + 14);
+    } else if (tareaBase.frecuenciaRecurrencia === 'Mensual') {
+      fechaActual.setMonth(fechaActual.getMonth() + 1);
+    } else {
+      break;
+    }
+
+    if (fechaActual > fechaFin) break;
+
+    const nuevaOcurrencia: Tarea = {
+      ...tareaBase,
+      identificador: generarIdentificador(),
+      fechaCreacion: new Date().toISOString(),
+      fechaDeseableFin: fechaActual.toISOString().split('T')[0],
+      esRecurrente: false, // Las ocurrencias no son recurrentes ellas mismas
+      frecuenciaRecurrencia: undefined,
+      fechaFinRecurrencia: undefined,
+      estado: 'BACKLOG', // Por defecto van al backlog las futuras
+      semanaId: 'ESTRATEGIA'
+    };
+    
+    nuevasTareas.push(nuevaOcurrencia);
+    if (nuevasTareas.length > 52) break; // Seguridad
+  }
+
+  for (const t of nuevasTareas) {
+    await guardarTarea(t);
   }
 }

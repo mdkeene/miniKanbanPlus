@@ -105,16 +105,31 @@ export function ModalCargaRapida({
             </div>
 
             <div className="space-y-1">
-              <label className="etiqueta-campo ml-1 text-[11px]">Estado Inicial</label>
-              <select
-                value={configuracion.estado}
-                onChange={(evento) => actualizarCampo("estado", evento.target.value as EstadoKanban)}
-                className="campo-formulario h-11 text-sm"
-              >
-                {estadosKanban.map((estado) => (
-                  <option key={estado} value={estado}>{etiquetasEstado[estado]}</option>
-                ))}
-              </select>
+              <label className="etiqueta-campo ml-1 text-[11px]">Destino Estratégico</label>
+              <div className="flex p-1 bg-slate-100 rounded-2xl gap-1">
+                <button
+                  type="button"
+                  onClick={() => actualizarCampo("estado", "IDEA")}
+                  className={`flex-1 py-2 px-3 rounded-xl text-xs font-black transition-all ${
+                    configuracion.estado === "IDEA" 
+                      ? "bg-white text-violet-600 shadow-sm" 
+                      : "text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  💡 Incubadora
+                </button>
+                <button
+                  type="button"
+                  onClick={() => actualizarCampo("estado", "BACKLOG")}
+                  className={`flex-1 py-2 px-3 rounded-xl text-xs font-black transition-all ${
+                    configuracion.estado === "BACKLOG" 
+                      ? "bg-white text-indigo-600 shadow-sm" 
+                      : "text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  📦 Backlog
+                </button>
+              </div>
             </div>
 
             <div className="space-y-1">

@@ -71,24 +71,17 @@ export function TabDashboard() {
     const urgentes = tareasPeriodo.filter(t => t.esUrgente).length;
     const pendientes = total - completadas;
     
-    const puntosTotales = tareasPeriodo.reduce((sum, t) => sum + (t.complejidad || 0), 0);
-    const puntosCompletados = tareasPeriodo
-      .filter(t => t.estado === "TERMINADO")
-      .reduce((sum, t) => sum + (t.complejidad || 0), 0);
-
     const porProyecto = proyectos.map(p => {
       const tareasProy = tareasPeriodo.filter(t => t.proyectoId === p.identificador);
       return {
         ...p,
         count: tareasProy.length,
-        puntos: tareasProy.reduce((sum, t) => sum + (t.complejidad || 0), 0),
         urgentes: tareasProy.filter(t => t.esUrgente).length
       };
     }).filter(p => p.count > 0);
 
     const porPersona = personas.map(per => {
       const tareasPers = tareasPeriodo.filter(t => t.personaAsignadaId === per.identificador);
-      const puntosPers = tareasPers.reduce((sum, t) => sum + (t.complejidad || 0), 0);
       
       const pCompletadas = tareasPers.filter(t => t.estado === "TERMINADO").length;
       const pDevueltas = tareasPers.filter(t => t.esDevuelto).length;
@@ -100,23 +93,22 @@ export function TabDashboard() {
         return {
           nombre: proy.nombre,
           color: proy.color,
-          puntos: tProy.reduce((sum, t) => sum + (t.complejidad || 0), 0)
+          count: tProy.length
         };
-      }).filter(dp => dp.puntos > 0);
+      }).filter(dp => dp.count > 0);
 
       const sinProy = tareasPers.filter(t => !t.proyectoId);
       if (sinProy.length > 0) {
         desgloseProyectos.push({
           nombre: "Otros",
           color: "#cbd5e1",
-          puntos: sinProy.reduce((sum, t) => sum + (t.complejidad || 0), 0)
+          count: sinProy.length
         });
       }
 
       return {
         ...per,
         count: tareasPers.length,
-        puntos: puntosPers,
         completadas: pCompletadas,
         devueltas: pDevueltas,
         spillovers: pSpillovers,
@@ -133,12 +125,9 @@ export function TabDashboard() {
       spillovers,
       urgentes,
       pendientes,
-      puntosTotales,
-      puntosCompletados,
       porProyecto,
       porPersona,
-      progreso: total > 0 ? Math.round((completadas / total) * 100) : 0,
-      progresoPuntos: puntosTotales > 0 ? Math.round((puntosCompletados / puntosTotales) * 100) : 0
+      progreso: total > 0 ? Math.round((completadas / total) * 100) : 0
     };
   }, [tareas, proyectos, personas, tipoPeriodo, offset]);
 
@@ -179,12 +168,11 @@ export function TabDashboard() {
       </header>
 
       {/* Tarjetas de Resumen */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {[
           { label: "Tareas Totales", value: stats.total, unit: "items", sub: `${stats.completadas} completadas`, color: "slate", border: "border-slate-200" },
-          { label: "Puntos de Esfuerzo", value: stats.puntosTotales, unit: "pts", sub: "Carga Fibonacci", color: "sky", border: "border-sky-100" },
-          { label: "Progreso Tareas", value: `${stats.progreso}%`, bar: stats.progreso, color: "slate", border: "border-slate-200" },
-          { label: "Progreso Esfuerzo", value: `${stats.progresoPuntos}%`, bar: stats.progresoPuntos, color: "sky", border: "border-sky-100" }
+          { label: "Progreso Tareas", value: `${stats.progreso}%`, bar: stats.progreso, color: "sky", border: "border-sky-100" },
+          { label: "Alertas Activas", value: stats.urgentes + stats.spillovers, unit: "urg/sp", sub: "Atención Requerida", color: "rose", border: "border-rose-100" }
         ].map((c, i) => (
           <div key={i} className={`rounded-[24px] border ${c.border} bg-white p-8 shadow-sm transition-all hover:border-sky-400 hover:shadow-md`}>
             <span className="text-xs font-black uppercase tracking-widest text-slate-400">{c.label}</span>
@@ -223,8 +211,7 @@ export function TabDashboard() {
                     <tr className="border-b border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-400">
                       <th className="pb-4">Proyecto</th>
                       <th className="pb-4 text-center">Tareas</th>
-                      <th className="pb-4 text-center">Urgentes</th>
-                      <th className="pb-4 text-right">Carga (pts)</th>
+                      <th className="pb-4 text-right">Urgentes</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
@@ -237,16 +224,7 @@ export function TabDashboard() {
                           </div>
                         </td>
                         <td className="py-4 text-center font-bold text-slate-600">{p.count}</td>
-                        <td className="py-4 text-center">
-                          {p.urgentes > 0 ? (
-                            <span className="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-black text-rose-600">
-                              🚨 {p.urgentes}
-                            </span>
-                          ) : (
-                            <span className="text-slate-300">-</span>
-                          )}
-                        </td>
-                        <td className="py-4 text-right font-black text-slate-900">{p.puntos}</td>
+                        <td className="py-4 text-right font-black text-slate-900">{p.urgentes}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -273,12 +251,11 @@ export function TabDashboard() {
                       <th className="pb-4">Persona</th>
                       <th className="pb-4 text-center">Done</th>
                       <th className="pb-4 text-center">D/S</th>
-                      <th className="pb-4 text-center">Urg</th>
-                      <th className="pb-4 text-right">Pts</th>
+                      <th className="pb-4 text-right">Urg</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
-                    {stats.porPersona.sort((a, b) => b.puntos - a.puntos).map(p => (
+                    {stats.porPersona.sort((a, b) => b.count - a.count).map(p => (
                       <tr key={p.identificador} className="group">
                         <td className="py-4">
                           <div className="flex items-center gap-3">
@@ -298,14 +275,7 @@ export function TabDashboard() {
                             <span className="text-slate-200">-</span>
                           )}
                         </td>
-                        <td className="py-4 text-center">
-                          {p.urgentes > 0 ? (
-                            <span className="font-black text-rose-600">{p.urgentes}</span>
-                          ) : (
-                            <span className="text-slate-200">-</span>
-                          )}
-                        </td>
-                        <td className="py-4 text-right font-black text-slate-900">{p.puntos}</td>
+                        <td className="py-4 text-right font-black text-slate-900">{p.urgentes}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -329,8 +299,8 @@ export function TabDashboard() {
                   <div className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{p.area}</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-black text-sky-600">{p.puntos}</div>
-                  <div className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Puntos</div>
+                  <div className="text-2xl font-black text-sky-600">{p.count}</div>
+                  <div className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Tareas</div>
                 </div>
              </div>
 
@@ -356,7 +326,7 @@ export function TabDashboard() {
                          <div className="h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: dp.color }} />
                          <span className="font-bold text-slate-600 truncate">{dp.nombre}</span>
                       </div>
-                      <span className="font-black text-slate-900">{dp.puntos} pts</span>
+                      <span className="font-black text-slate-900">{dp.count}</span>
                    </div>
                 ))}
              </div>

@@ -28,7 +28,9 @@ import {
   obtenerTareas,
   guardarTarea as guardarTareaLib,
   eliminarTarea as eliminarTareaLib,
-  moverTarea as moverTareaLib
+  moverTarea as moverTareaLib,
+  normalizarTareaDesdeSupabase,
+  generarOcurrenciasRecurrentes
 } from "@/lib/tareas";
 import { obtenerProyectos } from "@/lib/proyectos";
 import {
@@ -184,21 +186,15 @@ export function TableroKanban() {
         { event: '*', schema: 'public', table: 'tasks' },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            const p = payload.new as any;
-            const nueva: Tarea = {
-              ...p,
-              identificador: p.id
-            };
+            const nueva = normalizarTareaDesdeSupabase(payload.new);
             setTareas(actuales => {
               if (actuales.find(t => t.identificador === nueva.identificador)) return actuales;
               return [...actuales, nueva];
             });
           } else if (payload.eventType === 'UPDATE') {
-            const p = payload.new as any;
+            const actualizada = normalizarTareaDesdeSupabase(payload.new);
             setTareas(actuales => actuales.map(t => 
-              t.identificador === p.id 
-                ? { ...t, ...p, identificador: p.id } 
-                : t
+              t.identificador === actualizada.identificador ? actualizada : t
             ));
           } else if (payload.eventType === 'DELETE') {
             const eliminadaId = payload.old.id;
@@ -385,6 +381,11 @@ export function TableroKanban() {
     const nuevaTarea = crearTareaDesdeBorrador(borrador, indiceOrden);
 
     await guardarTareaLib(nuevaTarea);
+    
+    if (nuevaTarea.esRecurrente) {
+      await generarOcurrenciasRecurrentes(nuevaTarea);
+    }
+
     await recargarTareas();
     setBorradorNuevaTarea(null);
     setMensajeSistema({ tipo: "exito", texto: "Tarea creada correctamente." });
@@ -464,7 +465,6 @@ export function TableroKanban() {
         titulo,
         tipo: configuracion.tipo,
         prioridad: configuracion.prioridad,
-        complejidad: 1,
         estado: configuracion.estado,
         fechaDeseableFin: configuracion.fechaDeseableFin,
         observaciones: "",

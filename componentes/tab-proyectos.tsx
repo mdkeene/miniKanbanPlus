@@ -3,23 +3,14 @@
 import { useState, useEffect } from "react";
 import { 
   type Proyecto, 
-  type TareaPeriodica,
-  type FrecuenciaTarea,
-  type TipoTarea,
-  type PrioridadTarea,
-  type ComplejidadTarea,
   type Persona,
   tiposTarea,
-  prioridadesTarea,
-  complejidadesTarea
+  prioridadesTarea
 } from "@/tipos/tareas";
 import { 
   obtenerProyectos, 
   guardarProyecto, 
-  eliminarProyecto,
-  actualizarTareaPeriodica,
-  eliminarTareaPeriodica,
-  crearTareaPeriodicaVacia
+  eliminarProyecto
 } from "@/lib/proyectos";
 import { obtenerPersonas } from "@/lib/personas";
 
@@ -32,11 +23,6 @@ export function TabProyectos() {
   const [nuevoNombre, setNuevoNombre] = useState("");
   const [nuevaDescripcion, setNuevaDescripcion] = useState("");
   const [nuevoColor, setNuevoColor] = useState("#0ea5e9");
-
-  // Estados para Tarea Periódica
-  const [proyectoParaTarea, setProyectoParaTarea] = useState<Proyecto | null>(null);
-  const [editandoTarea, setEditandoTarea] = useState<TareaPeriodica | null>(null);
-  const [formularioTP, setFormularioTP] = useState<TareaPeriodica>(crearTareaPeriodicaVacia());
 
   useEffect(() => {
     async function cargar() {
@@ -62,8 +48,7 @@ export function TabProyectos() {
       identificador: `PRJ-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
       nombre: nuevoNombre,
       descripcion: nuevaDescripcion,
-      color: nuevoColor,
-      tareasPeriodicas: []
+      color: nuevoColor
     };
 
     await guardarProyecto(proyecto);
@@ -73,7 +58,7 @@ export function TabProyectos() {
   }
 
   async function handleEliminarProyecto(id: string) {
-    if (!confirm("¿Estás seguro de eliminar este proyecto y sus tareas periódicas?")) return;
+    if (!confirm("¿Estás seguro de eliminar este proyecto?")) return;
     await eliminarProyecto(id);
     const prjs = await obtenerProyectos();
     setProyectos(prjs);
@@ -216,193 +201,7 @@ export function TabProyectos() {
             </button>
           </div>
         </section>
-
-        {/* Tareas Periódicas (Solo si editando) */}
-        {editandoProyecto && (
-          <section className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm xl:p-8 animate-in fade-in slide-in-from-top-4 duration-300">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-black text-slate-900">Tareas Recurrentes</h3>
-              <button 
-                onClick={() => {
-                  const pActual = proyectos.find(p => p.identificador === editandoProyecto.identificador);
-                  if (pActual) {
-                    setProyectoParaTarea(pActual);
-                    setFormularioTP(crearTareaPeriodicaVacia());
-                    setEditandoTarea(null);
-                  }
-                }}
-                className="rounded-xl border-2 border-sky-100 bg-sky-50 px-4 py-2 text-xs font-black text-sky-600 transition-colors hover:bg-sky-100 active:scale-95"
-              >
-                + Añadir Tarea
-              </button>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {proyectos.find(p => p.identificador === editandoProyecto.identificador)?.tareasPeriodicas.length === 0 ? (
-                <p className="col-span-2 text-sm italic text-slate-400 text-center py-8 border-2 border-dashed border-slate-200 rounded-[20px]">
-                  No hay tareas periódicas configuradas en este proyecto.
-                </p>
-              ) : (
-                proyectos.find(p => p.identificador === editandoProyecto.identificador)?.tareasPeriodicas.map((tarea: TareaPeriodica) => (
-                  <div 
-                    key={tarea.identificador} 
-                    className="group flex flex-col justify-between gap-3 rounded-[24px] border border-slate-200 bg-slate-50 p-5 transition-all hover:bg-white hover:shadow-md hover:-translate-y-0.5"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{tarea.tipo}</span>
-                        <span className="rounded-full bg-white border border-slate-200 px-2 py-0.5 text-[10px] font-black uppercase text-slate-500">
-                          {tarea.complejidad} pts
-                        </span>
-                      </div>
-                      <h4 className="font-bold text-slate-800 mt-2 text-sm">{tarea.titulo}</h4>
-                    </div>
-                    
-                    <div className="flex items-end justify-between mt-2 pt-3 border-t border-slate-200/50">
-                      <span className="text-[11px] font-bold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-lg border border-sky-100">
-                        ↻ {tarea.frecuencia}
-                      </span>
-                      <div className="flex gap-2">
-                        <button 
-                          onClick={() => {
-                            const pActual = proyectos.find(p => p.identificador === editandoProyecto.identificador);
-                            if (pActual) {
-                              setProyectoParaTarea(pActual);
-                              setEditandoTarea(tarea);
-                              setFormularioTP(tarea);
-                            }
-                          }}
-                          className="rounded-lg bg-white shadow-sm border border-slate-200 p-2 text-slate-500 hover:border-sky-300 hover:text-sky-600 transition-colors"
-                          title="Editar tarea recurrente"
-                        >
-                          ✏️
-                        </button>
-                        <button 
-                          onClick={async () => {
-                            if (confirm("¿Eliminar esta tarea periódica?")) {
-                              await eliminarTareaPeriodica(editandoProyecto.identificador, tarea.identificador);
-                              const updatedPrjs = await obtenerProyectos();
-                              setProyectos(updatedPrjs);
-                            }
-                          }}
-                          className="rounded-lg bg-white shadow-sm border border-slate-200 p-2 text-slate-500 hover:border-rose-300 hover:text-rose-600 transition-colors"
-                          title="Eliminar tarea recurrente"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
-        )}
       </div>
-
-      {/* Modal de Tarea Periódica */}
-      {proyectoParaTarea && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-sky-950/30 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-xl rounded-[32px] bg-white p-8 shadow-2xl animate-in zoom-in-95 duration-200">
-            <h3 className="text-2xl font-bold text-slate-900 mb-6">
-              {editandoTarea ? "Editar Tarea Periódica" : "Nueva Tarea Periódica"}
-              <span className="block text-sm font-medium text-slate-500 mt-1">
-                Proyecto: {proyectoParaTarea.nombre}
-              </span>
-            </h3>
-
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-2 md:col-span-2">
-                <label className="text-xs font-black uppercase tracking-wider text-slate-500 pl-1">Título</label>
-                <input 
-                  value={formularioTP.titulo}
-                  onChange={e => setFormularioTP(f => ({ ...f, titulo: e.target.value }))}
-                  placeholder="Ej: Revisión semanal de métricas"
-                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-sky-400 focus:ring-4 focus:ring-sky-50 transition-all"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-black uppercase tracking-wider text-slate-500 pl-1">Frecuencia</label>
-                <select 
-                  value={formularioTP.frecuencia}
-                  onChange={e => setFormularioTP(f => ({ ...f, frecuencia: e.target.value as FrecuenciaTarea }))}
-                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-sky-400 transition-all appearance-none bg-slate-50"
-                >
-                  <option value="Semanal">Semanal</option>
-                  <option value="Quincenal">Quincenal</option>
-                  <option value="Mensual">Mensual</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-black uppercase tracking-wider text-slate-500 pl-1">Tipo</label>
-                <select 
-                  value={formularioTP.tipo}
-                  onChange={e => setFormularioTP(f => ({ ...f, tipo: e.target.value as TipoTarea }))}
-                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-sky-400 transition-all appearance-none bg-slate-50"
-                >
-                  {tiposTarea.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-black uppercase tracking-wider text-slate-500 pl-1">Prioridad</label>
-                <select 
-                  value={formularioTP.prioridad}
-                  onChange={e => setFormularioTP(f => ({ ...f, prioridad: e.target.value as PrioridadTarea }))}
-                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-sky-400 transition-all appearance-none bg-slate-50"
-                >
-                  {prioridadesTarea.map(p => <option key={p} value={p}>{p}</option>)}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-black uppercase tracking-wider text-slate-500 pl-1">Complejidad (Fibonacci)</label>
-                <select 
-                  value={formularioTP.complejidad}
-                  onChange={e => setFormularioTP(f => ({ ...f, complejidad: parseInt(e.target.value) as ComplejidadTarea }))}
-                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-sky-400 transition-all appearance-none bg-slate-50"
-                >
-                  {complejidadesTarea.map(c => <option key={c} value={c}>{c} puntos</option>)}
-                </select>
-              </div>
-
-              <div className="space-y-2 md:col-span-2">
-                <label className="text-xs font-black uppercase tracking-wider text-slate-500 pl-1">Responsable Predeterminado</label>
-                <select 
-                  value={formularioTP.personaAsignadaId || ""}
-                  onChange={e => setFormularioTP(f => ({ ...f, personaAsignadaId: e.target.value }))}
-                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-sky-400 transition-all appearance-none bg-slate-50"
-                >
-                  <option value="">Sin asignar</option>
-                  {personas.map(p => <option key={p.identificador} value={p.identificador}>{p.nombre} ({p.area})</option>)}
-                </select>
-              </div>
-            </div>
-
-            <div className="mt-8 flex justify-end gap-3">
-              <button 
-                onClick={() => setProyectoParaTarea(null)}
-                className="rounded-2xl border border-slate-200 px-6 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
-              >
-                Cancelar
-              </button>
-              <button 
-                onClick={async () => {
-                  if (!formularioTP.titulo.trim()) return;
-                  await actualizarTareaPeriodica(proyectoParaTarea!.identificador, formularioTP);
-                  const updatedPrjs = await obtenerProyectos();
-                  setProyectos(updatedPrjs);
-                  setProyectoParaTarea(null);
-                }}
-                className="rounded-2xl bg-sky-600 px-8 py-3 text-sm font-bold text-white shadow-xl shadow-sky-100 hover:bg-sky-500 transition-all hover:-translate-y-0.5"
-              >
-                {editandoTarea ? "Actualizar Tarea" : "Crear Tarea"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
     </div>
   );

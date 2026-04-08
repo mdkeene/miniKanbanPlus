@@ -25,9 +25,6 @@ export const tiposTarea = [
 
 export type TipoTarea = (typeof tiposTarea)[number];
 
-export const complejidadesTarea = [1, 2, 3, 5, 8] as const;
-export type ComplejidadTarea = (typeof complejidadesTarea)[number];
-
 export type OrdenTablero =
   | "manual"
   | "titulo"
@@ -63,7 +60,6 @@ export type Tarea = {
   titulo: string;
   tipo?: TipoTarea;
   prioridad: PrioridadTarea;
-  complejidad?: ComplejidadTarea;
   fechaDeseableFin: string;
   observaciones: string;
   enlace: string;
@@ -75,29 +71,20 @@ export type Tarea = {
   esUrgente?: boolean;
   esSpillover?: boolean;
   esDevuelto?: boolean;
+
+  // Recurrencia
+  esRecurrente?: boolean;
+  frecuenciaRecurrencia?: "Semanal" | "Quincenal" | "Mensual" | "Anual";
+  fechaFinRecurrencia?: string;
 };
 
 export type BorradorTarea = Omit<Tarea, "identificador" | "fechaCreacion" | "indiceOrden">;
-
-export type FrecuenciaTarea = "Semanal" | "Quincenal" | "Mensual";
-
-export type TareaPeriodica = {
-  identificador: string;
-  titulo: string;
-  tipo: TipoTarea;
-  prioridad: PrioridadTarea;
-  complejidad: ComplejidadTarea;
-  frecuencia: FrecuenciaTarea;
-  activo: boolean;
-  personaAsignadaId?: string;
-};
 
 export type Proyecto = {
   identificador: string;
   nombre: string;
   descripcion: string;
   color: string;
-  tareasPeriodicas: TareaPeriodica[];
 };
 
 export type SemanaInfo = {
