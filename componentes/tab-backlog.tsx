@@ -37,6 +37,7 @@ export function TabBacklog() {
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [swimlanesExpandidos, setSwimlanesExpandidos] = useState<string[]>([]);
   const [modoBloqueado, setModoBloqueado] = useState(false);
+  const [seleccionadas, setSeleccionadas] = useState<string[]>([]);
 
   useEffect(() => {
     async function cargarDatos() {
@@ -302,8 +303,12 @@ export function TabBacklog() {
                         onFinalizarArrastre={() => {}}
                         onActualizarDestino={() => {}}
                         onSoltar={() => {}}
-                        seleccionadas={[]}
-                        alCambiarSeleccion={() => {}}
+                        seleccionadas={seleccionadas}
+                        alCambiarSeleccion={(id, sel) => {
+                          setSeleccionadas(actual => 
+                            sel ? [...actual, id] : actual.filter(i => i !== id)
+                          );
+                        }}
                         modoBloqueado={modoBloqueado}
                       />
                     </div>
@@ -329,8 +334,12 @@ export function TabBacklog() {
                         onFinalizarArrastre={() => {}}
                         onActualizarDestino={() => {}}
                         onSoltar={() => {}}
-                        seleccionadas={[]}
-                        alCambiarSeleccion={() => {}}
+                        seleccionadas={seleccionadas}
+                        alCambiarSeleccion={(id, sel) => {
+                          setSeleccionadas(actual => 
+                            sel ? [...actual, id] : actual.filter(i => i !== id)
+                          );
+                        }}
                         modoBloqueado={modoBloqueado}
                       />
                     </div>
@@ -362,8 +371,12 @@ export function TabBacklog() {
                   onFinalizarArrastre={() => {}}
                   onActualizarDestino={() => {}}
                   onSoltar={() => {}}
-                  seleccionadas={[]}
-                  alCambiarSeleccion={() => {}}
+                  seleccionadas={seleccionadas}
+                  alCambiarSeleccion={(id, sel) => {
+                    setSeleccionadas(actual => 
+                      sel ? [...actual, id] : actual.filter(i => i !== id)
+                    );
+                  }}
                   modoBloqueado={modoBloqueado}
                />
             </div>
@@ -390,8 +403,12 @@ export function TabBacklog() {
                     onFinalizarArrastre={() => {}}
                     onActualizarDestino={() => {}}
                     onSoltar={() => {}}
-                    seleccionadas={[]}
-                    alCambiarSeleccion={() => {}}
+                    seleccionadas={seleccionadas}
+                    alCambiarSeleccion={(id, sel) => {
+                      setSeleccionadas(actual => 
+                        sel ? [...actual, id] : actual.filter(i => i !== id)
+                      );
+                    }}
                     modoBloqueado={modoBloqueado}
                  />
                  

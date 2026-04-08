@@ -613,7 +613,7 @@ export function TableroKanban() {
                       <button 
                         onClick={abrirTareaUrgente}
                         title="Tarea Urgente"
-                        className="flex h-11 w-11 lg:w-auto items-center justify-center gap-2 rounded-2xl bg-rose-600 lg:px-5 lg:shadow-xl lg:shadow-rose-500/20 text-sm font-black text-white hover:bg-rose-500 transition-all hover:scale-105 active:scale-95 animate-pulse"
+                        className="flex h-11 w-11 lg:w-auto items-center justify-center gap-2 rounded-2xl bg-rose-900 lg:px-5 lg:shadow-xl lg:shadow-rose-900/20 text-sm font-black text-white hover:bg-rose-800 transition-all hover:scale-105 active:scale-95"
                       >
                         <span className="text-lg lg:text-base">🚨</span> 
                         <span className="hidden lg:inline text-xs">Tarea Urgente</span>
