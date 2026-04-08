@@ -155,21 +155,9 @@ export async function cerrarSesion() {
 }
 
 /**
- * Verifica si un email está en la lista de perfiles "invitados" por un administrador.
- */
-export async function buscarInvitacion(email: string): Promise<boolean> {
-  const { data } = await supabase
-    .from('profiles')
-    .select('email')
-    .eq('email', email)
-    .single();
-  return !!data;
-}
-
-/**
- * Registra a un nuevo usuario invitado.
- * Supabase Auth creará el registro y nuestro flujo de 'login' se encargará 
- * de vincularlo con el perfil pre-existente por email.
+ * Registra a un nuevo usuario. 
+ * Primero crea la cuenta en Auth y luego verifica si tiene un perfil previo
+ * creado por Michael para vincularlo.
  */
 export async function registrar(email: string, clave: string): Promise<Sesion | null> {
   const { data, error } = await supabase.auth.signUp({
@@ -178,10 +166,35 @@ export async function registrar(email: string, clave: string): Promise<Sesion | 
   });
 
   if (error) {
-    console.error("Registration error:", error.message);
+    if (error.message.includes("already registered")) {
+      throw new Error("Este email ya está registrado. Intenta iniciar sesión con tu contraseña.");
+    }
     throw error;
   }
 
-  // Intentamos login inmediatamente para activar el 'Smart Link' de perfiles
+  if (!data.session) {
+    throw new Error("Se requiere confirmación por email o la cuenta no pudo crearse.");
+  }
+
+  // Ahora que estamos "logueados", comprobamos si Michael lo invitó (existe en profiles)
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('email', email)
+    .single();
+
+  if (!profile) {
+    // SECURITY FIREWALL: No estaba invitado. Borramos su rastro y fuera.
+    await supabase.auth.signOut();
+    throw new Error("Lo sentimos, este email no ha sido invitado por Michael al sistema.");
+  }
+
+  // ÉXITO: Estaba invitado. Vinculamos el perfil con el nuevo UID de Auth.
+  await supabase
+    .from('profiles')
+    .update({ id: data.session.user.id })
+    .eq('email', email);
+
+  // Re-login para asegurar que la sesión tiene el perfil vinculado
   return await login(email, clave);
 }
