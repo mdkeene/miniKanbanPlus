@@ -7,7 +7,9 @@ import {
   obtenerTareas, 
   guardarTarea as guardarTareaLib,
   eliminarTarea as eliminarTareaLib,
-  crearBorradorVacio
+  crearBorradorVacio,
+  crearTareaDesdeBorrador,
+  obtenerSiguienteIndice
 } from "@/lib/tareas";
 import { obtenerPersonas } from "@/lib/personas";
 import { obtenerProyectos } from "@/lib/proyectos";
@@ -125,9 +127,14 @@ export function TabBacklog() {
   }
 
   async function handleGuardarTarea(borrador: any) {
-    // La sincronización Realtime se encargará de actualizar la lista
-    // una vez que la base de datos confirme el guardado.
-    await guardarTareaLib(borrador);
+    // Si no tiene identificador es una tarea nueva
+    if (!borrador.identificador) {
+      const indice = obtenerSiguienteIndice(tareas, borrador.estado);
+      const nuevaTarea = crearTareaDesdeBorrador(borrador, indice);
+      await guardarTareaLib(nuevaTarea);
+    } else {
+      await guardarTareaLib(borrador);
+    }
     setTareaEditando(null);
     setCreandoNueva(null);
   }

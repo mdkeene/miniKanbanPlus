@@ -473,12 +473,13 @@ export function TableroKanban() {
     // SPILLOVER LOGIC: Si el tablero está bloqueado y movemos de Kanban a Backlog/Idea
     const esEstadoKanbanOriginal = ["DEFINIDO", "EN_CURSO", "BLOQUEADO", "TERMINADO"].includes(estadoArrastre.origen);
     const esEstadoNoKanbanDestino = ["IDEA", "BACKLOG"].includes(destinoDrop.estado);
-    const aplicarSpillover = modoBloqueado && esEstadoKanbanOriginal && esEstadoNoKanbanDestino;
+    const aplicarCambioLock = modoBloqueado && esEstadoKanbanOriginal && esEstadoNoKanbanDestino;
 
-    if (aplicarSpillover) {
+    if (aplicarCambioLock) {
       const tarea = tareas.find(t => t.identificador === estadoArrastre.identificador);
       if (tarea) {
-        await guardarTareaLib({ ...tarea, ...destinoDrop, esSpillover: true });
+        const flag = destinoDrop.estado === "BACKLOG" ? { esDevuelto: true } : { esSpillover: true };
+        await guardarTareaLib({ ...tarea, ...destinoDrop, ...flag });
       }
     } else {
       await moverTareaLib(estadoArrastre.identificador, destinoDrop);
@@ -725,9 +726,13 @@ export function TableroKanban() {
               <div className="fixed bottom-6 left-1/2 z-[80] -translate-x-1/2 flex items-center gap-3 rounded-full border border-slate-200 bg-white/90 backdrop-blur-xl px-5 py-3 shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
                 <span className="text-xs font-black text-sky-600 px-3 border-r border-slate-100">{seleccionadas.length} seleccionadas</span>
                 <div className="flex gap-1.5">
-                  <button onClick={duplicarSeleccionadas} className="h-9 px-3 rounded-xl bg-slate-900 text-[10px] font-black text-white hover:bg-slate-800 transition-all">👯 Clonar</button>
-                  <button onClick={moverASemanaSiguiente} className="h-9 px-3 rounded-xl bg-sky-600 text-[10px] font-black text-white hover:bg-sky-500 transition-all">📅 Sig. Semana</button>
-                  <button onClick={eliminarSeleccionadas} className="h-9 px-3 rounded-xl bg-rose-600 text-[10px] font-black text-white hover:bg-rose-500 transition-all">🗑️ Eliminar</button>
+                  {!modoBloqueado && (
+                    <>
+                      <button onClick={duplicarSeleccionadas} className="h-9 px-3 rounded-xl bg-slate-900 text-[10px] font-black text-white hover:bg-slate-800 transition-all">👯 Clonar</button>
+                      <button onClick={moverASemanaSiguiente} className="h-9 px-3 rounded-xl bg-sky-600 text-[10px] font-black text-white hover:bg-sky-500 transition-all">📅 Sig. Semana</button>
+                      <button onClick={eliminarSeleccionadas} className="h-9 px-3 rounded-xl bg-rose-600 text-[10px] font-black text-white hover:bg-rose-500 transition-all">🗑️ Eliminar</button>
+                    </>
+                  )}
                   <button onClick={() => setSeleccionadas([])} className="h-9 px-3 rounded-xl bg-slate-100 text-[10px] font-black text-slate-500 hover:bg-slate-200 transition-all font-bold">✕</button>
                 </div>
               </div>

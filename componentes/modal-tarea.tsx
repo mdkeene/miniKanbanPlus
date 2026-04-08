@@ -98,6 +98,25 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
     setFormulario((valorActual) => ({ ...valorActual, [clave]: valor }));
   }
 
+  const esEstadoKanban = (e: EstadoKanban) => ["DEFINIDO", "EN_CURSO", "BLOQUEADO", "TERMINADO"].includes(e);
+  
+  const estadosDisponibles = estadosKanban.filter(estado => {
+    if (!propiedades.modoBloqueado) return true;
+    
+    // Si estamos editando y la tarea ya estaba en el tablero semanal, permitimos todo el Kanban
+    if (propiedades.modo === "editar" && esEstadoKanban(propiedades.tarea.estado)) {
+      return true;
+    }
+
+    // Para tareas nuevas o tareas que están en Backlog/Idea, solo permitimos Backlog/Idea
+    // Excepción: Si es una Tarea Urgente que se está creando (ya viene como DEFINIDO)
+    if (propiedades.modo === "crear" && formulario.esUrgente) {
+      return esEstadoKanban(estado);
+    }
+
+    return ["IDEA", "BACKLOG"].includes(estado);
+  });
+
   function guardar() {
     const titulo = limpiarTextoPlano(formulario.titulo, limitesSeguridad.tituloMaximo);
     const enlace = formulario.enlace.trim();
@@ -194,12 +213,20 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
               <label className="etiqueta-campo">Estado</label>
               <select
                 value={formulario.estado}
-                onChange={(evento) =>
-                  actualizarCampo("estado", evento.target.value as EstadoKanban)
-                }
+                onChange={(evento) => {
+                  const nuevoEstado = evento.target.value as EstadoKanban;
+                  if (propiedades.modo === "editar" && propiedades.modoBloqueado) {
+                    const deKanbanABacklog = esEstadoKanban(propiedades.tarea.estado) && nuevoEstado === "BACKLOG";
+                    const deKanbanAIdea = esEstadoKanban(propiedades.tarea.estado) && nuevoEstado === "IDEA";
+                    
+                    if (deKanbanABacklog) actualizarCampo("esDevuelto", true);
+                    if (deKanbanAIdea) actualizarCampo("esSpillover", true);
+                  }
+                  actualizarCampo("estado", nuevoEstado);
+                }}
                 className="campo-formulario"
               >
-                {estadosKanban.map((estado) => (
+                {estadosDisponibles.map((estado) => (
                   <option key={estado} value={estado}>
                     {etiquetasEstado[estado]}
                   </option>

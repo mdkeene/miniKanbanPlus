@@ -49,7 +49,8 @@ export async function obtenerTareas(): Promise<Tarea[]> {
     semanaId: t.semana_id,
     proyectoId: t.proyecto_id,
     esUrgente: t.es_urgente,
-    esSpillover: t.es_spillover
+    esSpillover: t.es_spillover,
+    esDevuelto: t.es_devuelto
   }));
 }
 
@@ -73,7 +74,8 @@ export async function guardarTarea(tarea: Tarea) {
       proyecto_id: tarea.proyectoId || null,
       team_id: '00000000-0000-0000-0000-000000000001',
       es_urgente: tarea.esUrgente ?? false,
-      es_spillover: tarea.esSpillover ?? false
+      es_spillover: tarea.esSpillover ?? false,
+      es_devuelto: tarea.esDevuelto ?? false
     });
 
   if (error) {
@@ -147,6 +149,7 @@ export function crearTareaDesdeBorrador(
     proyectoId: borrador.proyectoId,
     esUrgente: borrador.esUrgente,
     esSpillover: borrador.esSpillover,
+    esDevuelto: borrador.esDevuelto,
     indiceOrden
   };
 }

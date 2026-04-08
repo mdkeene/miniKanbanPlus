@@ -74,6 +74,7 @@ export type Tarea = {
   proyectoId?: string;
   esUrgente?: boolean;
   esSpillover?: boolean;
+  esDevuelto?: boolean;
 };
 
 export type BorradorTarea = Omit<Tarea, "identificador" | "fechaCreacion" | "indiceOrden">;

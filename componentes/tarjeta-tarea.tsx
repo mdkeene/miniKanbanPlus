@@ -90,6 +90,11 @@ export function TarjetaTarea({
                 📦 SPILLOVER
               </span>
             )}
+            {tarea.esDevuelto && (
+              <span className="flex h-5 items-center rounded-lg bg-indigo-500 px-1.5 text-[8px] font-black text-white shadow-sm shadow-indigo-200">
+                ↩️ DEVUELTO
+              </span>
+            )}
           </div>
         </div>
 
