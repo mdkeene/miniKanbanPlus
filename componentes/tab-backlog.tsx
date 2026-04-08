@@ -6,12 +6,14 @@ import { ModalTarea } from "@/componentes/modal-tarea";
 import { 
   obtenerTareas, 
   guardarTarea as guardarTareaLib,
+  eliminarTarea as eliminarTareaLib,
   crearBorradorVacio
 } from "@/lib/tareas";
 import { obtenerPersonas } from "@/lib/personas";
 import { obtenerProyectos } from "@/lib/proyectos";
 import { obtenerSemanaId } from "@/lib/semanas";
 import { supabase } from "@/lib/supabase";
+import { obtenerConfigTablero } from "@/lib/config";
 import { 
   type Tarea, 
   type Persona, 
@@ -32,18 +34,21 @@ export function TabBacklog() {
   const [agruparPorPersona, setAgruparPorPersona] = useState(false);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [swimlanesExpandidos, setSwimlanesExpandidos] = useState<string[]>([]);
+  const [modoBloqueado, setModoBloqueado] = useState(false);
 
   useEffect(() => {
     async function cargarDatos() {
       try {
-        const [ts, ps, prjs] = await Promise.all([
+        const [ts, ps, prjs, config] = await Promise.all([
           obtenerTareas(),
           obtenerPersonas(),
-          obtenerProyectos()
+          obtenerProyectos(),
+          obtenerConfigTablero()
         ]);
         setTareas(ts || []);
         setPersonas(ps || []);
         setProyectos(prjs || []);
+        setModoBloqueado(config.locked_in);
       } catch (error) {
         console.error("Error cargando datos del Backlog:", error);
       } finally {
@@ -134,6 +139,13 @@ export function TabBacklog() {
       semanaId: obtenerSemanaId()
     };
     await handleGuardarTarea(tareaPromovida);
+  }
+
+  async function handleEliminarTarea(id: string) {
+    const confirmar = window.confirm("¿Estás seguro de que quieres eliminar esta tarea?");
+    if (!confirmar) return;
+    await eliminarTareaLib(id);
+    setTareaEditando(null);
   }
 
   if (cargando) {
@@ -285,6 +297,7 @@ export function TabBacklog() {
                         onSoltar={() => {}}
                         seleccionadas={[]}
                         alCambiarSeleccion={() => {}}
+                        modoBloqueado={modoBloqueado}
                       />
                     </div>
 
@@ -311,6 +324,7 @@ export function TabBacklog() {
                         onSoltar={() => {}}
                         seleccionadas={[]}
                         alCambiarSeleccion={() => {}}
+                        modoBloqueado={modoBloqueado}
                       />
                     </div>
                   </div>
@@ -343,6 +357,7 @@ export function TabBacklog() {
                   onSoltar={() => {}}
                   seleccionadas={[]}
                   alCambiarSeleccion={() => {}}
+                  modoBloqueado={modoBloqueado}
                />
             </div>
 
@@ -370,6 +385,7 @@ export function TabBacklog() {
                     onSoltar={() => {}}
                     seleccionadas={[]}
                     alCambiarSeleccion={() => {}}
+                    modoBloqueado={modoBloqueado}
                  />
                  
                  {/* Overlay informativo para Backlog */}
@@ -392,11 +408,9 @@ export function TabBacklog() {
           personas={personas}
           onCerrar={() => setTareaEditando(null)}
           onGuardarEdicion={handleGuardarTarea}
-          onEliminar={async (id) => {
-             // Lógica de eliminación...
-             setTareaEditando(null);
-          }}
+          onEliminar={handleEliminarTarea}
           alPromoverASprint={handlePromoverASprint}
+          modoBloqueado={modoBloqueado}
         />
       )}
 

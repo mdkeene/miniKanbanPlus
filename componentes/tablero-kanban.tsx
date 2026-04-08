@@ -57,6 +57,8 @@ import {
 } from "@/tipos/tareas";
 import { generarIdentificador } from "@/lib/tareas";
 import { supabase } from "@/lib/supabase";
+import { obtenerConfigTablero, actualizarConfigTablero } from "@/lib/config";
+import { obtenerSesion } from "@/lib/auth";
 
 const etiquetasEstado: Record<EstadoKanban, string> = {
   DEFINIDO: "Definido",
@@ -143,18 +145,24 @@ export function TableroKanban() {
   const [agruparPorPersona, setAgruparPorPersona] = useState(false);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [swimlanesExpandidos, setSwimlanesExpandidos] = useState<string[]>([]);
+  const [modoBloqueado, setModoBloqueado] = useState(false);
+  const [usuarioActual, setUsuarioActual] = useState<Persona | null>(null);
 
   useEffect(() => {
     async function inicializar() {
       try {
-        const [ps, ts, prjs] = await Promise.all([
+        const [ps, ts, prjs, config, sesion] = await Promise.all([
           obtenerPersonas(),
           obtenerTareas(),
-          obtenerProyectos()
+          obtenerProyectos(),
+          obtenerConfigTablero(),
+          obtenerSesion()
         ]);
         setPersonas(ps);
         setTareas(ts);
         setProyectos(prjs);
+        setModoBloqueado(config.locked_in);
+        setUsuarioActual(sesion?.usuario || null);
       } catch (e) {
         console.error("Error al cargar datos:", e);
       } finally {
@@ -302,7 +310,15 @@ export function TableroKanban() {
   }, [agruparPorPersona, tareasSemanales, personas]);
 
   function abrirCreacionRapida() {
+    if (modoBloqueado) return;
     setBorradorNuevaTarea(crearBorradorVacio("DEFINIDO", semanaActiva));
+  }
+
+  function abrirTareaUrgente() {
+    const borrador = crearBorradorVacio("DEFINIDO", semanaActiva);
+    borrador.esUrgente = true;
+    borrador.prioridad = "URGENTE";
+    setBorradorNuevaTarea(borrador);
   }
 
   async function guardarNuevaTarea(borrador: BorradorTarea) {
@@ -453,7 +469,21 @@ export function TableroKanban() {
 
   async function completarDrop() {
     if (!arrastreDisponible || !estadoArrastre || !destinoDrop) return;
-    await moverTareaLib(estadoArrastre.identificador, destinoDrop);
+    
+    // SPILLOVER LOGIC: Si el tablero está bloqueado y movemos de Kanban a Backlog/Idea
+    const esEstadoKanbanOriginal = ["DEFINIDO", "EN_CURSO", "BLOQUEADO", "TERMINADO"].includes(estadoArrastre.origen);
+    const esEstadoNoKanbanDestino = ["IDEA", "BACKLOG"].includes(destinoDrop.estado);
+    const aplicarSpillover = modoBloqueado && esEstadoKanbanOriginal && esEstadoNoKanbanDestino;
+
+    if (aplicarSpillover) {
+      const tarea = tareas.find(t => t.identificador === estadoArrastre.identificador);
+      if (tarea) {
+        await guardarTareaLib({ ...tarea, ...destinoDrop, esSpillover: true });
+      }
+    } else {
+      await moverTareaLib(estadoArrastre.identificador, destinoDrop);
+    }
+
     await recargarTareas();
     setMensajeSistema({ tipo: "exito", texto: "Tarea reubicada." });
     setEstadoArrastre(null);
@@ -499,6 +529,36 @@ export function TableroKanban() {
   return (
     <main className="min-h-screen bg-white text-slate-900">
       <div className="flex h-screen flex-col overflow-hidden">
+        
+        {/* Toggle de Modo de Tablero */}
+        <div className={`shrink-0 flex items-center justify-between px-6 py-2 border-b transition-colors duration-500 ${modoBloqueado ? 'bg-slate-900 border-slate-800' : 'bg-sky-50/50 border-sky-100'}`}>
+          <div className="flex items-center gap-3">
+             <span className={`text-[10px] font-black uppercase tracking-widest ${modoBloqueado ? 'text-slate-400' : 'text-sky-600'}`}>
+               Estado del Tablero:
+             </span>
+             <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase ${modoBloqueado ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'}`}>
+                {modoBloqueado ? '🔒 Locked In (Ejecución)' : '📂 Planning (Planificación)'}
+             </div>
+          </div>
+
+          {usuarioActual?.rol === 'admin' && (
+            <button 
+              onClick={async () => {
+                const nuevoEstado = !modoBloqueado;
+                await actualizarConfigTablero(nuevoEstado);
+                setModoBloqueado(nuevoEstado);
+                setMensajeSistema({ tipo: "exito", texto: nuevoEstado ? "Tablero BLOQUEADO para ejecución." : "Tablero abierto para PLANIFICACIÓN." });
+              }}
+              className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${
+                modoBloqueado 
+                  ? 'bg-sky-500 text-white hover:bg-sky-400 shadow-lg shadow-sky-500/20' 
+                  : 'bg-slate-950 text-white hover:bg-slate-800 shadow-xl'
+              }`}
+            >
+              {modoBloqueado ? '🔓 Abrir Planificación' : '🔒 Bloquear Tablero'}
+            </button>
+          )}
+        </div>
 
         <div className="flex-1 overflow-auto bg-white p-4 md:p-6 custom-scrollbar">
           <div className="mx-auto w-full max-w-full">
@@ -535,14 +595,27 @@ export function TableroKanban() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <button 
-                      onClick={abrirCreacionRapida}
-                      title="Nueva Tarea"
-                      className="flex h-11 w-11 lg:w-auto items-center justify-center gap-2 rounded-2xl bg-slate-950 lg:px-5 lg:shadow-xl lg:shadow-slate-950/20 text-sm font-black text-white hover:bg-slate-800 transition-all hover:scale-105 active:scale-95"
-                    >
-                      <span className="text-lg lg:text-base">+</span> 
-                      <span className="hidden lg:inline text-xs">Nueva Tarea</span>
-                    </button>
+                    {!modoBloqueado ? (
+                      <>
+                        <button 
+                          onClick={abrirCreacionRapida}
+                          title="Nueva Tarea"
+                          className="flex h-11 w-11 lg:w-auto items-center justify-center gap-2 rounded-2xl bg-slate-950 lg:px-5 lg:shadow-xl lg:shadow-slate-950/20 text-sm font-black text-white hover:bg-slate-800 transition-all hover:scale-105 active:scale-95"
+                        >
+                          <span className="text-lg lg:text-base">+</span> 
+                          <span className="hidden lg:inline text-xs">Nueva Tarea</span>
+                        </button>
+                      </>
+                    ) : (
+                      <button 
+                        onClick={abrirTareaUrgente}
+                        title="Tarea Urgente"
+                        className="flex h-11 w-11 lg:w-auto items-center justify-center gap-2 rounded-2xl bg-rose-600 lg:px-5 lg:shadow-xl lg:shadow-rose-500/20 text-sm font-black text-white hover:bg-rose-500 transition-all hover:scale-105 active:scale-95 animate-pulse"
+                      >
+                        <span className="text-lg lg:text-base">🚨</span> 
+                        <span className="hidden lg:inline text-xs">Tarea Urgente</span>
+                      </button>
+                    )}
 
                     <button 
                       onClick={() => setMostrarFiltros(!mostrarFiltros)}
@@ -584,7 +657,7 @@ export function TableroKanban() {
                       value={filtroPersona}
                       onChange={(e) => setFiltroPersona(e.target.value)}
                     >
-                      <option value="todos">Todas</option>
+                      <option value="todas">Todas</option>
                       <option value="sin-asignar">Sin asignar</option>
                       {personas.map(p => (
                         <option key={p.identificador} value={p.identificador}>{p.nombre}</option>
@@ -628,13 +701,15 @@ export function TableroKanban() {
                     {agruparPorPersona ? "🏊 Calles" : "🏢 Base"}
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setModalCargaAbierto(true)}
-                    className="h-11 px-4 rounded-2xl bg-amber-100 text-[11px] font-black text-amber-900 hover:bg-amber-200 transition-all"
-                  >
-                    🚀 Carga Rápida
-                  </button>
+                  {!modoBloqueado && (
+                    <button
+                      type="button"
+                      onClick={() => setModalCargaAbierto(true)}
+                      className="h-11 px-4 rounded-2xl bg-amber-100 text-[11px] font-black text-amber-900 hover:bg-amber-200 transition-all"
+                    >
+                      🚀 Carga Rápida
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -718,6 +793,7 @@ export function TableroKanban() {
                                   sel ? [...actual, id] : actual.filter((i) => i !== id)
                                 );
                               }}
+                              modoBloqueado={modoBloqueado}
                             />
                           );
                         })}
@@ -751,6 +827,7 @@ export function TableroKanban() {
                           sel ? [...actual, id] : actual.filter((i) => i !== id)
                         );
                       }}
+                      modoBloqueado={modoBloqueado}
                     />
                   ))}
                 </div>
@@ -770,6 +847,7 @@ export function TableroKanban() {
           onGuardarEdicion={guardarEdicionCompleta}
           onEliminar={eliminarTareaBoard}
           alMoverABacklog={manejarMoverABacklog}
+          modoBloqueado={modoBloqueado}
         />
       )}
 

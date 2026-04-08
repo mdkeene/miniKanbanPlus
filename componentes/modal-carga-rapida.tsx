@@ -16,16 +16,6 @@ type PropiedadesModalCargaRapida = {
   onCrear: (configuracion: ConfiguracionCargaRapida) => void;
 };
 
-const opcionesTipo: TipoTarea[] = [
-  "Reunion",
-  "Analisis",
-  "Planificacion",
-  "Seguimiento",
-  "Documentacion",
-  "Coordinacion",
-  "Ejecución"
-];
-
 const opcionesPrioridad: PrioridadTarea[] = ["BAJA", "MEDIA", "ALTA", "URGENTE"];
 
 const etiquetasEstado: Record<EstadoKanban, string> = {
@@ -101,19 +91,6 @@ export function ModalCargaRapida({
 
           {/* Configuration Grid */}
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-1">
-              <label className="etiqueta-campo ml-1 text-[11px]">Tipo de Tarea</label>
-              <select
-                value={configuracion.tipo}
-                onChange={(evento) => actualizarCampo("tipo", evento.target.value as TipoTarea)}
-                className="campo-formulario h-11 text-sm"
-              >
-                {opcionesTipo.map((tipo) => (
-                  <option key={tipo} value={tipo}>{tipo}</option>
-                ))}
-              </select>
-            </div>
-
             <div className="space-y-1">
               <label className="etiqueta-campo ml-1 text-[11px]">Prioridad Global</label>
               <select

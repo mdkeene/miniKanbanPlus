@@ -23,6 +23,7 @@ import { obtenerSesion } from "@/lib/auth";
 type PropiedadesBase = {
   personas: Persona[];
   onCerrar: () => void;
+  modoBloqueado?: boolean;
 };
 
 type PropiedadesCrear = PropiedadesBase & {
@@ -154,6 +155,14 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
               <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
                 {esEditar ? "Actualizar información" : "Captura los detalles"}
               </h2>
+              <div className="mt-2 flex gap-2">
+                {formulario.esUrgente && (
+                  <span className="rounded-lg bg-rose-500 px-2 py-0.5 text-[10px] font-black text-white">🚨 TAREA URGENTE</span>
+                )}
+                {formulario.esSpillover && (
+                  <span className="rounded-lg bg-amber-500 px-2 py-0.5 text-[10px] font-black text-white">📦 SPILLOVER</span>
+                )}
+              </div>
             </div>
             <button
               type="button"
@@ -173,7 +182,8 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
               <input
                 value={formulario.titulo}
                 onChange={(evento) => actualizarCampo("titulo", evento.target.value)}
-                className="campo-formulario !text-lg focus:ring-4 focus:ring-sky-500/5 transition-all"
+                className="campo-formulario !text-lg focus:ring-4 focus:ring-sky-500/5 transition-all disabled:opacity-75 disabled:cursor-not-allowed"
+                disabled={propiedades.modoBloqueado && esEditar}
                 maxLength={limitesSeguridad.tituloMaximo}
                 placeholder="¿Qué hay que hacer?"
                 autoFocus
@@ -303,13 +313,15 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
             <div className="flex flex-wrap gap-2">
               {esEditar && (
                 <>
-                  <button
-                    type="button"
-                    onClick={() => propiedades.onEliminar(propiedades.tarea.identificador)}
-                    className="flex-1 rounded-2xl bg-rose-50 px-5 py-3 text-sm font-black text-rose-600 transition hover:bg-rose-100 sm:flex-none"
-                  >
-                    🗑️ Borrar
-                  </button>
+                  {!propiedades.modoBloqueado && (
+                    <button
+                      type="button"
+                      onClick={() => propiedades.onEliminar(propiedades.tarea.identificador)}
+                      className="flex-1 rounded-2xl bg-rose-50 px-5 py-3 text-sm font-black text-rose-600 transition hover:bg-rose-100 sm:flex-none"
+                    >
+                      🗑️ Borrar
+                    </button>
+                  )}
                   {propiedades.tarea.estado === "BACKLOG" && propiedades.alPromoverASprint && (
                     <button
                       type="button"

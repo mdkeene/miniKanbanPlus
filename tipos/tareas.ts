@@ -72,6 +72,8 @@ export type Tarea = {
   indiceOrden: number;
   semanaId: string; // Formato "YYYY-WNN" (ej. 2024-W12)
   proyectoId?: string;
+  esUrgente?: boolean;
+  esSpillover?: boolean;
 };
 
 export type BorradorTarea = Omit<Tarea, "identificador" | "fechaCreacion" | "indiceOrden">;
@@ -122,4 +124,8 @@ export type DestinoArrastre = {
 export type Sesion = {
   usuario: Persona;
   token: string;
+};
+
+export type ConfigTablero = {
+  locked_in: boolean;
 };

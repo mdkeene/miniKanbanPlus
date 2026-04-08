@@ -24,6 +24,7 @@ type PropiedadesColumnaKanban = {
   onSoltar: () => void;
   seleccionadas: string[];
   alCambiarSeleccion: (identificador: string, seleccionada: boolean) => void;
+  modoBloqueado?: boolean;
 };
 
 export function ColumnaKanban({
@@ -43,7 +44,8 @@ export function ColumnaKanban({
   onActualizarDestino,
   onSoltar,
   seleccionadas,
-  alCambiarSeleccion
+  alCambiarSeleccion,
+  modoBloqueado = false
 }: PropiedadesColumnaKanban) {
   const destinoCoincide = destinoDrop?.estado === estado && destinoDrop?.personaId === personaId;
   const mostrarHuecoFinal = destinoCoincide && destinoDrop.indice === tareas.length;
@@ -131,6 +133,7 @@ export function ColumnaKanban({
                 onFinalizarArrastre={onFinalizarArrastre}
                 seleccionada={seleccionadas.includes(tarea.identificador)}
                 alCambiarSeleccion={(sel) => alCambiarSeleccion(tarea.identificador, sel)}
+                modoBloqueado={modoBloqueado}
               />
             </div>
           );

@@ -16,6 +16,7 @@ type PropiedadesTarjetaTarea = {
   onFinalizarArrastre: () => void;
   seleccionada: boolean;
   alCambiarSeleccion: (seleccionada: boolean) => void;
+  modoBloqueado?: boolean;
 };
 
 const bordesPrioridad: Record<PrioridadTarea, string> = {
@@ -36,7 +37,8 @@ export function TarjetaTarea({
   onIniciarArrastre,
   onFinalizarArrastre,
   seleccionada,
-  alCambiarSeleccion
+  alCambiarSeleccion,
+  modoBloqueado = false
 }: PropiedadesTarjetaTarea) {
   const [edicionRapida, setEdicionRapida] = useState(false);
   const [tituloTemporal, setTituloTemporal] = useState(tarea.titulo);
@@ -76,6 +78,18 @@ export function TarjetaTarea({
             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400/80">
               {tarea.identificador}
             </span>
+          </div>
+          <div className="flex gap-1">
+            {tarea.esUrgente && (
+              <span className="flex h-5 items-center rounded-lg bg-rose-500 px-1.5 text-[8px] font-black text-white shadow-sm shadow-rose-200 animate-pulse">
+                🚨 URGENTE
+              </span>
+            )}
+            {tarea.esSpillover && (
+              <span className="flex h-5 items-center rounded-lg bg-amber-500 px-1.5 text-[8px] font-black text-white shadow-sm shadow-amber-200">
+                📦 SPILLOVER
+              </span>
+            )}
           </div>
         </div>
 
@@ -146,7 +160,8 @@ export function TarjetaTarea({
             e.stopPropagation();
             setEdicionRapida(true);
           }}
-          className="absolute right-3 top-2 flex h-7 w-7 items-center justify-center rounded-lg bg-white opacity-0 shadow-sm border border-slate-100 text-slate-400 transition-all hover:bg-sky-50 hover:text-sky-600 hover:border-sky-100 group-hover:opacity-100"
+          className="absolute right-3 top-2 flex h-7 w-7 items-center justify-center rounded-lg bg-white opacity-0 shadow-sm border border-slate-100 text-slate-400 transition-all hover:bg-sky-50 hover:text-sky-600 hover:border-sky-100 group-hover:opacity-100 disabled:hidden"
+          disabled={modoBloqueado}
         >
           <span className="text-xs">✎</span>
         </button>

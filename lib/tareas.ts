@@ -47,7 +47,9 @@ export async function obtenerTareas(): Promise<Tarea[]> {
     personaAsignadaId: t.persona_asignada_id,
     indiceOrden: t.indice_orden,
     semanaId: t.semana_id,
-    proyectoId: t.proyecto_id
+    proyectoId: t.proyecto_id,
+    esUrgente: t.es_urgente,
+    esSpillover: t.es_spillover
   }));
 }
 
@@ -69,7 +71,9 @@ export async function guardarTarea(tarea: Tarea) {
       indice_orden: tarea.indiceOrden,
       semana_id: tarea.semanaId,
       proyecto_id: tarea.proyectoId || null,
-      team_id: '00000000-0000-0000-0000-000000000001'
+      team_id: '00000000-0000-0000-0000-000000000001',
+      es_urgente: tarea.esUrgente ?? false,
+      es_spillover: tarea.esSpillover ?? false
     });
 
   if (error) {
@@ -116,7 +120,9 @@ export function crearBorradorVacio(
     estado,
     personaAsignadaId: "",
     semanaId: semanaId,
-    proyectoId: undefined
+    proyectoId: undefined,
+    esUrgente: false,
+    esSpillover: false
   };
 }
 
@@ -139,6 +145,8 @@ export function crearTareaDesdeBorrador(
     personaAsignadaId: borrador.personaAsignadaId,
     semanaId: borrador.semanaId,
     proyectoId: borrador.proyectoId,
+    esUrgente: borrador.esUrgente,
+    esSpillover: borrador.esSpillover,
     indiceOrden
   };
 }
