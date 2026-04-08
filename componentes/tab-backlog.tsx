@@ -214,6 +214,33 @@ export function TabBacklog() {
     setModalCargaAbierto(false);
   }
 
+  async function manejarPromoverSeleccionadas() {
+    if (seleccionadas.length === 0) return;
+    
+    const semanaActual = obtenerSemanaId();
+    for (const id of seleccionadas) {
+      const tarea = tareas.find(t => t.identificador === id);
+      if (tarea) {
+        await guardarTareaLib({
+          ...tarea,
+          estado: "DEFINIDO",
+          semanaId: semanaActual
+        });
+      }
+    }
+    setSeleccionadas([]);
+  }
+
+  async function manejarEliminarSeleccionadas() {
+    if (seleccionadas.length === 0) return;
+    if (!window.confirm(`¿Estás seguro de que quieres eliminar ${seleccionadas.length} tareas?`)) return;
+
+    for (const id of seleccionadas) {
+      await eliminarTareaLib(id);
+    }
+    setSeleccionadas([]);
+  }
+
   if (cargando) {
     return (
       <div className="flex h-full items-center justify-center bg-slate-50/50">
@@ -534,6 +561,41 @@ export function TabBacklog() {
           onCerrar={() => setModalCargaAbierto(false)}
           onCrear={crearDesdeCargaRapida}
         />
+      )}
+
+      {/* Barra de Acciones en Lote (Flotante) */}
+      {seleccionadas.length > 0 && (
+        <div className="fixed bottom-10 left-1/2 z-[80] -translate-x-1/2 flex items-center gap-4 rounded-full border border-slate-200 bg-white/90 backdrop-blur-xl px-6 py-4 shadow-2xl animate-in slide-in-from-bottom-6 duration-300">
+          <div className="flex items-center gap-3 pr-4 border-r border-slate-100">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-sky-500 text-[10px] font-black text-white shadow-lg shadow-sky-500/20">
+              {seleccionadas.length}
+            </span>
+            <span className="text-sm font-black text-slate-900 tracking-tight">Seleccionadas</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {!modoBloqueado && (
+              <button 
+                onClick={manejarPromoverSeleccionadas}
+                className="h-10 px-5 rounded-xl bg-sky-600 text-xs font-black text-white shadow-lg shadow-sky-600/20 hover:bg-sky-500 hover:-translate-y-0.5 transition-all"
+              >
+                🚀 Pasar a Sprint
+              </button>
+            )}
+            <button 
+              onClick={manejarEliminarSeleccionadas}
+              className="h-10 px-5 rounded-xl bg-rose-600 text-xs font-black text-white shadow-lg shadow-rose-600/20 hover:bg-rose-500 hover:-translate-y-0.5 transition-all"
+            >
+              🗑️ Eliminar
+            </button>
+            <button 
+              onClick={() => setSeleccionadas([])}
+              className="ml-2 h-10 w-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 transition-all font-bold"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
