@@ -18,6 +18,7 @@ import {
   estadosKanban
 } from "@/tipos/tareas";
 import { obtenerProyectos } from "@/lib/proyectos";
+import { obtenerSesion } from "@/lib/auth";
 
 type PropiedadesBase = {
   personas: Persona[];
@@ -41,15 +42,6 @@ type PropiedadesEditar = PropiedadesBase & {
 
 type PropiedadesModalTarea = PropiedadesCrear | PropiedadesEditar;
 
-const opcionesTipo: TipoTarea[] = [
-  "Reunion",
-  "Analisis",
-  "Planificacion",
-  "Seguimiento",
-  "Documentacion",
-  "Coordinacion",
-  "Ejecución"
-];
 const opcionesPrioridad: PrioridadTarea[] = ["BAJA", "MEDIA", "ALTA", "URGENTE"];
 
 const etiquetasEstado: Record<EstadoKanban, string> = {
@@ -62,13 +54,11 @@ const etiquetasEstado: Record<EstadoKanban, string> = {
 };
 
 export function ModalTarea(propiedades: PropiedadesModalTarea) {
-  const obtenerEstadoInicial = () => {
+  const [formulario, setFormulario] = useState<BorradorTarea>(() => {
     if (propiedades.modo === "editar") {
       return {
         titulo: propiedades.tarea.titulo,
-        tipo: propiedades.tarea.tipo,
         prioridad: propiedades.tarea.prioridad,
-        complejidad: propiedades.tarea.complejidad,
         fechaDeseableFin: propiedades.tarea.fechaDeseableFin,
         observaciones: propiedades.tarea.observaciones,
         enlace: propiedades.tarea.enlace,
@@ -78,24 +68,24 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
         proyectoId: propiedades.tarea.proyectoId
       };
     }
-    
-    // Modo crear
-    const borrador = { ...propiedades.borrador };
-    // Michael: Las ideas no necesitan dueño inicial
-    if (borrador.estado !== "IDEA" && !borrador.personaAsignadaId && propiedades.personas.length > 0) {
-      borrador.personaAsignadaId = propiedades.personas[0].identificador;
-    }
-    return borrador;
-  };
-
-  const [formulario, setFormulario] = useState<BorradorTarea>(obtenerEstadoInicial);
+    return { ...propiedades.borrador };
+  });
+  
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
     async function cargar() {
-      const p = await obtenerProyectos();
+      const [p, sesion] = await Promise.all([
+        obtenerProyectos(),
+        obtenerSesion()
+      ]);
       setProyectos(p);
+
+      // Default assignment logic:
+      if (propiedades.modo === "crear" && !formulario.personaAsignadaId && sesion) {
+        setFormulario(prev => ({ ...prev, personaAsignadaId: sesion.usuario.identificador }));
+      }
     }
     cargar();
   }, []);
@@ -208,23 +198,6 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
             </div>
 
             <div className="space-y-1">
-              <label className="etiqueta-campo">Tipo de Actividad</label>
-              <select
-                value={formulario.tipo}
-                onChange={(evento) =>
-                  actualizarCampo("tipo", evento.target.value as TipoTarea)
-                }
-                className="campo-formulario"
-              >
-                {opcionesTipo.map((tipo) => (
-                  <option key={tipo} value={tipo}>
-                    {tipo}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-1">
               <label className="etiqueta-campo">Prioridad</label>
               <select
                 value={formulario.prioridad}
@@ -239,23 +212,6 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
                 {opcionesPrioridad.map((prioridad) => (
                   <option key={prioridad} value={prioridad}>
                     {prioridad}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-1">
-              <label className="etiqueta-campo">Complejidad (Story Points)</label>
-              <select
-                value={formulario.complejidad}
-                onChange={(evento) =>
-                  actualizarCampo("complejidad", parseInt(evento.target.value) as any)
-                }
-                className="campo-formulario"
-              >
-                {[1, 2, 3, 5, 8].map((v) => (
-                  <option key={v} value={v}>
-                    {v} {v === 1 ? "Punto (Muy fácil)" : "Puntos"}
                   </option>
                 ))}
               </select>

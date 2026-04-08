@@ -25,17 +25,6 @@ const bordesPrioridad: Record<PrioridadTarea, string> = {
   URGENTE: "border-l-rose-500"
 };
 
-function BarrasComplejidad({ puntos }: { puntos: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {Array.from({ length: Math.min(puntos, 8) }).map((_, i) => (
-        <div key={i} className={`h-3 w-1 rounded-full ${
-          puntos <= 3 ? "bg-emerald-400" : puntos <= 5 ? "bg-sky-500" : "bg-amber-500"
-        }`} />
-      ))}
-    </div>
-  );
-}
 
 export function TarjetaTarea({
   tarea,
@@ -88,7 +77,6 @@ export function TarjetaTarea({
               {tarea.identificador}
             </span>
           </div>
-          <BarrasComplejidad puntos={tarea.complejidad} />
         </div>
 
         {/* Título o Edición */}
@@ -130,9 +118,6 @@ export function TarjetaTarea({
         {/* Footer: Tags, Fecha y Avatar */}
         <div className="flex items-end justify-between mt-1 gap-2">
           <div className="flex flex-wrap items-center gap-2 max-w-[70%]">
-            <span className="inline-flex items-center rounded-lg bg-slate-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-slate-500">
-              {tarea.tipo}
-            </span>
             {tarea.fechaDeseableFin && (
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="text-[10px] font-bold text-slate-400 whitespace-nowrap">

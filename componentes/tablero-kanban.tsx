@@ -603,7 +603,6 @@ export function TableroKanban() {
                     >
                       <option value="manual">Manual</option>
                       <option value="titulo">Título</option>
-                      <option value="tipo">Tipo</option>
                       <option value="prioridad">Prioridad</option>
                       <option value="fechaDeseable">Fecha</option>
                       <option value="fechaCreacion">Registro</option>

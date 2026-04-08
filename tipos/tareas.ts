@@ -61,9 +61,9 @@ export type Tarea = {
   identificador: string;
   fechaCreacion: string;
   titulo: string;
-  tipo: TipoTarea;
+  tipo?: TipoTarea;
   prioridad: PrioridadTarea;
-  complejidad: ComplejidadTarea;
+  complejidad?: ComplejidadTarea;
   fechaDeseableFin: string;
   observaciones: string;
   enlace: string;

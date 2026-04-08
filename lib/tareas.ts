@@ -58,9 +58,9 @@ export async function guardarTarea(tarea: Tarea) {
       id: tarea.identificador,
       fecha_creacion: tarea.fechaCreacion,
       titulo: tarea.titulo,
-      tipo: tarea.tipo,
+      tipo: tarea.tipo || "Ejecución",
       prioridad: tarea.prioridad,
-      complejidad: tarea.complejidad,
+      complejidad: tarea.complejidad || 1,
       fecha_deseable_fin: tarea.fechaDeseableFin || null,
       observaciones: tarea.observaciones,
       enlace: tarea.enlace,
@@ -109,9 +109,7 @@ export function crearBorradorVacio(
 ): BorradorTarea {
   return {
     titulo: "",
-    tipo: "Planificacion",
     prioridad: "MEDIA",
-    complejidad: 1,
     fechaDeseableFin: "",
     observaciones: "",
     enlace: "",
@@ -130,9 +128,7 @@ export function crearTareaDesdeBorrador(
     identificador: generarIdentificador(),
     fechaCreacion: new Date().toISOString(),
     titulo: limpiarTextoPlano(borrador.titulo, limitesSeguridad.tituloMaximo),
-    tipo: borrador.tipo,
     prioridad: borrador.prioridad,
-    complejidad: borrador.complejidad,
     fechaDeseableFin: borrador.fechaDeseableFin,
     observaciones: limpiarTextoMultilinea(
       borrador.observaciones,
@@ -170,9 +166,6 @@ export function agruparPorEstado(
     switch (orden) {
       case "titulo":
         comparacion = a.titulo.localeCompare(b.titulo);
-        break;
-      case "tipo":
-        comparacion = a.tipo.localeCompare(b.tipo);
         break;
       case "prioridad":
         comparacion =
