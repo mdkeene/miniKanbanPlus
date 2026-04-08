@@ -177,20 +177,29 @@ export async function guardarPersona(persona: Persona) {
 }
 
 export async function eliminarPersona(identificador: string): Promise<{ success: boolean; error?: string }> {
-  // 🛡️ REASIGNACIÓN PREVENTIVA (Superpoder de Borrado)
-  // Antes de borrar, pasamos sus tareas al administrador para evitar bloqueos
-  if (identificador !== "PR-ADMIN") {
-    const { error: errorReasignacion } = await supabase
-      .from('tareas')
-      .update({ personaAsignadaId: 'PR-ADMIN' })
-      .eq('personaAsignadaId', identificador);
-    
-    if (errorReasignacion) {
-      console.warn("Aviso: No se pudieron reasignar tareas automáticamente:", errorReasignacion.message);
-    }
+  // 🛡️ REASIGNACIÓN DINÁMICA (Superpoder de Borrado v2)
+  // 1. Buscamos al primer administrador real disponible
+  const { data: adminData } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('rol', 'admin')
+    .neq('id', identificador) // No nos reasignamos a nosotros mismos si nos estamos borrando
+    .limit(1)
+    .single();
+
+  const idDestino = adminData?.id || null;
+
+  // 2. Intentamos mover las tareas al administrador real o dejarlas sin asignar
+  const { error: errorReasignacion } = await supabase
+    .from('tareas')
+    .update({ personaAsignadaId: idDestino })
+    .eq('personaAsignadaId', identificador);
+  
+  if (errorReasignacion) {
+    console.warn("Aviso: No se pudieron reasignar tareas automáticamente. Intentando borrado forzado...", errorReasignacion.message);
   }
 
-  // Intentar borrar el perfil
+  // 3. Intentar borrar el perfil
   const { error } = await supabase
     .from('profiles')
     .delete()
