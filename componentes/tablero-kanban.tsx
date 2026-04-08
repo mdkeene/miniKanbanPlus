@@ -362,8 +362,10 @@ export function TableroKanban() {
   }
 
   async function manejarMoverABacklog(tarea: Tarea) {
-    const tareaActualizada = { ...tarea, estado: "BACKLOG" as const };
+    const backupFlags = modoBloqueado ? { esDevuelto: true } : {};
+    const tareaActualizada = { ...tarea, estado: "BACKLOG" as const, ...backupFlags };
     await guardarTareaLib(tareaActualizada);
+    await recargarTareas(); // Requerido para ver el badge si se queda en vista (aunque se cierra el modal)
     setTareaEnEdicion(null);
     setMensajeSistema({ texto: "Tarea enviada al Backlog", tipo: "exito" });
   }
