@@ -94,12 +94,13 @@ export function TabProyectos() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="p-6 md:p-8 lg:p-10 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[1600px] mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       
       {/* Columna Izquierda: Lista de Proyectos (Maestro) */}
       <div className="flex flex-col gap-4 lg:col-span-4 lg:sticky lg:top-32 max-h-[calc(100vh-140px)]">
-        <div className="flex items-center justify-between rounded-[32px] bg-white/80 p-5 shadow-panel backdrop-blur border border-white/70">
-          <h2 className="text-xl font-bold text-slate-900">Proyectos</h2>
+        <div className="flex items-center justify-between rounded-[24px] bg-white p-5 shadow-sm border border-slate-200">
+          <h2 className="text-xl font-black text-slate-900">Proyectos</h2>
           <button 
             onClick={cancelarEdicion}
             className="flex h-10 items-center justify-center rounded-2xl bg-sky-100 px-4 text-sm font-black text-sky-600 transition-all hover:bg-sky-200 hover:scale-105 active:scale-95"
@@ -120,10 +121,10 @@ export function TabProyectos() {
                 <div 
                   key={proyecto.identificador}
                   onClick={() => iniciarEdicion(proyecto)}
-                  className={`group relative flex cursor-pointer flex-col gap-1 rounded-[24px] border p-5 backdrop-blur transition-all ${
+                  className={`group relative flex cursor-pointer flex-col gap-1 rounded-[24px] border p-5 transition-all ${
                     activo 
-                      ? "border-sky-200 bg-white shadow-xl scale-[1.02] z-10" 
-                      : "border-white/50 bg-white/60 shadow-sm hover:bg-white hover:shadow-md"
+                      ? "border-sky-400 bg-white shadow-md scale-[1.02] z-10" 
+                      : "border-slate-100 bg-white shadow-sm hover:border-slate-300 hover:shadow-md"
                   }`}
                 >
                   <div 
@@ -158,8 +159,8 @@ export function TabProyectos() {
       <div className="flex flex-col gap-6 lg:col-span-8">
         
         {/* Formulario de Proyecto */}
-        <section className="rounded-[32px] border border-white/70 bg-white/80 p-6 shadow-panel backdrop-blur xl:p-8">
-          <h2 className="text-2xl font-bold text-slate-900 mb-6">
+        <section className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm xl:p-8">
+          <h2 className="text-2xl font-black text-slate-900 mb-6">
             {editandoProyecto ? "Editar Proyecto" : "Nuevo Proyecto"}
           </h2>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -218,9 +219,9 @@ export function TabProyectos() {
 
         {/* Tareas Periódicas (Solo si editando) */}
         {editandoProyecto && (
-          <section className="rounded-[32px] border border-white/70 bg-white/80 p-6 shadow-panel backdrop-blur xl:p-8 animate-in fade-in slide-in-from-top-4 duration-300">
+          <section className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm xl:p-8 animate-in fade-in slide-in-from-top-4 duration-300">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-slate-900">Tareas Recurrentes</h3>
+              <h3 className="text-xl font-black text-slate-900">Tareas Recurrentes</h3>
               <button 
                 onClick={() => {
                   const pActual = proyectos.find(p => p.identificador === editandoProyecto.identificador);
@@ -402,6 +403,7 @@ export function TabProyectos() {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

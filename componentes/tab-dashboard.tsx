@@ -143,7 +143,7 @@ export function TabDashboard() {
   }, [tareas, proyectos, personas, tipoPeriodo, offset]);
 
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="p-6 md:p-10 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[1600px] mx-auto">
       {/* Selector de Periodo y Resumen */}
       <header className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
@@ -181,12 +181,12 @@ export function TabDashboard() {
       {/* Tarjetas de Resumen */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {[
-          { label: "Tareas Totales", value: stats.total, unit: "items", sub: `${stats.completadas} completadas`, color: "slate" },
-          { label: "Puntos de Esfuerzo", value: stats.puntosTotales, unit: "pts", sub: "Carga Fibonacci", color: "sky" },
-          { label: "Progreso Tareas", value: `${stats.progreso}%`, bar: stats.progreso, color: "slate" },
-          { label: "Progreso Esfuerzo", value: `${stats.progresoPuntos}%`, bar: stats.progresoPuntos, color: "sky" }
+          { label: "Tareas Totales", value: stats.total, unit: "items", sub: `${stats.completadas} completadas`, color: "slate", border: "border-slate-200" },
+          { label: "Puntos de Esfuerzo", value: stats.puntosTotales, unit: "pts", sub: "Carga Fibonacci", color: "sky", border: "border-sky-100" },
+          { label: "Progreso Tareas", value: `${stats.progreso}%`, bar: stats.progreso, color: "slate", border: "border-slate-200" },
+          { label: "Progreso Esfuerzo", value: `${stats.progresoPuntos}%`, bar: stats.progresoPuntos, color: "sky", border: "border-sky-100" }
         ].map((c, i) => (
-          <div key={i} className="rounded-[40px] border border-white bg-white/80 p-8 shadow-panel backdrop-blur transition-transform hover:scale-[1.02]">
+          <div key={i} className={`rounded-[24px] border ${c.border} bg-white p-8 shadow-sm transition-all hover:border-sky-400 hover:shadow-md`}>
             <span className="text-xs font-black uppercase tracking-widest text-slate-400">{c.label}</span>
             <div className="mt-3 flex items-baseline gap-2">
               <span className={`text-5xl font-black ${c.color === "sky" ? "text-sky-600" : "text-slate-900"}`}>{c.value}</span>
@@ -208,10 +208,10 @@ export function TabDashboard() {
 
       <div className="grid gap-10 lg:grid-cols-2">
         {/* Distribución por Proyecto - SALUD DEL PROYECTO */}
-        <section className="rounded-[40px] border border-white bg-white p-10 shadow-panel">
+        <section className="rounded-[24px] border border-slate-200 bg-white p-8 md:p-10 shadow-sm">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-2xl font-black text-slate-900 tracking-tight">Salud por Proyecto</h3>
-            <span className="rounded-full bg-slate-100 px-4 py-1 text-xs font-black text-slate-500 uppercase">Resumen de Carga</span>
+            <span className="rounded-full bg-slate-50 border border-slate-100 px-4 py-1 text-xs font-black text-slate-400 uppercase">Resumen de Carga</span>
           </div>
           <div className="space-y-6">
             {stats.porProyecto.length === 0 ? (
@@ -257,10 +257,10 @@ export function TabDashboard() {
         </section>
 
         {/* Detalle de Rendimiento Individual */}
-        <section className="rounded-[40px] border border-white bg-white p-10 shadow-panel">
+        <section className="rounded-[24px] border border-slate-200 bg-white p-8 md:p-10 shadow-sm">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-2xl font-black text-slate-900 tracking-tight">Detalle por Persona</h3>
-            <span className="rounded-full bg-sky-50 px-4 py-1 text-xs font-black text-sky-600 uppercase">Métricas</span>
+            <span className="rounded-full bg-sky-50 border border-sky-100 px-4 py-1 text-xs font-black text-sky-600 uppercase">Métricas</span>
           </div>
           <div className="space-y-6">
             {stats.porPersona.length === 0 ? (
@@ -316,10 +316,10 @@ export function TabDashboard() {
         </section>
       </div>
 
-      {/* Tarjetas Visuales Detalladas (Manteniendo el diseño premiun previo) */}
+      {/* Tarjetas Visuales Detalladas - FLAT STYLE */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {stats.porPersona.map((p) => (
-          <div key={p.identificador} className="flex flex-col gap-4 rounded-3xl border-2 border-slate-50 bg-white p-6 transition-all hover:border-sky-100 hover:shadow-xl">
+          <div key={p.identificador} className="flex flex-col gap-4 rounded-[24px] border border-slate-200 bg-white p-6 transition-all hover:border-sky-300 hover:shadow-md">
              <div className="flex items-center gap-4">
                 <div className="h-12 w-12 rounded-2xl flex shrink-0 items-center justify-center font-black text-lg text-white" style={{ backgroundColor: p.color || "#0ea5e9" }}>
                   {p.foto ? <img src={p.foto} className="h-full w-full object-cover" /> : p.nombre[0]}

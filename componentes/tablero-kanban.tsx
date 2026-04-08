@@ -573,7 +573,7 @@ export function TableroKanban() {
                   <div className="flex items-center gap-1 rounded-2xl border border-slate-100 bg-slate-50 p-1 shrink-0">
                     <button
                       onClick={() => navegarSemana(-1)}
-                      className="h-9 w-8 flex items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm hover:text-slate-900 transition-all font-bold"
+                      className="h-9 w-8 flex items-center justify-center rounded-xl bg-white text-slate-400 border border-slate-100 shadow-sm hover:text-slate-900 transition-all font-bold"
                     >
                       ◀
                     </button>
@@ -585,7 +585,7 @@ export function TableroKanban() {
                     </div>
                     <button
                       onClick={() => navegarSemana(1)}
-                      className="h-9 w-8 flex items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm hover:text-slate-900 transition-all font-bold"
+                      className="h-9 w-8 flex items-center justify-center rounded-xl bg-white text-slate-400 border border-slate-100 shadow-sm hover:text-slate-900 transition-all font-bold"
                     >
                       ▶
                     </button>

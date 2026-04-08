@@ -120,9 +120,9 @@ export function TabUsuarios() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="p-6 md:p-8 lg:p-10 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[1400px] mx-auto">
       {/* Sección de Invitación Rápida */}
-      <section className="rounded-[32px] bg-slate-950 p-6 shadow-2xl shadow-slate-900/20 text-white overflow-hidden relative group">
+      <section className="rounded-[24px] bg-slate-950 p-6 shadow-sm text-white overflow-hidden relative group border border-slate-800">
         <div className="absolute top-0 right-0 w-64 h-64 bg-sky-500/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl transition-transform group-hover:scale-110" />
         
         <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
