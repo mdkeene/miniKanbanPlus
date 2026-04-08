@@ -148,6 +148,7 @@ export function TableroKanban() {
   const [modoBloqueado, setModoBloqueado] = useState(false);
   const [usuarioActual, setUsuarioActual] = useState<Persona | null>(null);
   const [celebracionGif, setCelebracionGif] = useState<string | null>(null);
+  const [accionEnCursoGif, setAccionEnCursoGif] = useState<string | null>(null);
 
   useEffect(() => {
     async function inicializar() {
@@ -267,6 +268,21 @@ export function TableroKanban() {
     }, 3500);
   }
 
+  // Función para motivar el inicio de una tarea
+  function lanzarAccionEnCurso() {
+    const gifsEnCurso = [
+      "https://media.giphy.com/media/Mgt4Ttvxfp7CmedT5m/giphy.gif",
+      "https://media.giphy.com/media/CjmvTCZf2U3p09Cn0h/giphy.gif",
+      "https://media.giphy.com/media/7brdgdB5YunnPDd5Ky/giphy.gif"
+    ];
+    const randomGif = gifsEnCurso[Math.floor(Math.random() * gifsEnCurso.length)];
+    setAccionEnCursoGif(randomGif);
+    
+    setTimeout(() => {
+      setAccionEnCursoGif(null);
+    }, 2800);
+  }
+
   useEffect(() => {
     if (!mensajeSistema) return;
     const temporizador = window.setTimeout(() => setMensajeSistema(null), 2400);
@@ -361,6 +377,10 @@ export function TableroKanban() {
 
     if (tareaActualizada.estado === "TERMINADO" && tareaAnterior?.estado !== "TERMINADO") {
       lanzarCelebracion();
+    }
+
+    if (tareaActualizada.estado === "EN_CURSO" && tareaAnterior?.estado === "DEFINIDO") {
+      lanzarAccionEnCurso();
     }
   }
 
@@ -501,6 +521,11 @@ export function TableroKanban() {
     // CELEBRATION LOGIC: Si la tarea va a TERMINADO
     if (destinoDrop.estado === "TERMINADO" && estadoArrastre.origen !== "TERMINADO") {
       lanzarCelebracion();
+    }
+
+    // ACCION EN CURSO: De Definido a En Curso
+    if (destinoDrop.estado === "EN_CURSO" && estadoArrastre.origen === "DEFINIDO") {
+      lanzarAccionEnCurso();
     }
     
     // SPILLOVER LOGIC: Si el tablero está bloqueado y movemos de Kanban a Backlog/Idea
@@ -943,6 +968,26 @@ export function TableroKanban() {
                <div className="bg-white px-8 py-3 rounded-2xl shadow-2xl border-2 border-sky-100 flex flex-col items-center gap-1">
                   <span className="text-2xl font-black text-slate-900 tracking-tighter uppercase">¡Tarea Terminada!</span>
                   <span className="text-xs font-bold text-sky-600 uppercase tracking-widest">Puntos conseguidos para el equipo 🚀</span>
+               </div>
+             </div>
+          </div>
+        </div>
+      )}
+      {/* Overlay de Motivación - Iniciar Tarea */}
+      {accionEnCursoGif && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[2px] animate-in fade-in duration-500" />
+          <div className="relative animate-in zoom-in slide-in-from-bottom-10 duration-500">
+             <div className="absolute -inset-10 bg-amber-500/30 blur-3xl rounded-full animate-pulse" />
+             <div className="relative flex flex-col items-center gap-6">
+               <img 
+                 src={accionEnCursoGif} 
+                 alt="Motivación" 
+                 className="h-64 md:h-[350px] w-auto rounded-[32px] shadow-2xl border-8 border-white object-cover"
+               />
+               <div className="bg-white px-10 py-4 rounded-2xl shadow-2xl border-2 border-amber-100 flex flex-col items-center gap-1">
+                  <span className="text-3xl font-black text-slate-900 tracking-tighter uppercase">¡A POR ELLO!</span>
+                  <span className="text-xs font-bold text-amber-600 uppercase tracking-widest">Progreso en marcha ⚡</span>
                </div>
              </div>
           </div>
