@@ -28,7 +28,6 @@ export async function login(email: string, clave: string): Promise<Sesion | null
   }
 
   // Fetch the profile from our custom 'profiles' table
-  // Fetch the profile from our custom 'profiles' table
   const { data: profileData } = await supabase
     .from('profiles')
     .select('*')
@@ -56,33 +55,28 @@ export async function login(email: string, clave: string): Promise<Sesion | null
     }
   }
 
+  // SECURITY CHECK: Si después de todo no hay perfil, es que NO está invitado.
+  if (!profile) {
+    console.warn("Acceso denegado: Email no invitado.");
+    await supabase.auth.signOut();
+    return null;
+  }
+
   const persona: Persona = {
     identificador: data.session.user.id,
-    nombre: profile?.nombre || data.session.user.email?.split('@')[0] || "Usuario",
+    nombre: profile.nombre || "Usuario",
     email: data.session.user.email || "",
-    area: profile?.area || "General",
-    foto: profile?.foto || "",
-    rol: (profile?.rol as any) || "usuario",
-    color: profile?.color || "#94a3b8"
+    area: profile.area || "General",
+    foto: profile.foto || "",
+    rol: (profile.rol as any) || "usuario",
+    color: profile.color || "#94a3b8"
   };
-
-  // Auto-provision if profile is missing entirely
-  if (!profile) {
-    await guardarPersona(persona);
-  }
-
-  // Auto-provision if profile is missing
-  if (!profile) {
-    await guardarPersona(persona);
-  }
 
   const sesion: Sesion = {
     usuario: persona,
     token: data.session.access_token
   };
 
-  // Keep a local copy for quick sync checks if needed, 
-  // though Supabase manages the main session.
   if (typeof window !== "undefined") {
     window.localStorage.setItem(CLAVE_SESION, JSON.stringify(sesion));
   }
@@ -100,7 +94,7 @@ export async function obtenerSesion(): Promise<Sesion | null> {
     return null;
   }
 
-  // Get profile data
+  // Get profile data - CRITICAL CHECK
   const { data: profileData } = await supabase
     .from('profiles')
     .select('*')
@@ -109,7 +103,7 @@ export async function obtenerSesion(): Promise<Sesion | null> {
 
   let profile = profileData;
 
-  // Smart Link Check en la sesión continuada
+  // Smart Link Check en la sesión continuada (por si se acaba de registrar)
   if (!profile && session.user.email) {
     const { data: profileByEmail } = await supabase
       .from('profiles')
@@ -126,23 +120,28 @@ export async function obtenerSesion(): Promise<Sesion | null> {
     }
   }
 
+  // SECURITY FIREWALL: Si hay sesión de Auth pero NO hay perfil invitado, expulsión inmediata.
+  if (!profile) {
+    console.error("Sesión huérfana detectada. Expulsando...");
+    await supabase.auth.signOut();
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(CLAVE_SESION);
+    }
+    return null;
+  }
+
   const result: Sesion = {
     usuario: {
       identificador: session.user.id,
-      nombre: profile?.nombre || session.user.email?.split('@')[0] || "Usuario",
+      nombre: profile.nombre || "Usuario",
       email: session.user.email || "",
-      area: profile?.area || "General",
-      foto: profile?.foto || "",
-      rol: (profile?.rol as any) || "usuario",
-      color: profile?.color || "#94a3b8"
+      area: profile.area || "General",
+      foto: profile.foto || "",
+      rol: (profile.rol as any) || "usuario",
+      color: profile.color || "#94a3b8"
     },
     token: session.access_token
   };
-
-  // Auto-provision if session exists but profile doesn't (safeguard)
-  if (!profile) {
-    await guardarPersona(result.usuario);
-  }
 
   return result;
 }

@@ -148,31 +148,34 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
     });
   }
 
+  const esEditar = propiedades.modo === "editar";
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="flex w-full max-w-4xl flex-col overflow-hidden rounded-[40px] border border-white/60 bg-white shadow-2xl animate-in zoom-in-95 duration-200 lg:max-h-[92vh]">
-        {/* Header del Modal */}
-        <div className="border-b border-slate-100 bg-slate-50/50 p-6 md:p-8">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-md animate-in fade-in duration-300 overflow-y-auto">
+      <div className="relative my-auto flex w-full max-w-4xl flex-col overflow-hidden rounded-[32px] border border-white/60 bg-white shadow-2xl animate-in zoom-in-95 duration-200 max-h-[calc(100vh-3rem)]">
+        
+        {/* Header - Anclado */}
+        <div className="border-b border-slate-50 bg-slate-50/30 p-6 md:p-8 shrink-0">
           <div className="flex items-start justify-between gap-4">
             <div>
               <span className="inline-flex rounded-full bg-sky-100 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-sky-700">
-                {propiedades.modo === "crear" ? "Nueva tarea" : `Edición: ${propiedades.tarea.identificador}`}
+                {esEditar ? `Edición: ${propiedades.tarea.identificador}` : "Nueva tarea"}
               </span>
-              <h2 className="mt-3 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
-                {propiedades.modo === "crear" ? "Captura los detalles" : "Actualizar información"}
+              <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
+                {esEditar ? "Actualizar información" : "Captura los detalles"}
               </h2>
             </div>
             <button
               type="button"
               onClick={propiedades.onCerrar}
-              className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-xl text-slate-400 transition hover:border-slate-300 hover:text-slate-950"
+              className="group flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-400 transition hover:border-slate-300 hover:text-slate-950"
             >
-              ✕
+              <span className="text-xl font-bold">✕</span>
             </button>
           </div>
         </div>
 
-        {/* Cuerpo del Modal (Scrollable) */}
+        {/* Cuerpo - Scrolleable */}
         <div className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
           <div className="grid gap-6 md:grid-cols-2">
             <div className="md:col-span-2">
@@ -180,14 +183,14 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
               <input
                 value={formulario.titulo}
                 onChange={(evento) => actualizarCampo("titulo", evento.target.value)}
-                className="campo-formulario !text-lg"
+                className="campo-formulario !text-lg focus:ring-4 focus:ring-sky-500/5 transition-all"
                 maxLength={limitesSeguridad.tituloMaximo}
                 placeholder="¿Qué hay que hacer?"
                 autoFocus
               />
             </div>
 
-            <div>
+            <div className="space-y-1">
               <label className="etiqueta-campo">Estado</label>
               <select
                 value={formulario.estado}
@@ -204,7 +207,7 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
               </select>
             </div>
 
-            <div>
+            <div className="space-y-1">
               <label className="etiqueta-campo">Tipo de Actividad</label>
               <select
                 value={formulario.tipo}
@@ -221,7 +224,7 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
               </select>
             </div>
 
-            <div>
+            <div className="space-y-1">
               <label className="etiqueta-campo">Prioridad</label>
               <select
                 value={formulario.prioridad}
@@ -231,7 +234,7 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
                     evento.target.value as PrioridadTarea
                   )
                 }
-                className="campo-formulario"
+                className="campo-formulario font-bold"
               >
                 {opcionesPrioridad.map((prioridad) => (
                   <option key={prioridad} value={prioridad}>
@@ -241,8 +244,8 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
               </select>
             </div>
 
-            <div>
-              <label className="etiqueta-campo">Complejidad</label>
+            <div className="space-y-1">
+              <label className="etiqueta-campo">Complejidad (Story Points)</label>
               <select
                 value={formulario.complejidad}
                 onChange={(evento) =>
@@ -258,7 +261,25 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
               </select>
             </div>
 
-            <div>
+            <div className="space-y-1">
+              <label className="etiqueta-campo font-bold text-indigo-600">Persona Responsable</label>
+              <select
+                value={formulario.personaAsignadaId}
+                onChange={(evento) =>
+                  actualizarCampo("personaAsignadaId", evento.target.value)
+                }
+                className="campo-formulario border-indigo-100 bg-indigo-50/5"
+              >
+                <option value="">(Sin asignar - Solo Ideas)</option>
+                {propiedades.personas.map((persona) => (
+                  <option key={persona.identificador} value={persona.identificador}>
+                    {persona.nombre} ({persona.area})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-1">
               <label className="etiqueta-campo">Fecha Límite</label>
               <input
                 type="date"
@@ -270,26 +291,8 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
               />
             </div>
 
-            <div>
-              <label className="etiqueta-campo">Persona Responsable</label>
-              <select
-                value={formulario.personaAsignadaId}
-                onChange={(evento) =>
-                  actualizarCampo("personaAsignadaId", evento.target.value)
-                }
-                className="campo-formulario font-bold"
-              >
-                <option value="">(Sin asignar - Solo Ideas)</option>
-                {propiedades.personas.map((persona) => (
-                  <option key={persona.identificador} value={persona.identificador}>
-                    {persona.nombre} ({persona.area})
-                  </option>
-                ))}
-              </select>
-            </div>
-
             <div className="md:col-span-2">
-              <label className="etiqueta-campo">Proyecto Relacionado</label>
+              <label className="etiqueta-campo">Proyecto de Referencia</label>
               <select
                 value={formulario.proyectoId || ""}
                 onChange={(evento) =>
@@ -307,7 +310,7 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
             </div>
 
             <div className="md:col-span-2">
-              <label className="etiqueta-campo">Enlace de Referencia</label>
+              <label className="etiqueta-campo">Enlace Externo (Documentación)</label>
               <input
                 value={formulario.enlace}
                 onChange={(evento) => actualizarCampo("enlace", evento.target.value)}
@@ -318,75 +321,75 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
             </div>
 
             <div className="md:col-span-2">
-              <label className="etiqueta-campo">Observaciones y Notas</label>
+              <label className="etiqueta-campo">Observaciones Estratégicas</label>
               <textarea
                 value={formulario.observaciones}
                 onChange={(evento) =>
                   actualizarCampo("observaciones", evento.target.value)
                 }
-                className="campo-formulario min-h-[160px] resize-none"
+                className="campo-formulario min-h-[140px] resize-none"
                 maxLength={limitesSeguridad.observacionesMaximas}
-                placeholder="Escribe aquí los detalles importantes..."
+                placeholder="Escribe aquí los detalles importantes para el equipo..."
               />
             </div>
           </div>
 
           {error && (
-            <div className="mt-6 rounded-[24px] bg-rose-50 p-5 text-center text-rose-700 font-bold border border-rose-100 animate-bounce">
+            <div className="mt-8 rounded-2xl bg-rose-50 p-4 text-center text-rose-600 font-bold border border-rose-100">
               ⚠️ {error}
             </div>
           )}
         </div>
 
-        {/* Footer del Modal */}
-        <div className="border-t border-slate-100 bg-slate-50/50 p-6 md:p-8">
+        {/* Footer - Anclado */}
+        <div className="border-t border-slate-100 bg-slate-50/80 p-6 md:p-8 shrink-0 backdrop-blur-md">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap gap-2">
-              {propiedades.modo === "editar" && (
+              {esEditar && (
                 <>
                   <button
                     type="button"
                     onClick={() => propiedades.onEliminar(propiedades.tarea.identificador)}
-                    className="flex-1 rounded-2xl bg-rose-50 px-6 py-4 text-sm font-black text-rose-600 transition hover:bg-rose-100 sm:flex-none"
+                    className="flex-1 rounded-2xl bg-rose-50 px-5 py-3 text-sm font-black text-rose-600 transition hover:bg-rose-100 sm:flex-none"
                   >
-                    🗑️ Eliminar
+                    🗑️ Borrar
                   </button>
                   {propiedades.tarea.estado === "BACKLOG" && propiedades.alPromoverASprint && (
                     <button
                       type="button"
                       onClick={() => propiedades.alPromoverASprint!(propiedades.tarea)}
-                      className="flex-1 rounded-2xl bg-sky-600 px-6 py-4 text-sm font-black text-white shadow-xl shadow-sky-500/20 transition hover:bg-sky-500 sm:flex-none"
+                      className="flex-1 rounded-2xl bg-sky-600 px-5 py-3 text-sm font-black text-white shadow-xl shadow-sky-500/20 transition hover:bg-sky-500 sm:flex-none"
                     >
-                      🏎️ Pasar a Sprint
+                      🏎️ Sprint
                     </button>
                   )}
-                  {(propiedades.tarea.estado !== "IDEA" && propiedades.tarea.estado !== "BACKLOG") && propiedades.alMoverABacklog && (
+                  {propiedades.tarea.estado !== "IDEA" && propiedades.tarea.estado !== "BACKLOG" && propiedades.alMoverABacklog && (
                     <button
                       type="button"
                       onClick={() => propiedades.alMoverABacklog!(propiedades.tarea)}
-                      className="flex-1 rounded-2xl bg-indigo-50 px-6 py-4 text-sm font-black text-indigo-600 transition hover:bg-indigo-100 sm:flex-none"
+                      className="flex-1 rounded-2xl bg-indigo-50 px-5 py-3 text-sm font-black text-indigo-600 transition hover:bg-indigo-100 sm:flex-none"
                     >
-                      📦 Retornar al Backlog
+                      📦 Backlog
                     </button>
                   )}
                 </>
               )}
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-col gap-3 sm:flex-row shadow-sm">
               <button
                 type="button"
                 onClick={propiedades.onCerrar}
-                className="rounded-2xl border-2 border-slate-200 bg-white px-8 py-4 text-sm font-black text-slate-600 transition hover:bg-slate-50"
+                className="rounded-2xl border border-slate-200 bg-white px-8 py-3 text-sm font-black text-slate-500 transition hover:border-slate-300"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={guardar}
-                className="rounded-2xl bg-slate-950 px-10 py-4 text-sm font-black text-white shadow-2xl shadow-slate-900/20 transition hover:bg-slate-800 hover:-translate-y-0.5 active:translate-y-0"
+                className="rounded-2xl bg-slate-950 px-10 py-3 text-sm font-black text-white shadow-2xl shadow-slate-900/10 transition hover:bg-slate-800 hover:-translate-y-0.5 active:translate-y-0"
               >
-                {propiedades.modo === "crear" ? "Crear Tarea" : "Guardar Cambios"}
+                {esEditar ? "Guardar Cambios" : "Crear Tarea"}
               </button>
             </div>
           </div>

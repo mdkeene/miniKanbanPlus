@@ -290,28 +290,33 @@ export function AppShell({
           </div>
         </div>
 
-         {/* Modal Gestión de Perfil */}
+         {/* Modal Gestión de Perfil - Versión Responsiva Ultra-Premium */}
          {modalPasswordAbierto && (
-           <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-950/20 backdrop-blur-md p-4 animate-in fade-in duration-300">
-             <div className="w-full max-w-sm rounded-[32px] border border-white bg-white p-6 md:p-8 shadow-2xl animate-in zoom-in-95 duration-200">
-               <div className="flex items-center gap-4 mb-8">
-                  <div 
-                    className="h-14 w-14 rounded-2xl flex items-center justify-center text-xl font-black text-white shadow-2xl"
-                    style={{ backgroundColor: colorTemp }}
-                  >
-                    {sesion.usuario.nombre.substring(0, 1).toUpperCase()}
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-black text-slate-950 leading-none">Mi Perfil</h3>
-                    <p className="text-[10px] font-black uppercase text-slate-400 mt-1 tracking-widest">Identidad en el sistema</p>
-                  </div>
+           <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-950/40 backdrop-blur-md p-4 animate-in fade-in duration-300 overflow-y-auto">
+             <div className="relative my-auto flex w-full max-w-md flex-col overflow-hidden rounded-[32px] border border-white/60 bg-white shadow-2xl animate-in zoom-in-95 duration-200 lg:max-h-[calc(100vh-2rem)]">
+               
+               {/* Header Premium (Fixed) */}
+               <div className="shrink-0 border-b border-slate-50 bg-slate-50/20 p-6 md:p-8">
+                <div className="flex items-center gap-4">
+                    <div 
+                      className="h-16 w-16 rounded-[22px] flex items-center justify-center text-2xl font-black text-white shadow-2xl animate-in zoom-in duration-300"
+                      style={{ backgroundColor: colorTemp }}
+                    >
+                      {sesion.usuario.nombre.substring(0, 1).toUpperCase()}
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-black text-slate-950 leading-tight">Mi Perfil</h3>
+                      <p className="text-[10px] font-black uppercase text-sky-600 mt-0.5 tracking-[0.2em] bg-sky-50 px-2 py-0.5 rounded-md inline-block">Control de Identidad</p>
+                    </div>
+                 </div>
                </div>
 
-               <div className="space-y-6">
+               {/* Scrollable Body (Dynamic Spacing) */}
+               <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-7 custom-scrollbar">
                  {/* Datos Básicos */}
-                 <div className="space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="etiqueta-campo">Nombre Completo</label>
+                 <div className="space-y-5">
+                    <div className="space-y-1.5 focus-within:translate-x-1 transition-transform">
+                      <label className="etiqueta-campo text-[11px] ml-1">Nombre Público</label>
                       <input 
                         type="text"
                         value={nombreTemp}
@@ -320,8 +325,8 @@ export function AppShell({
                         placeholder="Tu nombre real"
                       />
                     </div>
-                    <div className="space-y-1.5">
-                      <label className="etiqueta-campo">Área / Departamento</label>
+                    <div className="space-y-1.5 focus-within:translate-x-1 transition-transform">
+                      <label className="etiqueta-campo text-[11px] ml-1">Área o Departamento</label>
                       <input 
                         type="text"
                         value={areaTemp}
@@ -331,22 +336,23 @@ export function AppShell({
                       />
                     </div>
                     <div className="space-y-1.5 opacity-60">
-                      <label className="etiqueta-campo text-slate-400">Email (Vinculado a Login)</label>
-                      <p className="px-5 py-3 text-sm font-bold text-slate-500 bg-slate-50 rounded-2xl border border-slate-100 select-none">
-                        {sesion.usuario.email}
-                      </p>
+                      <label className="etiqueta-campo text-[11px] ml-1">Email Vinculado</label>
+                      <div className="px-5 py-3.5 text-sm font-bold text-slate-400 bg-slate-50 rounded-2xl border border-slate-100/50 flex items-center justify-between">
+                        <span>{sesion.usuario.email}</span>
+                        <span className="text-[10px] bg-slate-200 px-2 py-0.5 rounded-full">Protegido</span>
+                      </div>
                     </div>
                  </div>
 
                  {/* Selección de Color */}
-                 <div className="space-y-2">
-                    <label className="etiqueta-campo">Gama de Color Personal</label>
-                    <div className="flex flex-wrap gap-2">
+                 <div className="space-y-3">
+                    <label className="etiqueta-campo text-[11px] ml-1">Gama de Color Personalizada</label>
+                    <div className="grid grid-cols-6 gap-3">
                       {coloresDisponibles.map(color => (
                         <button
                           key={color}
                           onClick={() => setColorTemp(color)}
-                          className={`h-8 w-8 rounded-lg border-2 transition-all ${color === colorTemp ? "border-slate-400 scale-110 shadow-lg" : "border-transparent opacity-60 hover:opacity-100"}`}
+                          className={`h-10 w-full rounded-xl border-4 transition-all duration-300 ${color === colorTemp ? "border-slate-300 scale-105 shadow-inner" : "border-transparent opacity-50 hover:opacity-100 hover:scale-105"}`}
                           style={{ backgroundColor: color }}
                         />
                       ))}
@@ -354,60 +360,59 @@ export function AppShell({
                  </div>
 
                  {/* Seguridad */}
-                 <div className="pt-4 border-t border-slate-100">
+                 <div className="pt-6 border-t border-slate-100 space-y-4">
                     <div className="space-y-1.5">
-                      <label className="etiqueta-campo text-rose-400">Cambiar Contraseña (opcional)</label>
+                      <label className="etiqueta-campo text-rose-500 text-[11px] ml-1 font-black">Actualizar Contraseña</label>
                       <input 
                         type="password"
                         value={nuevaClave}
                         onChange={e => setNuevaClave(e.target.value)}
-                        className="campo-formulario border-rose-100 bg-rose-50/10"
-                        placeholder="Dejar en blanco para no cambiar"
+                        className="campo-formulario border-rose-100 bg-rose-50/5 focus:ring-rose-500/20"
+                        placeholder="Dejar en blanco para mantener actual"
                         onKeyDown={(e) => e.key === "Enter" && handleGuardarPerfil()}
                       />
                     </div>
                  </div>
 
+                 {/* Acciones Administrativas (Only for Admins) */}
+                 {sesion.usuario.rol === "admin" && (
+                    <div className="mt-8 border-t border-slate-100 pt-6 space-y-3">
+                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest text-center mb-2">Herramientas de Mantenimiento</p>
+                        <div className="grid grid-cols-1 gap-2">
+                             <button 
+                               onClick={() => { setModalPasswordAbierto(false); preConfirmarAccion("Demostración", "Generar datos de ejemplo...", handleGenerarEjemplos); }} 
+                               className="w-full flex items-center justify-center gap-2 rounded-xl bg-sky-50 py-3 text-xs font-black text-sky-600 hover:bg-sky-100 transition-all"
+                             >
+                               ✨ Generar Ejemplos
+                             </button>
+                             <button 
+                               onClick={() => { setModalPasswordAbierto(false); preConfirmarAccion("Limpieza", "Borrar datos de ejemplo...", handleBorrarEjemplos); }} 
+                               className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-50 py-3 text-xs font-black text-amber-600 hover:bg-amber-100 transition-all"
+                             >
+                               🗑️ Borrar Ejemplos
+                             </button>
+                             <button 
+                               onClick={() => { setModalPasswordAbierto(false); preConfirmarAccion("⚠️ RESET", "¡Borrar TODO el sistema!", handleBorrarTodo); }} 
+                               className="w-full flex items-center justify-center gap-2 rounded-xl bg-rose-50 py-3 text-xs font-black text-rose-600 hover:bg-rose-100 transition-all"
+                             >
+                               🔥 Reset Total del Sistema
+                             </button>
+                        </div>
+                    </div>
+                 )}
+               </div>
+
+               {/* Footer Premium (Fixed) */}
+               <div className="shrink-0 border-t border-slate-100 bg-slate-50/80 p-6 md:p-8 backdrop-blur-md">
                  {mensajeClave ? (
-                   <div className="rounded-xl bg-slate-950 p-4 text-center text-white font-bold text-sm animate-pulse">
+                   <div className="rounded-2xl bg-slate-950 px-6 py-4 text-center text-white font-black text-sm animate-pulse flex items-center justify-center gap-3">
+                     <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
                      {mensajeClave}
                    </div>
                  ) : (
-                   <div className="flex flex-col gap-3">
-                     <button onClick={handleGuardarPerfil} className="w-full rounded-2xl bg-sky-600 py-4 text-sm font-black text-white hover:bg-sky-500 shadow-xl shadow-sky-500/20 transition-all">Guardar Perfil</button>
-                     <button onClick={() => setModalPasswordAbierto(false)} className="w-full rounded-2xl border border-slate-200 py-3 text-sm font-black text-slate-500 hover:bg-slate-50 transition-all">Cancelar</button>
-                     
-                     {sesion.usuario.rol === "admin" && (
-                       <div className="mt-4 border-t border-slate-100 pt-4 space-y-2 text-center">
-                         <button 
-                           onClick={() => {
-                             setModalPasswordAbierto(false);
-                             preConfirmarAccion("Demostración", "Generar datos de ejemplo...", handleGenerarEjemplos);
-                           }} 
-                           className="w-full text-xs font-bold text-sky-600 hover:underline"
-                         >
-                           ✨ Generar Datos Ejemplo
-                         </button>
-                         <button 
-                           onClick={() => {
-                             setModalPasswordAbierto(false);
-                             preConfirmarAccion("Limpieza", "Borrar datos de ejemplo...", handleBorrarEjemplos);
-                           }} 
-                           className="w-full text-xs font-bold text-amber-600 hover:underline"
-                         >
-                           🗑️ Borrar Ejemplos
-                         </button>
-                         <button 
-                           onClick={() => {
-                             setModalPasswordAbierto(false);
-                             preConfirmarAccion("⚠️ RESET", "¡Borrar TODO el sistema!", handleBorrarTodo);
-                           }} 
-                           className="w-full text-xs font-bold text-rose-600 hover:underline hover:text-rose-700 transition-colors"
-                         >
-                           🔥 Reset Total
-                         </button>
-                       </div>
-                     )}
+                   <div className="flex flex-col gap-3 sm:flex-row shadow-sm">
+                     <button onClick={() => setModalPasswordAbierto(false)} className="flex-1 rounded-2xl border border-slate-200 bg-white py-4 text-sm font-black text-slate-500 hover:bg-slate-50 transition-all">Cancelar</button>
+                     <button onClick={handleGuardarPerfil} className="flex-[2] rounded-2xl bg-slate-950 py-4 text-sm font-black text-white shadow-2xl shadow-slate-900/20 hover:bg-slate-800 transition-all hover:-translate-y-0.5 active:translate-y-0">Guardar Perfil</button>
                    </div>
                  )}
                </div>

@@ -52,11 +52,11 @@ export function ModalCargaRapida({
   }
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 p-0 sm:p-4 md:p-10 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="flex h-full w-full flex-col bg-white shadow-2xl overflow-hidden sm:h-auto sm:max-h-[85vh] sm:max-w-2xl sm:rounded-[32px] md:rounded-[40px] border border-white/50 animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-950/50 p-0 sm:p-4 md:p-10 backdrop-blur-md animate-in fade-in duration-300 overflow-y-auto">
+      <div className="relative my-auto flex w-full max-w-2xl flex-col bg-white shadow-2xl overflow-hidden h-full sm:h-auto sm:max-h-[calc(100vh-4rem)] sm:rounded-[32px] md:rounded-[40px] border border-white/50 animate-in zoom-in-95 duration-200">
         
         {/* Header Premium (Pinned) */}
-        <header className="flex items-center justify-between border-b border-slate-100 bg-white/80 p-5 md:p-6 backdrop-blur-xl shrink-0">
+        <header className="flex items-center justify-between border-b border-slate-50 bg-white p-5 md:p-6 shrink-0">
           <div className="flex items-center gap-4">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-100 text-xl shadow-inner">
               🚀
