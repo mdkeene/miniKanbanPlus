@@ -153,3 +153,35 @@ export async function cerrarSesion() {
     window.localStorage.removeItem(CLAVE_SESION);
   }
 }
+
+/**
+ * Verifica si un email está en la lista de perfiles "invitados" por un administrador.
+ */
+export async function buscarInvitacion(email: string): Promise<boolean> {
+  const { data } = await supabase
+    .from('profiles')
+    .select('email')
+    .eq('email', email)
+    .single();
+  return !!data;
+}
+
+/**
+ * Registra a un nuevo usuario invitado.
+ * Supabase Auth creará el registro y nuestro flujo de 'login' se encargará 
+ * de vincularlo con el perfil pre-existente por email.
+ */
+export async function registrar(email: string, clave: string): Promise<Sesion | null> {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password: clave,
+  });
+
+  if (error) {
+    console.error("Registration error:", error.message);
+    throw error;
+  }
+
+  // Intentamos login inmediatamente para activar el 'Smart Link' de perfiles
+  return await login(email, clave);
+}

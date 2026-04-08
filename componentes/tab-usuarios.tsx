@@ -8,6 +8,8 @@ import { AvatarPersona } from "@/componentes/avatar-persona";
 export function TabUsuarios() {
   const [usuarios, setUsuarios] = useState<Persona[]>([]);
   const [editandoUsuario, setEditandoUsuario] = useState<Persona | null>(null);
+  const [emailInvitado, setEmailInvitado] = useState("");
+  const [invitando, setInvitando] = useState(false);
   
   const [nombre, setNombre] = useState("");
   const [area, setArea] = useState("");
@@ -24,6 +26,32 @@ export function TabUsuarios() {
     }
     cargar();
   }, []);
+
+  async function handleInvitacionRapida(e: React.FormEvent) {
+    e.preventDefault();
+    if (!emailInvitado.trim() || !emailInvitado.includes("@")) return;
+
+    setInvitando(true);
+    try {
+      const persona: Persona = {
+        identificador: crypto.randomUUID(),
+        nombre: emailInvitado.split("@")[0].charAt(0).toUpperCase() + emailInvitado.split("@")[0].slice(1),
+        area: "Invitado",
+        email: emailInvitado.trim(),
+        rol: "usuario",
+        color: "#94a3b8",
+        foto: "",
+        clave: "PENDIENTE"
+      };
+
+      await guardarPersona(persona);
+      const ps = await obtenerPersonas();
+      setUsuarios(ps);
+      setEmailInvitado("");
+    } finally {
+      setInvitando(false);
+    }
+  }
 
   async function handleGuardar() {
     if (!nombre.trim() || !area.trim()) return;
@@ -86,14 +114,42 @@ export function TabUsuarios() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Sección de Invitación Rápida */}
+      <section className="rounded-[32px] bg-slate-950 p-6 shadow-2xl shadow-slate-900/20 text-white overflow-hidden relative group">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-sky-500/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl transition-transform group-hover:scale-110" />
+        
+        <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex-1">
+            <h3 className="text-xl font-black tracking-tight">Crecimiento Instantáneo ⚡</h3>
+            <p className="text-sm font-medium text-slate-400">Invita a nuevos miembros solo con su email. Ellos harán el resto.</p>
+          </div>
+          
+          <form onSubmit={handleInvitacionRapida} className="flex-1 w-full flex items-center gap-2">
+            <input 
+              type="email"
+              value={emailInvitado}
+              onChange={e => setEmailInvitado(e.target.value)}
+              placeholder="compañero@innovaexport.com"
+              className="flex-1 bg-white/10 border border-white/10 rounded-2xl px-5 py-3 text-sm font-bold placeholder-white/20 outline-none focus:bg-white/20 focus:border-white/30 transition-all"
+            />
+            <button 
+              disabled={invitando || !emailInvitado.includes("@")}
+              className="px-6 py-3 rounded-2xl bg-sky-500 text-white font-black text-sm shadow-xl shadow-sky-500/20 hover:bg-sky-400 transition-all hover:-translate-y-0.5 disabled:opacity-30 active:scale-95"
+            >
+              {invitando ? "..." : "Invitar →"}
+            </button>
+          </form>
+        </div>
+      </section>
+
       {/* Formulario de Usuario (Compacto & Accesible) */}
       <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm xl:p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-xl font-black text-slate-950">
-              {editandoUsuario ? "Editar Perfil" : "Añadir Miembro"}
+              {editandoUsuario ? "Editar Perfil" : "Panel de Miembros"}
             </h2>
-            <p className="text-sm font-medium text-slate-500">Gestión de accesos y credenciales del equipo.</p>
+            <p className="text-sm font-medium text-slate-500">Ajusta detalles o gestiona credenciales específicas.</p>
           </div>
           {editandoUsuario && (
             <button onClick={cancelarBorrador} className="text-sm font-bold text-sky-600 hover:text-sky-700">
