@@ -269,12 +269,14 @@ export function TableroKanban() {
 
   const columnas = useMemo(
     () =>
-      estadosKanban.map((estado) => ({
-        estado,
-        titulo: etiquetasEstado[estado],
-        tareas: agruparPorEstado(tareasSemanales, estado, ordenActivo, sentidoOrden),
-        estilos: estilosEstado[estado]
-      })),
+      estadosKanban
+        .filter((estado) => estado !== "IDEA" && estado !== "BACKLOG")
+        .map((estado) => ({
+          estado,
+          titulo: etiquetasEstado[estado],
+          tareas: agruparPorEstado(tareasSemanales, estado, ordenActivo, sentidoOrden),
+          estilos: estilosEstado[estado]
+        })),
     [ordenActivo, sentidoOrden, tareasSemanales]
   );
 
