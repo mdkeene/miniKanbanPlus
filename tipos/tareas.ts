@@ -76,13 +76,15 @@ export type Tarea = {
 
 export type BorradorTarea = Omit<Tarea, "identificador" | "fechaCreacion" | "indiceOrden">;
 
+export type FrecuenciaTarea = "Semanal" | "Quincenal" | "Mensual";
+
 export type TareaPeriodica = {
   identificador: string;
   titulo: string;
   tipo: TipoTarea;
   prioridad: PrioridadTarea;
   complejidad: ComplejidadTarea;
-  frecuencia: "Semanal" | "Quincenal" | "Mensual";
+  frecuencia: FrecuenciaTarea;
   activo: boolean;
   personaAsignadaId?: string;
 };

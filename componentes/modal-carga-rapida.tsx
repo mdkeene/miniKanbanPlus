@@ -32,7 +32,9 @@ const etiquetasEstado: Record<EstadoKanban, string> = {
   DEFINIDO: "Definido",
   EN_CURSO: "En curso",
   BLOQUEADO: "Bloqueado",
-  TERMINADO: "Terminado"
+  TERMINADO: "Terminado",
+  IDEA: "Idea",
+  BACKLOG: "Backlog"
 };
 
 export function ModalCargaRapida({
