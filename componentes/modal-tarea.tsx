@@ -176,21 +176,7 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
               </h2>
               <div className="mt-2 flex items-center gap-3">
                 {(formulario.esUrgente || formulario.prioridad === 'URGENTE') && (
-                  <div className="flex items-center gap-4">
-                    <img 
-                      src={[
-                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNjZidDRpajlhbjYwZ3p0bGN1eXFpcnN6djN4emFqNGhoemV2NDFqaCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/snEeOh54kCFxe/giphy.gif",
-                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbWFpYjFiNDV0cWtmanF5MDZheDQxZTM5NGtzZHdmMzZqYmhvcmgweiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/4fpYYc2GGxIB10f0t6/giphy.gif",
-                        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcDlqOWlzcjZsY204OXRrZzc5cDIyZzF0dTB0YjI3eW9mZ2hneXd6OCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/mLOhDIEtkM92K3qtOM/giphy.gif"
-                      ][(formulario.titulo.length) % 3]} 
-                      alt="Emergency" 
-                      className="h-20 w-20 rounded-2xl object-cover border-4 border-rose-500 shadow-2xl shadow-rose-500/40"
-                    />
-                    <div className="flex flex-col">
-                       <span className="rounded-lg bg-rose-500 px-3 py-1 text-xs font-black text-white animate-pulse shadow-sm shadow-rose-200">🚨 TAREA URGENTE</span>
-                       <span className="text-[10px] font-bold text-rose-600 mt-1 uppercase tracking-tight">Atención: Esto notificará como prioridad máxima</span>
-                    </div>
-                  </div>
+                  <span className="rounded-lg bg-rose-500 px-3 py-1 text-xs font-black text-white animate-pulse shadow-sm shadow-rose-200">🚨 TAREA URGENTE</span>
                 )}
                 {formulario.esSpillover && (
                   <span className="rounded-lg bg-amber-500 px-3 py-1 text-xs font-black text-white shadow-sm shadow-amber-200">📦 SPILLOVER</span>
@@ -395,7 +381,20 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
               )}
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row shadow-sm">
+            <div className="relative flex flex-col gap-3 sm:flex-row shadow-sm">
+              {/* GIF de Emergencia pequeño y flotante */}
+              {hoverGuardar && (
+                <div className="absolute bottom-full left-1/2 mb-4 -translate-y-2 -translate-x-1/2 w-[150px] h-[150px] animate-in slide-in-from-bottom-2 fade-in duration-300 pointer-events-none z-[120]">
+                  <div className="relative h-full w-full">
+                    <div className="absolute -inset-4 bg-rose-500/20 blur-xl rounded-full animate-pulse" />
+                    <img 
+                      src="https://media.giphy.com/media/snEeOh54kCFxe/giphy.gif"
+                      alt="Emergencia"
+                      className="h-full w-full rounded-2xl border-4 border-white shadow-2xl object-cover"
+                    />
+                  </div>
+                </div>
+              )}
               <button
                 type="button"
                 onClick={propiedades.onCerrar}
@@ -408,7 +407,7 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
                 onClick={guardar}
                 onMouseEnter={() => (formulario.esUrgente || formulario.prioridad === 'URGENTE') && setHoverGuardar(true)}
                 onMouseLeave={() => setHoverGuardar(false)}
-                className="rounded-2xl bg-slate-950 px-10 py-3 text-sm font-black text-white shadow-2xl shadow-slate-900/10 transition hover:bg-slate-800 hover:-translate-y-0.5 active:translate-y-0 relative"
+                className="rounded-2xl bg-slate-950 px-10 py-3 text-sm font-black text-white shadow-2xl shadow-slate-900/10 transition hover:bg-slate-800 hover:-translate-y-0.5 active:translate-y-0"
               >
                 {esEditar ? "Guardar Cambios" : "Crear Tarea"}
               </button>
@@ -416,22 +415,6 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
           </div>
         </div>
 
-        {/* Overlay de Advertencia Urgente al Hover */}
-        {hoverGuardar && (
-          <div className="absolute inset-0 z-[110] flex items-center justify-center bg-rose-950/80 backdrop-blur-sm animate-in fade-in duration-300 pointer-events-none">
-            <div className="flex flex-col items-center gap-6">
-              <img 
-                src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNjZidDRpajlhbjYwZ3p0bGN1eXFpcnN6djN4emFqNGhoemV2NDFqaCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/snEeOh54kCFxe/giphy.gif"
-                alt="PELIGRO"
-                className="h-64 w-64 rounded-3xl border-4 border-white shadow-2xl"
-              />
-              <div className="text-center space-y-2">
-                <h3 className="text-4xl font-black text-white tracking-tighter">¡ESTO ES UNA EMERGENCIA!</h3>
-                <p className="text-rose-200 font-bold uppercase tracking-widest">¿ESTÁS SEGURO DE QUE ESTA TAREA ES PRIORIDAD MÁXIMA?</p>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

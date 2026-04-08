@@ -252,6 +252,22 @@ export function TableroKanban() {
     };
   }, []);
 
+  // Función para lanzar la celebración de Michael Scott
+  function lanzarCelebracion() {
+    const michaelScottGifs = [
+      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbnFlcWxxbnFlcWxxbnFlcWxxbnFlcWxxbnFlcWxxbnFlcWxxJmVwPXYxX2dpZnNfc2VhcmNoJmN0PWc/KYElw07kzDspa/giphy.gif",
+      "https://media.giphy.com/media/sfxlOSTXORjOobH2QG/giphy.gif",
+      "https://media.giphy.com/media/5LcfoE5u34kfNvW1Oi/giphy.gif",
+      "https://media.giphy.com/media/l2QEdoFAgf1zmhEK4/giphy.gif"
+    ];
+    const randomGif = michaelScottGifs[Math.floor(Math.random() * michaelScottGifs.length)];
+    setCelebracionGif(randomGif);
+    
+    setTimeout(() => {
+      setCelebracionGif(null);
+    }, 3500);
+  }
+
   useEffect(() => {
     if (!mensajeSistema) return;
     const temporizador = window.setTimeout(() => setMensajeSistema(null), 2400);
@@ -330,13 +346,23 @@ export function TableroKanban() {
     await recargarTareas();
     setBorradorNuevaTarea(null);
     setMensajeSistema({ tipo: "exito", texto: "Tarea creada correctamente." });
+
+    if (borrador.estado === "TERMINADO") {
+      lanzarCelebracion();
+    }
   }
 
   async function guardarEdicionCompleta(tareaActualizada: Tarea) {
+    const tareaAnterior = tareas.find(t => t.identificador === tareaActualizada.identificador);
+    
     await guardarTareaLib(tareaActualizada);
     await recargarTareas();
     setTareaEnEdicion(null);
     setMensajeSistema({ tipo: "exito", texto: "Cambios guardados." });
+
+    if (tareaActualizada.estado === "TERMINADO" && tareaAnterior?.estado !== "TERMINADO") {
+      lanzarCelebracion();
+    }
   }
 
   async function guardarTituloRapido(identificador: string, titulo: string) {
@@ -475,14 +501,7 @@ export function TableroKanban() {
 
     // CELEBRATION LOGIC: Si la tarea va a TERMINADO
     if (destinoDrop.estado === "TERMINADO" && estadoArrastre.origen !== "TERMINADO") {
-      const gifs = [
-        "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExamNsaWUwYWs4azZtYTFkdXk5ZnplNWQ3Nnp2Y2p2cXZvOTZuYnIzYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l2QEdoFAgf1zmhEK4/giphy.gif",
-        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3gxOG11cDJ0NTVpOTI2Zms3OG05enFvZmd1MHVsdGcweG1zcHZrciZlcD12MV9naWZzX3NlYXJjaCZjdD1n/sfxlOSTXORjOobH2QG/giphy.gif",
-        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3gxOG11cDJ0NTVpOTI2Zms3OG05enFvZmd1MHVsdGcweG1zcHZrciZlcD12MV9naWZzX3NlYXJjaCZjdD1n/5LcfoE5u34kfNvW1Oi/giphy.gif"
-      ];
-      const randomGif = gifs[Math.floor(Math.random() * gifs.length)];
-      setCelebracionGif(randomGif);
-      setTimeout(() => setCelebracionGif(null), 3000);
+      lanzarCelebracion();
     }
     
     // SPILLOVER LOGIC: Si el tablero está bloqueado y movemos de Kanban a Backlog/Idea
@@ -906,6 +925,27 @@ export function TableroKanban() {
             }`}
           >
             {mensajeSistema.texto}
+          </div>
+        </div>
+      )}
+
+      {/* Overlay de Celebración - Michael Scott High Five */}
+      {celebracionGif && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[2px] animate-in fade-in duration-500" />
+          <div className="relative animate-in zoom-in spin-in-1 duration-500">
+             <div className="absolute -inset-10 bg-sky-500/30 blur-3xl rounded-full animate-pulse" />
+             <div className="relative flex flex-col items-center gap-6">
+               <img 
+                 src={celebracionGif} 
+                 alt="Celebración" 
+                 className="h-72 md:h-[400px] w-auto rounded-[40px] shadow-2xl border-8 border-white object-cover"
+               />
+               <div className="bg-white px-8 py-3 rounded-2xl shadow-2xl border-2 border-sky-100 flex flex-col items-center gap-1">
+                  <span className="text-2xl font-black text-slate-900 tracking-tighter uppercase">¡Tarea Terminada!</span>
+                  <span className="text-xs font-bold text-sky-600 uppercase tracking-widest">Puntos conseguidos para el equipo 🚀</span>
+               </div>
+             </div>
           </div>
         </div>
       )}
