@@ -255,7 +255,6 @@ export function TableroKanban() {
   // Función para lanzar la celebración de Michael Scott
   function lanzarCelebracion() {
     const michaelScottGifs = [
-      "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbnFlcWxxbnFlcWxxbnFlcWxxbnFlcWxxbnFlcWxxbnFlcWxxJmVwPXYxX2dpZnNfc2VhcmNoJmN0PWc/KYElw07kzDspa/giphy.gif",
       "https://media.giphy.com/media/sfxlOSTXORjOobH2QG/giphy.gif",
       "https://media.giphy.com/media/5LcfoE5u34kfNvW1Oi/giphy.gif",
       "https://media.giphy.com/media/l2QEdoFAgf1zmhEK4/giphy.gif"
