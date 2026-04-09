@@ -5,6 +5,7 @@ export async function obtenerProyectos(): Promise<Proyecto[]> {
   const { data, error } = await supabase
     .from("projects")
     .select("*")
+    .order("orden_selector", { ascending: true })
     .order("nombre", { ascending: true });
 
   if (error) {
@@ -16,7 +17,8 @@ export async function obtenerProyectos(): Promise<Proyecto[]> {
     identificador: p.identificador,
     nombre: p.nombre,
     descripcion: p.descripcion,
-    color: p.color
+    color: p.color,
+    ordenSelector: p.orden_selector || 0
   }));
 }
 
@@ -27,7 +29,8 @@ export async function guardarProyecto(proyecto: Proyecto): Promise<void> {
       identificador: proyecto.identificador,
       nombre: proyecto.nombre,
       descripcion: proyecto.descripcion,
-      color: proyecto.color
+      color: proyecto.color,
+      orden_selector: proyecto.ordenSelector || 0
     });
 
   if (error) {
@@ -51,7 +54,8 @@ export function crearProyectoVacio(): Proyecto {
     identificador: crypto.randomUUID(),
     nombre: "",
     descripcion: "",
-    color: "#0ea5e9"
+    color: "#0ea5e9",
+    ordenSelector: 0
   };
 }
 

@@ -79,6 +79,10 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
   const [error, setError] = useState("");
   const [hoverGuardar, setHoverGuardar] = useState(false);
   const [gifEmergencia, setGifEmergencia] = useState("https://media.giphy.com/media/snEeOh54kCFxe/giphy.gif");
+  
+  // Estados para Combobox de Proyectos
+  const [busquedaProyecto, setBusquedaProyecto] = useState("");
+  const [mostrarListaProyectos, setMostrarListaProyectos] = useState(false);
 
   const gifsEmergencia = [
     "https://media.giphy.com/media/snEeOh54kCFxe/giphy.gif",
@@ -92,6 +96,15 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
         obtenerSesion()
       ]);
       setProyectos(p);
+      
+      // Inicializar búsqueda si hay un proyecto seleccionado
+      if (propiedades.modo === "editar" && propiedades.tarea.proyectoId) {
+        const prj = p.find(item => item.identificador === propiedades.tarea.proyectoId);
+        if (prj) setBusquedaProyecto(prj.nombre);
+      } else if (propiedades.modo === "crear" && propiedades.borrador.proyectoId) {
+        const prj = p.find(item => item.identificador === propiedades.borrador.proyectoId);
+        if (prj) setBusquedaProyecto(prj.nombre);
+      }
 
       // Default assignment logic:
       if (propiedades.modo === "crear" && !formulario.personaAsignadaId && sesion) {
@@ -125,6 +138,10 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
     // Si estamos en el Tablero de la Semana, permitimos todo (será Urgente)
     return true;
   });
+
+  const proyectosFiltrados = proyectos.filter(p => 
+    p.nombre.toLowerCase().includes(busquedaProyecto.toLowerCase())
+  );
 
   function guardar() {
     const titulo = limpiarTextoPlano(formulario.titulo, limitesSeguridad.tituloMaximo);
@@ -345,22 +362,68 @@ export function ModalTarea(propiedades: PropiedadesModalTarea) {
               )}
             </div>
 
-            <div className="md:col-span-2">
+            <div className="md:col-span-2 relative">
               <label className="etiqueta-campo">Proyecto de Referencia</label>
-              <select
-                value={formulario.proyectoId || ""}
-                onChange={(evento) =>
-                  actualizarCampo("proyectoId", evento.target.value || undefined)
-                }
-                className="campo-formulario"
-              >
-                <option value="">Sin proyecto específico</option>
-                {proyectos.map((proyecto) => (
-                  <option key={proyecto.identificador} value={proyecto.identificador}>
-                    {proyecto.nombre}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <div className="relative flex items-center">
+                  <input
+                    type="text"
+                    value={busquedaProyecto}
+                    onChange={(e) => {
+                      setBusquedaProyecto(e.target.value);
+                      setMostrarListaProyectos(true);
+                      if (!e.target.value) actualizarCampo("proyectoId", undefined);
+                    }}
+                    onFocus={() => setMostrarListaProyectos(true)}
+                    placeholder="Escribe para buscar un proyecto..."
+                    className="campo-formulario pr-10"
+                  />
+                  <div className="absolute right-4 text-slate-400 pointer-events-none">
+                    {mostrarListaProyectos ? "▲" : "▼"}
+                  </div>
+                </div>
+
+                {mostrarListaProyectos && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-10" 
+                      onClick={() => setMostrarListaProyectos(false)} 
+                    />
+                    <div className="absolute left-0 right-0 top-full z-20 mt-2 max-h-60 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 custom-scrollbar">
+                      <div 
+                        onClick={() => {
+                          actualizarCampo("proyectoId", undefined);
+                          setBusquedaProyecto("");
+                          setMostrarListaProyectos(false);
+                        }}
+                        className="flex cursor-pointer items-center rounded-xl px-4 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 transition-colors"
+                      >
+                        Sin proyecto específico
+                      </div>
+                      <div className="my-1 h-px bg-slate-50" />
+                      {proyectosFiltrados.length === 0 ? (
+                        <div className="px-4 py-3 text-sm text-slate-400 italic">No se encontraron proyectos</div>
+                      ) : (
+                        proyectosFiltrados.map((p) => (
+                          <div
+                            key={p.identificador}
+                            onClick={() => {
+                              actualizarCampo("proyectoId", p.identificador);
+                              setBusquedaProyecto(p.nombre);
+                              setMostrarListaProyectos(false);
+                            }}
+                            className="flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 hover:bg-slate-50 transition-colors group"
+                          >
+                            <div className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
+                            <span className="flex-1">{p.nombre}</span>
+                            <span className="text-[10px] font-black uppercase text-slate-300 group-hover:text-sky-500">{p.identificador}</span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
             <div className="md:col-span-2">

@@ -85,6 +85,7 @@ export type Proyecto = {
   nombre: string;
   descripcion: string;
   color: string;
+  ordenSelector?: number;
 };
 
 export type SemanaInfo = {

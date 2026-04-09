@@ -23,6 +23,7 @@ export function TabProyectos() {
   const [nuevoNombre, setNuevoNombre] = useState("");
   const [nuevaDescripcion, setNuevaDescripcion] = useState("");
   const [nuevoColor, setNuevoColor] = useState("#0ea5e9");
+  const [nuevoOrden, setNuevoOrden] = useState(0);
 
   useEffect(() => {
     async function cargar() {
@@ -43,12 +44,14 @@ export function TabProyectos() {
       ...editandoProyecto,
       nombre: nuevoNombre,
       descripcion: nuevaDescripcion,
-      color: nuevoColor
+      color: nuevoColor,
+      ordenSelector: nuevoOrden
     } : {
       identificador: `PRJ-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
       nombre: nuevoNombre,
       descripcion: nuevaDescripcion,
-      color: nuevoColor
+      color: nuevoColor,
+      ordenSelector: nuevoOrden
     };
 
     await guardarProyecto(proyecto);
@@ -69,6 +72,7 @@ export function TabProyectos() {
     setNuevoNombre("");
     setNuevaDescripcion("");
     setNuevoColor("#0ea5e9");
+    setNuevoOrden(0);
   }
 
   function iniciarEdicion(p: Proyecto) {
@@ -76,6 +80,7 @@ export function TabProyectos() {
     setNuevoNombre(p.nombre);
     setNuevaDescripcion(p.descripcion || "");
     setNuevoColor(p.color);
+    setNuevoOrden(p.ordenSelector || 0);
   }
 
   return (
@@ -124,6 +129,10 @@ export function TabProyectos() {
                       <h3 className={`text-base font-bold transition-colors ${activo ? "text-sky-600" : "text-slate-900 group-hover:text-sky-600"}`}>
                         {proyecto.nombre || "Sin Nombre"}
                       </h3>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span className="text-[10px] font-bold text-slate-300">ORDEN:</span>
+                        <span className="text-[10px] font-black text-sky-500">{proyecto.ordenSelector || 0}</span>
+                      </div>
                     </div>
                     <button 
                       onClick={(e) => { e.stopPropagation(); handleEliminarProyecto(proyecto.identificador); }}
@@ -182,6 +191,16 @@ export function TabProyectos() {
                 placeholder="Breve descripción de los objetivos..."
                 className="w-full min-h-[100px] rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-50"
               />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider pl-1">Orden de Aparición</label>
+              <input 
+                type="number"
+                value={nuevoOrden}
+                onChange={(e) => setNuevoOrden(parseInt(e.target.value) || 0)}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-50"
+              />
+              <p className="text-[10px] text-slate-400 pl-1">Los números bajos aparecen primero en el selector.</p>
             </div>
           </div>
           <div className="mt-6 flex justify-end gap-3">
